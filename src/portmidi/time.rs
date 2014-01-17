@@ -4,6 +4,7 @@
 
 use std::task;
 use std::io::timer;
+use std::comm;
 use extra::time;
 use extra::arc::Arc;
 
@@ -70,14 +71,15 @@ impl PtTimer	{
 			    let now = time::precise_time_ns();
 			    callback((now - starttime) / 1000000, &mut mutdata);
 			    match newport.try_recv() {
-			    	Some(ref arc_message) => {
+			    	comm::Data(ref arc_message) => {
 			    	//	let local_arc : Arc<~str> = newport.recv();
 		            	let message = arc_message.get();
 		            	if (*message == ~"stop")	{
 		            		stop = true;
 		            	}
 			    	},	
-			    	None => (),
+			    	comm::Empty => (),
+			    	comm::Disconnected => fail!("Action channel disconnect error.")
             	}
             	if (stop)	{
             		break;
