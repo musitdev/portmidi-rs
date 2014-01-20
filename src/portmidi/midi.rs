@@ -3,57 +3,108 @@
 */
 
 use std::{ptr, str, cast};
-use std::libc::{c_void, c_char};
+use std::libc::c_char;
 
-
+#[deriving(Eq, FromPrimitive)]
 pub enum PmError {
-    pmNoError = 0,
-    pmGotData = 1, /* < A "no error" return that also indicates data available */
-    pmHostError = -10000,
-    pmInvalidDeviceId, /** out of range or 
+    pmNoError = ffi::pmNoError as int,
+    pmGotData = ffi::pmGotData as int, /* < A "no error" return that also indicates data available */
+    pmHostError = ffi::pmHostError as int,
+    pmInvalidDeviceId = ffi::pmInvalidDeviceId as int, /** out of range or 
                         * output device when input is requested or 
                         * input device when output is requested or
                         * device is already opened 
                         */
-    pmInsufficientMemory,
-    pmBufferTooSmall,
-    pmBufferOverflow,
-    pmBadPtr, /* PortMidiStream parameter is NULL or
+    pmInsufficientMemory = ffi::pmInsufficientMemory as int,
+    pmBufferTooSmall = ffi::pmBufferTooSmall as int,
+    pmBufferOverflow = ffi::pmBufferOverflow as int,
+    pmBadPtr = ffi::pmBadPtr as int, /* PortMidiStream parameter is NULL or
                * stream is not opened or
                * stream is output when input is required or
                * stream is input when output is required */
-    pmBadData, /* illegal midi data, e.g. missing EOX */
-    pmInternalError,
-    pmBufferMaxSize /* buffer is already as large as it can be */
+    pmBadData = ffi::pmBadData as int, /* illegal midi data, e.g. missing EOX */
+    pmInternalError = ffi::pmInternalError as int,
+    pmBufferMaxSize = ffi::pmBufferMaxSize as int, /* buffer is already as large as it can be */
     /* NOTE: If you add a new error type, be sure to update Pm_GetErrorText() */
 }
 
-/**  A single PortMidiStream is a descriptor for an open MIDI device.
-*/
-pub type C_PortMidiStream = c_void; 
+impl PmError{
+  fn unwrap(error: ffi::PmError) -> PmError  {
+    FromPrimitive::from_i64(error as i64).unwrap()
+  }
+
+  fn wrap(&self) -> ffi::PmError  {
+    FromPrimitive::from_i64(*self as i64).unwrap()
+  }
+
+}
 
 mod ffi {
     use std::libc::{c_char, c_void};
 
+  /**  A single PortMidiStream is a descriptor for an open MIDI device.
+  */
+  pub type C_PortMidiStream = c_void; 
+
+  #[doc(hidden)]
+  pub type C_PmMessage = i32 ; 
+
+  /**
+      PmTimestamp is used to represent a millisecond clock with arbitrary
+      start time. The type is used for all MIDI timestampes and clocks.
+  */
+  pub type C_PmTimestamp = u32;
+// no TimeProc for first impl : typedef PmTimestamp (*PmTimeProcPtr)(void *time_info);
+
+  #[doc(hidden)]
+  pub  struct C_PmEvent {
+      message : C_PmMessage,
+      timestamp : C_PmTimestamp,
+  }
+
+  #[deriving(FromPrimitive)]
+  #[repr(C)]
+  pub enum PmError {
+      pmNoError = 0,
+      pmGotData = 1, /* < A "no error" return that also indicates data available */
+      pmHostError = -10000,
+      pmInvalidDeviceId = -9999, /** out of range or 
+                          * output device when input is requested or 
+                          * input device when output is requested or
+                          * device is already opened 
+                          */
+      pmInsufficientMemory = -9998,
+      pmBufferTooSmall = -9997,
+      pmBufferOverflow = -9996,
+      pmBadPtr = -9995, /* PortMidiStream parameter is NULL or
+                 * stream is not opened or
+                 * stream is output when input is required or
+                 * stream is input when output is required */
+      pmBadData = -9994, /* illegal midi data, e.g. missing EOX */
+      pmInternalError = -9993,
+      pmBufferMaxSize = -9992, /* buffer is already as large as it can be */
+      /* NOTE: If you add a new error type, be sure to update Pm_GetErrorText() */
+  }
+
     #[link(name = "portmidi")]
     extern "C" {
-        pub fn Pm_Initialize() -> super::PmError;
-        pub fn Pm_Terminate()-> super::PmError;
-        pub fn Pm_HasHostError(stream : *super::C_PortMidiStream ) -> i32;
-        pub fn Pm_GetErrorText(errorCode : super::PmError) -> *c_char;
+        pub fn Pm_Initialize() -> PmError;
+        pub fn Pm_Terminate()-> PmError;
+        pub fn Pm_HasHostError(stream : *C_PortMidiStream ) -> i32;
+        pub fn Pm_GetErrorText(errorCode : PmError) -> *c_char;
         pub fn Pm_GetHostErrorText(msg : *c_char , len : i32 );
         pub fn Pm_CountDevices() -> u32;
         pub fn Pm_GetDefaultInputDeviceID() -> super::C_PmDeviceID;
         pub fn Pm_GetDefaultOutputDeviceID() -> super::C_PmDeviceID;
         pub fn Pm_GetDeviceInfo(id:super::C_PmDeviceID) -> *super::C_PmDeviceInfo;
-        pub fn Pm_OpenInput(stream: **super::C_PortMidiStream, inputDevice : super::C_PmDeviceID, inputDriverInfo: *c_void, bufferSize : i32, time_proc: *c_void, time_info: *c_void) -> super::PmError;
-        pub fn Pm_OpenOutput(stream : **super::C_PortMidiStream, outputDevice : super::C_PmDeviceID, inputDriverInfo: *c_void, bufferSize : i32, time_proc: *c_void, time_info: *c_void, latency:i32) -> super::PmError;
-        pub fn Pm_Read(stream : *super::C_PortMidiStream, buffer : *mut super::C_PmEvent , length : i32) -> i16;
-        pub fn Pm_Abort(stream : *super::C_PortMidiStream) -> super::PmError;
-        pub fn Pm_Close(stream : *super::C_PortMidiStream) -> super::PmError;   
-        pub fn Pm_Poll(stream : *super::C_PortMidiStream) -> super::PmError;     
-        pub fn Pm_Write(stream : *super::C_PortMidiStream, buffer : *super::C_PmEvent , length : i32) -> super::PmError;
-        pub fn Pm_WriteShort(stream : *super::C_PortMidiStream, timestamp : super::PmTimestamp , message : super::C_PmMessage) -> super::PmError;
+        pub fn Pm_OpenInput(stream: **C_PortMidiStream, inputDevice : super::C_PmDeviceID, inputDriverInfo: *c_void, bufferSize : i32, time_proc: *c_void, time_info: *c_void) -> PmError;
+        pub fn Pm_OpenOutput(stream : **C_PortMidiStream, outputDevice : super::C_PmDeviceID, inputDriverInfo: *c_void, bufferSize : i32, time_proc: *c_void, time_info: *c_void, latency:i32) -> PmError;
+        pub fn Pm_Read(stream : *C_PortMidiStream, buffer : *mut C_PmEvent , length : i32) -> i16;
+        pub fn Pm_Abort(stream : *C_PortMidiStream) -> PmError;
+        pub fn Pm_Close(stream : *C_PortMidiStream) -> PmError;   
+        pub fn Pm_Poll(stream : *C_PortMidiStream) -> PmError;     
+        pub fn Pm_Write(stream : *C_PortMidiStream, buffer : *C_PmEvent , length : i32) -> PmError;
+        pub fn Pm_WriteShort(stream : *C_PortMidiStream, timestamp : C_PmTimestamp , message : C_PmMessage) -> PmError;
    }   
 }
 
@@ -64,7 +115,7 @@ mod ffi {
 #[inline(never)]
 pub fn initialize() -> PmError {
     unsafe {
-        ffi::Pm_Initialize()
+        PmError::unwrap(ffi::Pm_Initialize())
     }
 }
 
@@ -75,31 +126,8 @@ pub fn initialize() -> PmError {
 #[inline(never)]
 pub fn terminate() -> PmError {
     unsafe {
-        ffi::Pm_Terminate()
+        PmError::unwrap(ffi::Pm_Terminate())
     }
-}
-
-
-/**
-*    Test whether stream has a pending host error. Normally, the client finds
-*    out about errors through returned error codes, but some errors can occur
-*    asynchronously where the client does not
-*    explicitly call a function, and therefore cannot receive an error code.
-*    The client can test for a pending error using has_host_error(). If true,
-*    the error can be accessed and cleared by calling get_Error_text(). 
-*    Errors are also cleared by calling other functions that can return
-*    errors, e.g. open_input(), open_output(), read(), write(). The
-*    client does not need to call Pm_HasHostError(). Any pending error will be
-*    reported the next time the client performs an explicit function call on 
-*    the stream, e.g. an input or output operation. Until the error is cleared,
-*    no new error codes will be obtained, even for a different stream.
-*/
-#[inline(never)]
-pub fn has_host_error(stream:  *C_PortMidiStream) -> i32  {
-    unsafe {
-        ffi::Pm_HasHostError(stream)
-    }
-
 }
 
 /**  Translate portmidi error number into human readable message.
@@ -109,7 +137,7 @@ pub fn has_host_error(stream:  *C_PortMidiStream) -> i32  {
 #[inline(never)]
 pub fn get_error_text(error_code : PmError) -> ~str {
     unsafe { 
-        str::raw::from_c_str(ffi::Pm_GetErrorText(error_code))
+        str::raw::from_c_str(ffi::Pm_GetErrorText(error_code.wrap()))
     }
 }
 
@@ -249,13 +277,6 @@ pub fn get_default_output_device_id() -> PmDeviceID {
 
 
 /**
-    PmTimestamp is used to represent a millisecond clock with arbitrary
-    start time. The type is used for all MIDI timestampes and clocks.
-*/
-pub type PmTimestamp = u32;
-// no TimeProc for first impl : typedef PmTimestamp (*PmTimeProcPtr)(void *time_info);
-
-/**
     Pm_GetDeviceInfo() returns a pointer to a PmDeviceInfo structure
     referring to the device specified by id.
     If id is out of range the function returns NULL.
@@ -275,9 +296,6 @@ pub fn get_device_info(device : PmDeviceID) -> Option<PmDeviceInfo> {
     }
 }
 
-#[doc(hidden)]
-pub type C_PmMessage = i32 ; 
-
 #[deriving(Clone, Eq, Decodable, Encodable)]
 pub struct PmMessage { /**< see PmEvent */
     status : i8,
@@ -295,7 +313,7 @@ pub struct PmMessage { /**< see PmEvent */
 #[doc(hidden)]
 #[deriving(Clone, Eq, Decodable, Encodable)]
 impl PmMessage {
-    pub fn wrap(cmessage : C_PmMessage) -> PmMessage {
+    pub fn wrap(cmessage : ffi::C_PmMessage) -> PmMessage {
         PmMessage {
             status:  ((cmessage) & 0xFF) as i8,
             data1 : (((cmessage) >> 8) & 0xFF) as i8,
@@ -303,7 +321,7 @@ impl PmMessage {
         }
     }
 
-    pub fn unwrap(&self) -> C_PmMessage {
+    pub fn unwrap(&self) -> ffi::C_PmMessage {
         ((((self.data2 as i32) << 16) & 0xFF0000) |
           (((self.data1 as i32) << 8) & 0xFF00) |
           ((self.status as i32) & 0xFF)) as i32
@@ -376,29 +394,23 @@ impl PmMessage {
    the interrupting real-time message to insure that timestamps are
    non-decreasing.
  */
-#[doc(hidden)]
-pub  struct C_PmEvent {
-    message : C_PmMessage,
-    timestamp : PmTimestamp,
-}
-
 #[deriving(Clone, Eq, Decodable, Encodable)]
 pub  struct PmEvent {
     message : PmMessage,
-    timestamp : PmTimestamp,
+    timestamp : ffi::C_PmTimestamp,
 } 
 
 #[doc(hidden)]
 impl PmEvent {
-    pub fn wrap(cevent : C_PmEvent) -> PmEvent {
+    pub fn wrap(cevent : ffi::C_PmEvent) -> PmEvent {
         PmEvent {
             message:  PmMessage::wrap(cevent.message),
             timestamp : cevent.timestamp,
         }
     }
 
-    pub fn unwrap(&self) -> C_PmEvent {
-        C_PmEvent {
+    pub fn unwrap(&self) -> ffi::C_PmEvent {
+        ffi::C_PmEvent {
             message:  self.message.unwrap(),
             timestamp : self.timestamp,
         }
@@ -408,7 +420,7 @@ impl PmEvent {
 
 /// Representation of an input midi port.
 pub struct PmInputPort {
-    priv c_pm_stream : *C_PortMidiStream,
+    priv c_pm_stream : *ffi::C_PortMidiStream,
     priv inputDevice : C_PmDeviceID,
     priv bufferSize : i32,
 }
@@ -430,8 +442,30 @@ impl PmInputPort {
     #[inline(never)]
     pub fn open(&mut self)  -> PmError {
         unsafe {
-            ffi::Pm_OpenInput(&self.c_pm_stream, self.inputDevice, ptr::null(), self.bufferSize, ptr::null(), ptr::null())
+            PmError::unwrap(ffi::Pm_OpenInput(&self.c_pm_stream, self.inputDevice, ptr::null(), self.bufferSize, ptr::null(), ptr::null()))
         }
+    }
+
+    /**
+    *    Test whether stream has a pending host error. Normally, the client finds
+    *    out about errors through returned error codes, but some errors can occur
+    *    asynchronously where the client does not
+    *    explicitly call a function, and therefore cannot receive an error code.
+    *    The client can test for a pending error using has_host_error(). If true,
+    *    the error can be accessed and cleared by calling get_Error_text(). 
+    *    Errors are also cleared by calling other functions that can return
+    *    errors, e.g. open_input(), open_output(), read(), write(). The
+    *    client does not need to call Pm_HasHostError(). Any pending error will be
+    *    reported the next time the client performs an explicit function call on 
+    *    the stream, e.g. an input or output operation. Until the error is cleared,
+    *    no new error codes will be obtained, even for a different stream.
+    */
+    #[inline(never)]
+    pub fn has_host_error(&self) -> i32  {
+        unsafe {
+            ffi::Pm_HasHostError(self.c_pm_stream)
+        }
+
     }
 
     /**
@@ -464,7 +498,7 @@ impl PmInputPort {
     pub fn read(&mut self) -> Result<PmEvent, PmError> {
        
         //get one note a the time
-         let mut pevent : C_PmEvent = C_PmEvent {
+         let mut pevent : ffi::C_PmEvent = ffi::C_PmEvent {
             message : 0,
             timestamp : 0,
         };
@@ -486,7 +520,7 @@ impl PmInputPort {
     */
     pub fn poll(&self)  -> PmError  {
         unsafe {
-            ffi::Pm_Poll(self.c_pm_stream)
+            PmError::unwrap(ffi::Pm_Poll(self.c_pm_stream))
         }
     }
    
@@ -498,7 +532,7 @@ impl PmInputPort {
     pub fn close(&mut self)  -> PmError  {
 //      println!("portmidi::midi inport close");
         unsafe {
-            ffi::Pm_Close(self.c_pm_stream)
+            PmError::unwrap(ffi::Pm_Close(self.c_pm_stream))
         }
     }
 }
@@ -506,7 +540,7 @@ impl PmInputPort {
 
 /// Representation of an output midi port.
 pub struct PmOutputPort {
-    priv c_pm_stream : *C_PortMidiStream,
+    priv c_pm_stream : *ffi::C_PortMidiStream,
     priv outputDevice : C_PmDeviceID,
     priv bufferSize : i32,
 }
@@ -529,8 +563,30 @@ impl PmOutputPort {
     pub fn open(&mut self)  -> PmError {
 
         unsafe {
-            ffi::Pm_OpenOutput(&self.c_pm_stream, self.outputDevice, ptr::null(), self.bufferSize, ptr::null(), ptr::null(), 0)
+            PmError::unwrap(ffi::Pm_OpenOutput(&self.c_pm_stream, self.outputDevice, ptr::null(), self.bufferSize, ptr::null(), ptr::null(), 0))
         }
+    }
+
+    /**
+    *    Test whether stream has a pending host error. Normally, the client finds
+    *    out about errors through returned error codes, but some errors can occur
+    *    asynchronously where the client does not
+    *    explicitly call a function, and therefore cannot receive an error code.
+    *    The client can test for a pending error using has_host_error(). If true,
+    *    the error can be accessed and cleared by calling get_Error_text(). 
+    *    Errors are also cleared by calling other functions that can return
+    *    errors, e.g. open_input(), open_output(), read(), write(). The
+    *    client does not need to call Pm_HasHostError(). Any pending error will be
+    *    reported the next time the client performs an explicit function call on 
+    *    the stream, e.g. an input or output operation. Until the error is cleared,
+    *    no new error codes will be obtained, even for a different stream.
+    */
+    #[inline(never)]
+    pub fn has_host_error(&self) -> i32  {
+        unsafe {
+            ffi::Pm_HasHostError(self.c_pm_stream)
+        }
+
     }
 
     /**
@@ -543,7 +599,7 @@ impl PmOutputPort {
      */
     pub fn abort(&mut self) -> PmError {
         unsafe {
-            ffi::Pm_Abort(self.c_pm_stream)
+            PmError::unwrap(ffi::Pm_Abort(self.c_pm_stream))
         }
     }
      
@@ -554,7 +610,7 @@ impl PmOutputPort {
     */
     pub fn close(&mut self)  -> PmError  {
         unsafe {
-            ffi::Pm_Close(self.c_pm_stream)
+            PmError::unwrap(ffi::Pm_Close(self.c_pm_stream))
         }
     }
 
@@ -572,9 +628,9 @@ impl PmOutputPort {
         Sysex data may contain embedded real-time messages.
     */
     pub fn write_event(&mut self, midievent : PmEvent)  -> PmError  {
-        let cevent : C_PmEvent = midievent.unwrap();
+        let cevent : ffi::C_PmEvent = midievent.unwrap();
         unsafe {
-            ffi::Pm_Write(self.c_pm_stream, &cevent, 1)
+            PmError::unwrap(ffi::Pm_Write(self.c_pm_stream, &cevent, 1))
         }
     }
 
@@ -585,9 +641,9 @@ impl PmOutputPort {
         with latency = 0.)
     */
     pub fn write_message(&mut self, midimessage : PmMessage)  -> PmError  {
-        let cevent : C_PmMessage = midimessage.unwrap();
+        let cevent : ffi::C_PmMessage = midimessage.unwrap();
         unsafe {
-            ffi::Pm_WriteShort(self.c_pm_stream, 0, cevent)
+            PmError::unwrap(ffi::Pm_WriteShort(self.c_pm_stream, 0, cevent))
         }
     }
 }

@@ -3,25 +3,25 @@
 */
 
 use std::{ptr};
-use std::libc::{c_void};
-
 use midi;
-
-pub type C_PmQueue = c_void; 
 
 mod ffi {
     use midi;
+    use std::libc::{c_void};
+
+    pub type C_PmQueue = c_void; 
+    pub type C_util_PmMessage = i32 ; 
 
     #[link(name = "portmidi")]
     extern "C" {
-    	pub fn Pm_QueueCreate(num_msgs: i64, bytes_per_msg : u32) -> *super::C_PmQueue;
-    	pub fn Pm_QueueDestroy(queue : *super::C_PmQueue) -> midi::PmError;
-    	pub fn Pm_Dequeue(queue : *super::C_PmQueue, mess :*mut i32) -> midi::PmError;
-    	pub fn Pm_Enqueue(queue : *super::C_PmQueue, mess :*i32) -> midi::PmError;
-    	pub fn Pm_QueueFull(queue : *super::C_PmQueue) -> i32;
-    	pub fn Pm_QueueEmpty(queue : *super::C_PmQueue) -> i32;
-    	pub fn Pm_QueuePeek(queue : *super::C_PmQueue) -> *midi::C_PmMessage;
-    	pub fn Pm_SetOverflow(queue : *super::C_PmQueue) -> midi::PmError;
+    	pub fn Pm_QueueCreate(num_msgs: i64, bytes_per_msg : u32) -> *C_PmQueue;
+    	pub fn Pm_QueueDestroy(queue : *C_PmQueue) -> i32;
+    	pub fn Pm_Dequeue(queue : *C_PmQueue, mess :*mut C_util_PmMessage) -> i32;
+    	pub fn Pm_Enqueue(queue : *C_PmQueue, mess :*C_util_PmMessage) -> i32;
+    	pub fn Pm_QueueFull(queue : *C_PmQueue) -> i32;
+    	pub fn Pm_QueueEmpty(queue : *C_PmQueue) -> i32;
+    	pub fn Pm_QueuePeek(queue : *C_PmQueue) -> *C_util_PmMessage;
+    	pub fn Pm_SetOverflow(queue : *C_PmQueue) -> i32;
     }
 }
 
@@ -62,7 +62,7 @@ mod ffi {
  */
 
 pub struct PmQueue {
-	priv queue : *C_PmQueue,
+	priv queue : *ffi::C_PmQueue,
 }
 
 impl PmQueue{
@@ -83,7 +83,7 @@ impl PmQueue{
 
     pub fn destroy(&mut self) -> midi::PmError	{
     	unsafe	{
-    		ffi::Pm_QueueDestroy(self.queue)
+    		FromPrimitive::from_i64(ffi::Pm_QueueDestroy(self.queue)as i64).unwrap()
     	}
     }
 
@@ -97,9 +97,9 @@ impl PmQueue{
     notified when data is lost due to overflow.
  */
    pub fn dequeue(&mut self) -> Result<midi::PmMessage, midi::PmError>	{
-   		let mut cmes : midi::C_PmMessage = 0;
+   		let mut cmes : ffi::C_util_PmMessage = 0;
         let retdata : midi::PmError = unsafe {
-            ffi::Pm_Dequeue(self.queue, &mut cmes)
+            FromPrimitive::from_i64(ffi::Pm_Dequeue(self.queue, &mut cmes) as i64).unwrap()
         };
         match retdata {
             midi::pmNoError => Err(midi::pmNoError),
@@ -115,7 +115,7 @@ impl PmQueue{
  */
    pub fn enqueue(&mut self, mess : midi::PmMessage) -> midi::PmError	{
    		unsafe	{
-   			ffi::Pm_Enqueue(self.queue, &mess.unwrap())
+   			FromPrimitive::from_i64(ffi::Pm_Enqueue(self.queue, &mess.unwrap()) as i64).unwrap()
    		}
    }
 /*
@@ -169,7 +169,7 @@ impl PmQueue{
     might as well just call Pm_Dequeue() and accept the data if it is there.
  */
    pub fn peek(&mut self) -> Option<midi::PmMessage>	{
-        let retdata : *midi::C_PmMessage = unsafe {
+        let retdata : *ffi::C_util_PmMessage = unsafe {
             ffi::Pm_QueuePeek(self.queue)
         };
         match retdata {
@@ -189,7 +189,7 @@ impl PmQueue{
  */
    pub fn set_overflow(&mut self) -> midi::PmError	{
    		unsafe	{
-   			ffi::Pm_SetOverflow(self.queue)
+   			FromPrimitive::from_i64(ffi::Pm_SetOverflow(self.queue) as i64).unwrap()
    		}
    }
 }
