@@ -1,3 +1,6 @@
+env:
+  global:
+    - secure: TeiN4v6xNRQYOX8ahW9XYftnxfLVUw3e3M9PmfxHk6UPLZmPXAeOYXjT9yDP86cnErwslxPbE33d/O8zzOexbfDY/kEgo5nfP979Zx58BS2GgeudPsVVpWn7X2KbnvocC2cHIkJJt4Xoe+BgMisQvN1Cgc7AblnDdA84JPAyE3M=
 notifications:
   email:
     - philippe.delrieu@free.fr
@@ -10,5 +13,7 @@ install:
 script:
   - rustpkg build portmidi
   - rustdoc -o ./doc ./src/portmidi/lib.rs
+after_script:
+  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
 
 
