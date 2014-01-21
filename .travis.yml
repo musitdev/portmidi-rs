@@ -9,3 +9,6 @@ install:
   - sudo apt-get install libportmidi-dev
 script:
   - rustpkg build portmidi
+  - rustdoc -o ./doc ./src/portmidi/lib.rs
+
+
