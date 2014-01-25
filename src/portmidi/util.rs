@@ -6,7 +6,6 @@ use std::{ptr};
 use midi;
 
 mod ffi {
-    use midi;
     use std::libc::{c_void};
 
     pub type C_PmQueue = c_void; 

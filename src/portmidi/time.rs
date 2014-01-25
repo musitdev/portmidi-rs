@@ -74,14 +74,14 @@ impl PtTimer	{
 			    	comm::Data(ref arc_message) => {
 			    	//	let local_arc : Arc<~str> = newport.recv();
 		            	let message = arc_message.get();
-		            	if (*message == ~"stop")	{
+		            	if *message == ~"stop"	{
 		            		stop = true;
 		            	}
 			    	},	
 			    	comm::Empty => (),
 			    	comm::Disconnected => fail!("Action channel disconnect error.")
             	}
-            	if (stop)	{
+            	if stop	{
             		break;
             	}
 			}
