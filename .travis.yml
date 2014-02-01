@@ -11,7 +11,7 @@ install:
   - sudo apt-get install rust-nightly
   - sudo apt-get install libportmidi-dev
 script:
-  - rustpkg build portmidi
+  - rustpkg build portmidi#0.1
   - rustdoc -o ./doc ./src/portmidi/lib.rs
 after_script:
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
