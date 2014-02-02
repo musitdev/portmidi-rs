@@ -60,7 +60,7 @@ impl PtTimer	{
 	    	startTime: time::precise_time_ns(),
 	    };
 
-	    do task.spawn || {
+	    task.spawn (proc() {
 			let mut timer = timer::Timer::new().unwrap();
 			let periodic = timer.periodic(resolution);
 			let mut stop : bool = false;
@@ -85,7 +85,8 @@ impl PtTimer	{
             		break;
             	}
 			}
-	    };
+	    }
+	    );
 	    ptimer
 	}
 

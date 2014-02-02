@@ -1,10 +1,16 @@
-RUSTPKG ?= rustpkg
-RUST_FLAGS ?= -Z debug-info -O
+all: lib examples doc
 
-all:
-	$(RUSTPKG) $(RUST_FLAGS) install portmidi
+lib:
+	mkdir -p lib
+	rustc --out-dir=lib src/portmidi/lib.rs
+
+doc:
+	mkdir -p doc
+	rustdoc -o doc src/portmidi/lib.rs
+
 
 examples: all
-	$(RUSTPKG) $(RUST_FLAGS) install examples/portmidi
+	rustc -o bin -L ./lib src/examples/portmidiex1/main.rs
+
 clean:
-	rm -rf bin build lib
+	rm -rf bin lib doc
