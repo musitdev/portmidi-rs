@@ -6,7 +6,7 @@ use std::task;
 use std::io::timer;
 use std::comm;
 use extra::time;
-use extra::arc::Arc;
+use std::comm::{Chan, Port};
 
 pub enum PtError {
     ptNoError = 0,         /* success */
@@ -28,7 +28,7 @@ pub fn Pt_Sleep(duration: u64)	{
 }
 
 pub struct PtTimer	{
-	priv channel: Chan<Arc<~str>>,
+	priv channel: Chan<~str>,
 	priv started: bool,
 	priv startTime: u64,
 }
@@ -50,7 +50,7 @@ impl PtTimer	{
 	pub fn Pt_start<T:Send> (resolution : u64, userData : T , callback: extern "Rust" fn(u64, &mut T)) -> PtTimer {
 //	pub fn Pt_start<T:Send> (&self, resolution : u64, userData : T , callback: 'static |u64, &T|) {
 
-		let (newport, newchan): (Port<Arc<~str>>, Chan<Arc<~str>>) = Chan::new();
+		let (newport, newchan): (Port<~str>, Chan<~str>) = Chan::new();
 	    let task = task::task();
 	    //task.sched_mode(task::SingleThreaded);
 
@@ -71,9 +71,9 @@ impl PtTimer	{
 			    let now = time::precise_time_ns();
 			    callback((now - starttime) / 1000000, &mut mutdata);
 			    match newport.try_recv() {
-			    	comm::Data(ref arc_message) => {
+			    	comm::Data(ref message) => {
 			    	//	let local_arc : Arc<~str> = newport.recv();
-		            	let message = arc_message.get();
+		            //	let message = arc_message.get();
 		            	if *message == ~"stop"	{
 		            		stop = true;
 		            	}
@@ -97,8 +97,7 @@ impl PtTimer	{
     Upon success, returns ptNoError. See PtError for other values.
 */
 	pub fn  Pt_Stop(&mut self)	{
-	    let element_arc = Arc::new(~"stop");
-	    self.channel.send(element_arc);
+	    self.channel.send(~"stop");
 	    self.started = false;
 	}
 
