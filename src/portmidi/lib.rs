@@ -9,6 +9,7 @@
 
 //extern mod extra;
 extern mod extra;  //= "extra#0.10-pre"
+extern mod serialize;
 
 pub mod midi;
 pub mod time;
