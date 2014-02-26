@@ -3,12 +3,14 @@
 
 #[feature(globs)];
 
-extern mod portmidi;
+extern crate portmidi;
 
 use portmidi::midi;
+use std::io::stdio::println;
 
 #[main]
 fn main() {
     println("hello?");
     let error:midi::PmError = midi::initialize();
+    println!("res :{:?}", error);
 }

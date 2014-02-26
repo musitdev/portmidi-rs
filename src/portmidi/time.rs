@@ -1,19 +1,20 @@
 /*!
 * Function of PortMidi Time.
 */
+extern crate time;
+
 
 use std::task;
 use std::io::timer;
 use std::comm;
-use extra::time;
 use std::comm::{Chan, Port};
 
 pub enum PtError {
-    ptNoError = 0,         /* success */
-    ptHostError = -10000,  /* a system-specific error occurred */
-    ptAlreadyStarted,      /* cannot start timer because it is already started */
-    ptAlreadyStopped,      /* cannot stop timer because it is already stopped */
-    ptInsufficientMemory   /* memory could not be allocated */
+    PtNoError = 0,         /* success */
+    PtHostError = -10000,  /* a system-specific error occurred */
+    PtAlreadyStarted,      /* cannot start timer because it is already started */
+    PtAlreadyStopped,      /* cannot stop timer because it is already stopped */
+    PtInsufficientMemory   /* memory could not be allocated */
 }
 
 /*

@@ -18,23 +18,26 @@ pmutil.h : PmQueue functions
 Installation
 ============
 
-PortMidi binding is build with the rustpkg tool :
+PortMidi binding is build with the provided makefile :
 
 ```Shell
-> rustpkg build portmidi
+> make lib
 ```
 
-Examples are build too with rustpkg :
+Examples are build too with makefile :
 
 ```Shell
-> rustpkg build examples/portmidiex1
+> make examples
+> ./bin/example1
 ```
 Test suite. Contains example of use.
 ```Shell
-> rustpkg test portmidi
+> make test
+> ./bin/test
 ```
 
-PortMidi on Linux, windows and OSX. The binding has been only tested on Linux
+PortMidi works on Linux, windows and OSX. The binding has been only tested on Linux
+It's reported to work on Mac.
 
 License
 =======

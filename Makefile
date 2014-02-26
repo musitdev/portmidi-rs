@@ -3,6 +3,9 @@ all: lib examples doc
 lib:
 	mkdir -p lib
 	rustc --out-dir=lib src/portmidi/lib.rs
+test:
+	mkdir -p bin
+	rustc --out-dir=bin --test src/portmidi/test.rs
 
 doc:
 	mkdir -p doc
@@ -10,7 +13,8 @@ doc:
 
 
 examples: all
-	rustc -o bin -L ./lib src/examples/portmidiex1/main.rs
+	mkdir -p bin
+	rustc -o bin/example1 -L ./lib src/examples/portmidiex1/main.rs
 
 clean:
 	rm -rf bin lib doc

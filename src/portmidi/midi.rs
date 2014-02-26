@@ -7,24 +7,24 @@ use std::libc::c_char;
 
 #[deriving(Eq, FromPrimitive)]
 pub enum PmError {
-    pmNoError = ffi::pmNoError as int,
-    pmGotData = ffi::pmGotData as int, /* < A "no error" return that also indicates data available */
-    pmHostError = ffi::pmHostError as int,
-    pmInvalidDeviceId = ffi::pmInvalidDeviceId as int, /** out of range or 
+    PmNoError = ffi::PmNoError as int,
+    PmGotData = ffi::PmGotData as int, /* < A "no error" return that also indicates data available */
+    PmHostError = ffi::PmHostError as int,
+    PmInvalidDeviceId = ffi::PmInvalidDeviceId as int, /** out of range or 
                         * output device when input is requested or 
                         * input device when output is requested or
                         * device is already opened 
                         */
-    pmInsufficientMemory = ffi::pmInsufficientMemory as int,
-    pmBufferTooSmall = ffi::pmBufferTooSmall as int,
-    pmBufferOverflow = ffi::pmBufferOverflow as int,
-    pmBadPtr = ffi::pmBadPtr as int, /* PortMidiStream parameter is NULL or
+    PmInsufficientMemory = ffi::PmInsufficientMemory as int,
+    PmBufferTooSmall = ffi::PmBufferTooSmall as int,
+    PmBufferOverflow = ffi::PmBufferOverflow as int,
+    PmBadPtr = ffi::PmBadPtr as int, /* PortMidiStream parameter is NULL or
                * stream is not opened or
                * stream is output when input is required or
                * stream is input when output is required */
-    pmBadData = ffi::pmBadData as int, /* illegal midi data, e.g. missing EOX */
-    pmInternalError = ffi::pmInternalError as int,
-    pmBufferMaxSize = ffi::pmBufferMaxSize as int, /* buffer is already as large as it can be */
+    PmBadData = ffi::PmBadData as int, /* illegal midi data, e.g. missing EOX */
+    PmInternalError = ffi::PmInternalError as int,
+    PmBufferMaxSize = ffi::PmBufferMaxSize as int, /* buffer is already as large as it can be */
     /* NOTE: If you add a new error type, be sure to update Pm_GetErrorText() */
 }
 
@@ -65,24 +65,24 @@ mod ffi {
   #[deriving(FromPrimitive)]
   #[repr(C)]
   pub enum PmError {
-      pmNoError = 0,
-      pmGotData = 1, /* < A "no error" return that also indicates data available */
-      pmHostError = -10000,
-      pmInvalidDeviceId = -9999, /** out of range or 
+      PmNoError = 0,
+      PmGotData = 1, /* < A "no error" return that also indicates data available */
+      PmHostError = -10000,
+      PmInvalidDeviceId = -9999, /** out of range or 
                           * output device when input is requested or 
                           * input device when output is requested or
                           * device is already opened 
                           */
-      pmInsufficientMemory = -9998,
-      pmBufferTooSmall = -9997,
-      pmBufferOverflow = -9996,
-      pmBadPtr = -9995, /* PortMidiStream parameter is NULL or
+      PmInsufficientMemory = -9998,
+      PmBufferTooSmall = -9997,
+      PmBufferOverflow = -9996,
+      PmBadPtr = -9995, /* PortMidiStream parameter is NULL or
                  * stream is not opened or
                  * stream is output when input is required or
                  * stream is input when output is required */
-      pmBadData = -9994, /* illegal midi data, e.g. missing EOX */
-      pmInternalError = -9993,
-      pmBufferMaxSize = -9992, /* buffer is already as large as it can be */
+      PmBadData = -9994, /* illegal midi data, e.g. missing EOX */
+      PmInternalError = -9993,
+      PmBufferMaxSize = -9992, /* buffer is already as large as it can be */
       /* NOTE: If you add a new error type, be sure to update Pm_GetErrorText() */
   }
 
@@ -508,7 +508,7 @@ impl PmInputPort {
         };
 //        println!("portmidi::midi after read");
         match nbnote {
-            y if y == 0 => Err(pmNoError),
+            y if y == 0 => Err(PmNoError),
             y if y > 0 => Ok(PmEvent::wrap(pevent)),
             _ => Err(unsafe { cast::transmute::<i16, PmError>(nbnote) })
         }
