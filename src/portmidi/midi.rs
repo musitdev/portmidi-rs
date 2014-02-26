@@ -2,6 +2,7 @@
 * Function of PortMidi
 */
 
+
 use std::{ptr, str, cast};
 use std::libc::c_char;
 

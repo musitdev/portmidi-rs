@@ -11,8 +11,10 @@
 extern crate extra;  //= "extra#0.10-pre"
 extern crate serialize;
 
+#[allow(non_camel_case_types)]
 pub mod midi;
 pub mod time;
+#[allow(non_camel_case_types)]
 pub mod util;
 
 
