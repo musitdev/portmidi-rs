@@ -297,7 +297,7 @@ pub fn get_device_info(device : PmDeviceID) -> Option<PmDeviceInfo> {
     }
 }
 
-#[deriving(Clone, Eq, Decodable, Encodable)]
+#[deriving(Clone, Eq, Decodable, Encodable, Show)]
 pub struct PmMessage { /**< see PmEvent */
     status : i8,
     data1 : i8,
@@ -312,8 +312,8 @@ pub struct PmMessage { /**< see PmEvent */
     Pm_MessageData2() extract fields from a 32-bit midi message.
 */
 #[doc(hidden)]
-#[deriving(Clone, Eq, Decodable, Encodable)]
 impl PmMessage {
+    #[allow(visible_private_types)]
     pub fn wrap(cmessage : ffi::C_PmMessage) -> PmMessage {
         PmMessage {
             status:  ((cmessage) & 0xFF) as i8,
@@ -322,6 +322,7 @@ impl PmMessage {
         }
     }
 
+    #[allow(visible_private_types)]
     pub fn unwrap(&self) -> ffi::C_PmMessage {
         ((((self.data2 as i32) << 16) & 0xFF0000) |
           (((self.data1 as i32) << 8) & 0xFF00) |
@@ -395,6 +396,7 @@ impl PmMessage {
    the interrupting real-time message to insure that timestamps are
    non-decreasing.
  */
+#[allow(visible_private_types)]
 #[deriving(Clone, Eq, Decodable, Encodable)]
 pub  struct PmEvent {
     message : PmMessage,
@@ -403,6 +405,7 @@ pub  struct PmEvent {
 
 #[doc(hidden)]
 impl PmEvent {
+    #[allow(visible_private_types)]
     pub fn wrap(cevent : ffi::C_PmEvent) -> PmEvent {
         PmEvent {
             message:  PmMessage::wrap(cevent.message),
@@ -410,6 +413,7 @@ impl PmEvent {
         }
     }
 
+    #[allow(visible_private_types)]
     pub fn unwrap(&self) -> ffi::C_PmEvent {
         ffi::C_PmEvent {
             message:  self.message.unwrap(),

@@ -8,7 +8,7 @@
 ///  test : rustpkg test portmidi
 
 //extern mod extra;
-extern crate extra;  //= "extra#0.10-pre"
+//extern crate extra;  //= "extra#0.10-pre"
 extern crate serialize;
 
 #[allow(non_camel_case_types)]

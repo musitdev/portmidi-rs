@@ -7,7 +7,7 @@ extern crate time;
 use std::task;
 use std::io::timer;
 use std::comm;
-use std::comm::{Chan, Port};
+use std::comm::{channel, Sender, Receiver};
 
 pub enum PtError {
     PtNoError = 0,         /* success */
@@ -29,7 +29,7 @@ pub fn Pt_Sleep(duration: u64)	{
 }
 
 pub struct PtTimer	{
-	priv channel: Chan<~str>,
+	priv channel: Sender<~str>,
 	priv started: bool,
 	priv startTime: u64,
 }
@@ -51,7 +51,7 @@ impl PtTimer	{
 	pub fn Pt_start<T:Send> (resolution : u64, userData : T , callback: extern "Rust" fn(u64, &mut T)) -> PtTimer {
 //	pub fn Pt_start<T:Send> (&self, resolution : u64, userData : T , callback: 'static |u64, &T|) {
 
-		let (newport, newchan): (Port<~str>, Chan<~str>) = Chan::new();
+		let (newchan, newport): (Sender<~str>, Receiver<~str>) = channel();
 	    let task = task::task();
 	    //task.sched_mode(task::SingleThreaded);
 

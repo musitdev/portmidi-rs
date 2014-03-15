@@ -8,6 +8,7 @@ mod tests {
     use portmidi::midi;
     use portmidi::time;
     use portmidi::util;
+    use std::vec_ng::Vec;
 
     struct Sequencer   {
         midi_notes: ~[midi::PmEvent],
@@ -18,9 +19,9 @@ mod tests {
         println!("sequencer_callback time:{:?}", time);
      //   let inport = *data.inport;
         
-        while (match data.inport.poll() { midi::PmGotData => true, _ => false })    {
+        while match data.inport.poll() { midi::PmGotData => true, _ => false }    {
             // println!("portmidi input note {:?}", readMidi);
-            match (data.inport.read())    {
+            match data.inport.read()    {
                 Ok(notes) => println!("portmidi read midi note {:?}", notes),
                 Err(midi::PmNoError) => println!("portmidi read midi no note {:?}", midi::PmNoError),
                 Err(err) => println!("portmidi read midi error {:?}", err)
@@ -59,7 +60,7 @@ mod tests {
 
         let readMidi = inport.read();
         println!("portmidi input note {:?}", readMidi);
-        match (readMidi)    {
+        match readMidi    {
             Ok(notes) => println!("portmidi read midi note {:?}", notes),
             Err(midi::PmNoError) => println!("portmidi read midi no note {:?}", midi::PmNoError),
             Err(err) => println!("portmidi read midi error {:?}", err)
@@ -117,7 +118,7 @@ mod tests {
         queue.create(32, 4);
 
         let readMidi = queue.dequeue();
-        match (readMidi)    {
+        match readMidi    {
             Ok(notes) => println!("portmidi read midi note {:?}", notes),
             Err(midi::PmNoError) => assert_eq!(midi::PmNoError as int, midi::PmNoError as int),
             Err(err) => fail!("portmidi read midi error {:?}", err)
@@ -127,7 +128,7 @@ mod tests {
         assert_eq!(queue.is_full(), false);
 
         let peek1 = queue.peek();
-        match (peek1)   {
+        match peek1   {
             None => assert_eq!(peek1, None),
             _ => fail!("queue.peek  bad result. not None"),
         }
@@ -145,7 +146,7 @@ mod tests {
         assert_eq!(queue.is_full(), false);
 
         let peek1 = queue.peek();
-        match (peek1)   {
+        match peek1   {
             Some(notes) => assert_eq!(notes.data1, 36),
             None => fail!("queue.peek2  bad result. None"),
         }
@@ -154,7 +155,7 @@ mod tests {
         assert_eq!(queue.is_full(), false);
 
         let readqueue = queue.dequeue();
-        match (readqueue)    {
+        match readqueue    {
             Ok(notes) => assert_eq!(notes.data1, 36),
             Err(midi::PmNoError) => fail!("dequeue error no object found {:?}", readqueue),
             Err(err) => fail!("portmidi read midi error {:?}", err)
