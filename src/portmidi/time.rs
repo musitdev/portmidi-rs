@@ -29,9 +29,9 @@ pub fn Pt_Sleep(duration: u64)	{
 }
 
 pub struct PtTimer	{
-	priv channel: Sender<~str>,
-	priv started: bool,
-	priv startTime: u64,
+	channel: Sender<~str>,
+	started: bool,
+	startTime: u64,
 }
 
 impl PtTimer	{

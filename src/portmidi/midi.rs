@@ -59,8 +59,8 @@ mod ffi {
 
   #[doc(hidden)]
   pub  struct C_PmEvent {
-      message : C_PmMessage,
-      timestamp : C_PmTimestamp,
+      pub message : C_PmMessage,
+      pub timestamp : C_PmTimestamp,
   }
 
   #[deriving(FromPrimitive)]
@@ -172,7 +172,7 @@ pub static pmNoDevice :i32 = -1;
 pub struct PmDeviceInfo {
     structVersion: int, /* < this internal structure version */ 
     interf : ~str, /* < underlying MIDI API, e.g. MMSystem or DirectX */
-    name : ~str,    /* < device name, e.g. USB MidiSport 1x1 */
+    pub name : ~str,    /* < device name, e.g. USB MidiSport 1x1 */
     input : int, /* < true iff input is available */
     output : int, /* < true iff output is available */
     opened : int, /* < used by generic PortMidi code to do error checking on arguments */
@@ -182,7 +182,7 @@ pub struct PmDeviceInfo {
 pub struct C_PmDeviceInfo {
     structVersion: i32, /* < this internal structure version */ 
     interf : *c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
-    name : *c_char,    /* < device name, e.g. USB MidiSport 1x1 */
+    pub name : *c_char,    /* < device name, e.g. USB MidiSport 1x1 */
     input : i32, /* < true iff input is available */
     output : i32, /* < true iff output is available */
     opened : i32, /* < used by generic PortMidi code to do error checking on arguments */
@@ -299,9 +299,9 @@ pub fn get_device_info(device : PmDeviceID) -> Option<PmDeviceInfo> {
 
 #[deriving(Clone, Eq, Decodable, Encodable, Show)]
 pub struct PmMessage { /**< see PmEvent */
-    status : i8,
-    data1 : i8,
-    data2 : i8,
+    pub status : i8,
+    pub data1 : i8,
+    pub data2 : i8,
 }
 
 /**
@@ -399,8 +399,8 @@ impl PmMessage {
 #[allow(visible_private_types)]
 #[deriving(Clone, Eq, Decodable, Encodable)]
 pub  struct PmEvent {
-    message : PmMessage,
-    timestamp : ffi::C_PmTimestamp,
+    pub message : PmMessage,
+    pub timestamp : ffi::C_PmTimestamp,
 } 
 
 #[doc(hidden)]
@@ -425,9 +425,9 @@ impl PmEvent {
 
 /// Representation of an input midi port.
 pub struct PmInputPort {
-    priv c_pm_stream : *ffi::C_PortMidiStream,
-    priv inputDevice : C_PmDeviceID,
-    priv bufferSize : i32,
+    c_pm_stream : *ffi::C_PortMidiStream,
+    inputDevice : C_PmDeviceID,
+    bufferSize : i32,
 }
 
 impl PmInputPort {
@@ -545,9 +545,9 @@ impl PmInputPort {
 
 /// Representation of an output midi port.
 pub struct PmOutputPort {
-    priv c_pm_stream : *ffi::C_PortMidiStream,
-    priv outputDevice : C_PmDeviceID,
-    priv bufferSize : i32,
+    c_pm_stream : *ffi::C_PortMidiStream,
+    outputDevice : C_PmDeviceID,
+    bufferSize : i32,
 }
 
 impl PmOutputPort {

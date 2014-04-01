@@ -64,7 +64,7 @@ mod ffi {
  */
 
 pub struct PmQueue {
-	priv queue : *ffi::C_PmQueue,
+	queue : *ffi::C_PmQueue,
 }
 
 impl PmQueue{
