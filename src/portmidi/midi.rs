@@ -4,7 +4,7 @@
 
 
 use std::{ptr, str, cast};
-use std::libc::c_char;
+use libc::c_char;
 
 #[deriving(Eq, FromPrimitive)]
 pub enum PmError {
@@ -41,7 +41,7 @@ impl PmError{
 }
 
 mod ffi {
-    use std::libc::{c_char, c_void};
+    use libc::{c_char, c_void};
 
   /**  A single PortMidiStream is a descriptor for an open MIDI device.
   */

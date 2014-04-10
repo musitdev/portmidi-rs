@@ -4,11 +4,7 @@
 #![crate_type = "lib"]
 #![crate_type = "dylib"]
 
-///  build : rustpkg build portmidi
-///  test : rustpkg test portmidi
-
-//extern mod extra;
-//extern crate extra;  //= "extra#0.10-pre"
+extern crate libc;
 extern crate serialize;
 
 #[allow(non_camel_case_types)]

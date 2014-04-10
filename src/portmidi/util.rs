@@ -9,7 +9,7 @@ use std::{ptr};
 use midi;
 
 mod ffi {
-    use std::libc::{c_void};
+    use libc::{c_void};
 
     pub type C_PmQueue = c_void; 
     pub type C_util_PmMessage = i32 ; 
