@@ -3,8 +3,6 @@
 */
 extern crate time;
 
-
-use std::task;
 use std::io::timer;
 use std::comm;
 use std::comm::{channel, Sender, Receiver};
@@ -29,7 +27,7 @@ pub fn Pt_Sleep(duration: u64)	{
 }
 
 pub struct PtTimer	{
-	channel: Sender<~str>,
+	channel: Sender<String>,
 	started: bool,
 	startTime: u64,
 }
@@ -51,17 +49,14 @@ impl PtTimer	{
 	pub fn Pt_start<T:Send> (resolution : u64, userData : T , callback: extern "Rust" fn(u64, &mut T)) -> PtTimer {
 //	pub fn Pt_start<T:Send> (&self, resolution : u64, userData : T , callback: 'static |u64, &T|) {
 
-		let (newchan, newport): (Sender<~str>, Receiver<~str>) = channel();
-	    let task = task::task();
-	    //task.sched_mode(task::SingleThreaded);
-
+	    let (newchan, newport): (Sender<String>, Receiver<String>) = channel();
 	    let ptimer = PtTimer {
 	    	channel: newchan,
 	    	started: true,
 	    	startTime: time::precise_time_ns(),
 	    };
 
-	    task.spawn (proc() {
+	    spawn (proc() {
 			let mut timer = timer::Timer::new().unwrap();
 			let periodic = timer.periodic(resolution);
 			let mut stop : bool = false;
@@ -72,15 +67,15 @@ impl PtTimer	{
 			    let now = time::precise_time_ns();
 			    callback((now - starttime) / 1000000, &mut mutdata);
 			    match newport.try_recv() {
-			    	comm::Data(ref message) => {
+			    	Ok(ref message) => {
 			    	//	let local_arc : Arc<~str> = newport.recv();
 		            //	let message = arc_message.get();
-		            	if *message == ~"stop"	{
+		            	if *message == "stop".to_string()	{
 		            		stop = true;
 		            	}
 			    	},	
-			    	comm::Empty => (),
-			    	comm::Disconnected => fail!("Action channel disconnect error.")
+			    	Err(comm::Empty) => (),
+			    	Err(comm::Disconnected) => fail!("Action channel disconnect error.")
             	}
             	if stop	{
             		break;
@@ -98,7 +93,7 @@ impl PtTimer	{
     Upon success, returns ptNoError. See PtError for other values.
 */
 	pub fn  Pt_Stop(&mut self)	{
-	    self.channel.send(~"stop");
+	    self.channel.send("stop".to_string());
 	    self.started = false;
 	}
 

@@ -3,10 +3,11 @@
 */
 
 
-use std::{ptr, str, cast};
+use std::{ptr, str};
+use core::mem::transmute;
 use libc::c_char;
 
-#[deriving(Eq, FromPrimitive)]
+#[deriving(PartialEq, Eq, FromPrimitive)]
 pub enum PmError {
     PmNoError = ffi::PmNoError as int,
     PmGotData = ffi::PmGotData as int, /* < A "no error" return that also indicates data available */
@@ -136,7 +137,7 @@ pub fn terminate() -> PmError {
 *    no need to allocate storage
 */
 #[inline(never)]
-pub fn get_error_text(error_code : PmError) -> ~str {
+pub fn get_error_text(error_code : PmError) -> String {
     unsafe { 
         str::raw::from_c_str(ffi::Pm_GetErrorText(error_code.wrap()))
     }
@@ -171,8 +172,8 @@ pub static pmNoDevice :i32 = -1;
 
 pub struct PmDeviceInfo {
     structVersion: int, /* < this internal structure version */ 
-    interf : ~str, /* < underlying MIDI API, e.g. MMSystem or DirectX */
-    pub name : ~str,    /* < device name, e.g. USB MidiSport 1x1 */
+    interf : String, /* < underlying MIDI API, e.g. MMSystem or DirectX */
+    pub name : String,    /* < device name, e.g. USB MidiSport 1x1 */
     input : int, /* < true iff input is available */
     output : int, /* < true iff output is available */
     opened : int, /* < used by generic PortMidi code to do error checking on arguments */
@@ -297,7 +298,7 @@ pub fn get_device_info(device : PmDeviceID) -> Option<PmDeviceInfo> {
     }
 }
 
-#[deriving(Clone, Eq, Decodable, Encodable, Show)]
+#[deriving(Clone, PartialEq, Eq, Decodable, Encodable, Show)]
 pub struct PmMessage { /**< see PmEvent */
     pub status : i8,
     pub data1 : i8,
@@ -397,7 +398,7 @@ impl PmMessage {
    non-decreasing.
  */
 #[allow(visible_private_types)]
-#[deriving(Clone, Eq, Decodable, Encodable)]
+#[deriving(Clone, PartialEq, Eq, Decodable, Encodable)]
 pub  struct PmEvent {
     pub message : PmMessage,
     pub timestamp : ffi::C_PmTimestamp,
@@ -515,7 +516,7 @@ impl PmInputPort {
         match nbnote {
             y if y == 0 => Err(PmNoError),
             y if y > 0 => Ok(PmEvent::wrap(pevent)),
-            _ => Err(unsafe { cast::transmute::<i16, PmError>(nbnote) })
+            _ => Err(unsafe { transmute::<i16, PmError>(nbnote) })
         }
     }
  

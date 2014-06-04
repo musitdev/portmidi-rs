@@ -8,11 +8,11 @@ mod tests {
     use portmidi::midi;
     use portmidi::time;
     use portmidi::util;
-    use std::vec_ng::Vec;
+ //   use std::vec_ng::Vec;
 
     struct Sequencer   {
         midi_notes: ~[midi::PmEvent],
-        inport : ~midi::PmInputPort,
+        inport : Box<midi::PmInputPort>,
     }
 
     fn sequencer_callback(time:u64, data:&mut Sequencer)   {
@@ -90,7 +90,7 @@ mod tests {
         assert_eq!(sendnote2err as int, midi::PmNoError as int);
 
         //test sequencer
-        let data = Sequencer{midi_notes: ~[], inport: ~inport};
+        let data = Sequencer{midi_notes: ~[], inport: box inport};
         let mut timer = time::PtTimer::Pt_start(1000, data, sequencer_callback);
         time::Pt_Sleep(10000);
         timer.Pt_Stop(); 
