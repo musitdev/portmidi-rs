@@ -1,8 +1,9 @@
-#[crate_id = "portmidiex1#0.0.1"];
-#[license = "MIT"];
+#![crate_id = "portmidiex1#0.0.1"]
+#![license = "MIT"]
 
-#[feature(globs)];
+#![feature(globs)]
 
+extern crate debug;
 extern crate portmidi;
 
 use portmidi::midi;

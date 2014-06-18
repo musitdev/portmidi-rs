@@ -1,5 +1,6 @@
 ///  build : rustpkg test portmidi
 
+extern crate debug;
 extern crate portmidi;
 
 #[allow(type_overflow)]
@@ -11,14 +12,15 @@ mod tests {
  //   use std::vec_ng::Vec;
 
     struct Sequencer   {
-        midi_notes: ~[midi::PmEvent],
+        midi_notes: Vec<midi::PmEvent>,
         inport : Box<midi::PmInputPort>,
     }
 
     fn sequencer_callback(time:u64, data:&mut Sequencer)   {
         println!("sequencer_callback time:{:?}", time);
      //   let inport = *data.inport;
-        
+        let _ = data.midi_notes; // avoid dead code warning
+
         while match data.inport.poll() { midi::PmGotData => true, _ => false }    {
             // println!("portmidi input note {:?}", readMidi);
             match data.inport.read()    {
@@ -90,7 +92,7 @@ mod tests {
         assert_eq!(sendnote2err as int, midi::PmNoError as int);
 
         //test sequencer
-        let data = Sequencer{midi_notes: ~[], inport: box inport};
+        let data = Sequencer{midi_notes: vec!(), inport: box inport};
         let mut timer = time::PtTimer::Pt_start(1000, data, sequencer_callback);
         time::Pt_Sleep(10000);
         timer.Pt_Stop(); 
