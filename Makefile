@@ -17,4 +17,4 @@ examples: lib
 	rustc -o bin/example1 -L ./lib src/examples/portmidiex1/main.rs
 
 clean:
-	rm -rf bin lib doc
+	rm -rf bin lib doc target
