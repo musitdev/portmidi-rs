@@ -16,14 +16,14 @@ mod ffi {
 
     #[link(name = "portmidi")]
     extern "C" {
-    	pub fn Pm_QueueCreate(num_msgs: i64, bytes_per_msg : u32) -> *C_PmQueue;
-    	pub fn Pm_QueueDestroy(queue : *C_PmQueue) -> i32;
-    	pub fn Pm_Dequeue(queue : *C_PmQueue, mess :*mut C_util_PmMessage) -> i32;
-    	pub fn Pm_Enqueue(queue : *C_PmQueue, mess :*C_util_PmMessage) -> i32;
-    	pub fn Pm_QueueFull(queue : *C_PmQueue) -> i32;
-    	pub fn Pm_QueueEmpty(queue : *C_PmQueue) -> i32;
-    	pub fn Pm_QueuePeek(queue : *C_PmQueue) -> *C_util_PmMessage;
-    	pub fn Pm_SetOverflow(queue : *C_PmQueue) -> i32;
+    	pub fn Pm_QueueCreate(num_msgs: i64, bytes_per_msg : u32) -> *const C_PmQueue;
+    	pub fn Pm_QueueDestroy(queue : *const C_PmQueue) -> i32;
+    	pub fn Pm_Dequeue(queue : *const C_PmQueue, mess :*mut C_util_PmMessage) -> i32;
+    	pub fn Pm_Enqueue(queue : *const C_PmQueue, mess :*const C_util_PmMessage) -> i32;
+    	pub fn Pm_QueueFull(queue : *const C_PmQueue) -> i32;
+    	pub fn Pm_QueueEmpty(queue : *const C_PmQueue) -> i32;
+    	pub fn Pm_QueuePeek(queue : *const C_PmQueue) -> *const C_util_PmMessage;
+    	pub fn Pm_SetOverflow(queue : *const C_PmQueue) -> i32;
     }
 }
 
@@ -64,7 +64,7 @@ mod ffi {
  */
 
 pub struct PmQueue {
-	queue : *ffi::C_PmQueue,
+	queue : *const ffi::C_PmQueue,
 }
 
 impl PmQueue{
@@ -171,7 +171,7 @@ impl PmQueue{
     might as well just call Pm_Dequeue() and accept the data if it is there.
  */
    pub fn peek(&mut self) -> Option<midi::PmMessage>	{
-        let retdata : *ffi::C_util_PmMessage = unsafe {
+        let retdata : *const ffi::C_util_PmMessage = unsafe {
             ffi::Pm_QueuePeek(self.queue)
         };
         match retdata {

@@ -92,21 +92,21 @@ mod ffi {
     extern "C" {
         pub fn Pm_Initialize() -> PmError;
         pub fn Pm_Terminate()-> PmError;
-        pub fn Pm_HasHostError(stream : *C_PortMidiStream ) -> i32;
-        pub fn Pm_GetErrorText(errorCode : PmError) -> *c_char;
-        pub fn Pm_GetHostErrorText(msg : *c_char , len : i32 );
+        pub fn Pm_HasHostError(stream : *const C_PortMidiStream ) -> i32;
+        pub fn Pm_GetErrorText(errorCode : PmError) -> *const c_char;
+        pub fn Pm_GetHostErrorText(msg : *const c_char , len : i32 );
         pub fn Pm_CountDevices() -> u32;
         pub fn Pm_GetDefaultInputDeviceID() -> super::C_PmDeviceID;
         pub fn Pm_GetDefaultOutputDeviceID() -> super::C_PmDeviceID;
-        pub fn Pm_GetDeviceInfo(id:super::C_PmDeviceID) -> *super::C_PmDeviceInfo;
-        pub fn Pm_OpenInput(stream: **C_PortMidiStream, inputDevice : super::C_PmDeviceID, inputDriverInfo: *c_void, bufferSize : i32, time_proc: *c_void, time_info: *c_void) -> PmError;
-        pub fn Pm_OpenOutput(stream : **C_PortMidiStream, outputDevice : super::C_PmDeviceID, inputDriverInfo: *c_void, bufferSize : i32, time_proc: *c_void, time_info: *c_void, latency:i32) -> PmError;
-        pub fn Pm_Read(stream : *C_PortMidiStream, buffer : *mut C_PmEvent , length : i32) -> i16;
-        pub fn Pm_Abort(stream : *C_PortMidiStream) -> PmError;
-        pub fn Pm_Close(stream : *C_PortMidiStream) -> PmError;   
-        pub fn Pm_Poll(stream : *C_PortMidiStream) -> PmError;     
-        pub fn Pm_Write(stream : *C_PortMidiStream, buffer : *C_PmEvent , length : i32) -> PmError;
-        pub fn Pm_WriteShort(stream : *C_PortMidiStream, timestamp : C_PmTimestamp , message : C_PmMessage) -> PmError;
+        pub fn Pm_GetDeviceInfo(id:super::C_PmDeviceID) -> *const super::C_PmDeviceInfo;
+        pub fn Pm_OpenInput(stream: *const *const C_PortMidiStream, inputDevice : super::C_PmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void) -> PmError;
+        pub fn Pm_OpenOutput(stream : *const *const C_PortMidiStream, outputDevice : super::C_PmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void, latency:i32) -> PmError;
+        pub fn Pm_Read(stream : *const C_PortMidiStream, buffer : *mut C_PmEvent , length : i32) -> i16;
+        pub fn Pm_Abort(stream : *const C_PortMidiStream) -> PmError;
+        pub fn Pm_Close(stream : *const C_PortMidiStream) -> PmError;   
+        pub fn Pm_Poll(stream : *const C_PortMidiStream) -> PmError;     
+        pub fn Pm_Write(stream : *const C_PortMidiStream, buffer : *const C_PmEvent , length : i32) -> PmError;
+        pub fn Pm_WriteShort(stream : *const C_PortMidiStream, timestamp : C_PmTimestamp , message : C_PmMessage) -> PmError;
    }   
 }
 
@@ -148,7 +148,7 @@ pub fn get_error_text(error_code : PmError) -> String {
     After this routine executes, the host error is cleared. 
 */
 #[inline(never)]
-pub fn get_host_error_text(msg : *c_char , len : i32 ) {
+pub fn get_host_error_text(msg : *const c_char , len : i32 ) {
     unsafe { 
         ffi::Pm_GetHostErrorText(msg, len);
     }
@@ -182,8 +182,8 @@ pub struct PmDeviceInfo {
 #[doc(hidden)]
 pub struct C_PmDeviceInfo {
     structVersion: i32, /* < this internal structure version */ 
-    interf : *c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
-    pub name : *c_char,    /* < device name, e.g. USB MidiSport 1x1 */
+    interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
+    pub name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
     input : i32, /* < true iff input is available */
     output : i32, /* < true iff output is available */
     opened : i32, /* < used by generic PortMidi code to do error checking on arguments */
@@ -191,7 +191,7 @@ pub struct C_PmDeviceInfo {
 
 #[doc(hidden)]
 impl PmDeviceInfo {
-    pub fn wrap(cdevice_info : *C_PmDeviceInfo) -> PmDeviceInfo {
+    pub fn wrap(cdevice_info : *const C_PmDeviceInfo) -> PmDeviceInfo {
         unsafe {
             PmDeviceInfo {
                 structVersion: (*cdevice_info).structVersion as int,
@@ -426,7 +426,7 @@ impl PmEvent {
 
 /// Representation of an input midi port.
 pub struct PmInputPort {
-    c_pm_stream : *ffi::C_PortMidiStream,
+    c_pm_stream : *const ffi::C_PortMidiStream,
     inputDevice : C_PmDeviceID,
     bufferSize : i32,
 }
@@ -546,7 +546,7 @@ impl PmInputPort {
 
 /// Representation of an output midi port.
 pub struct PmOutputPort {
-    c_pm_stream : *ffi::C_PortMidiStream,
+    c_pm_stream : *const ffi::C_PortMidiStream,
     outputDevice : C_PmDeviceID,
     bufferSize : i32,
 }
