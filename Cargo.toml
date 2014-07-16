@@ -1,11 +1,6 @@
 [package]
 
-name = "rust-portmidi"
+name = "portmidi"
 version = "0.0.1"
 authors = ["Philippe Delrieu"]
 
-build = "make lib"
-
-[[lib]]
-
-name = "/portmidi/lib"

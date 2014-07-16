@@ -1,4 +1,4 @@
-#![crate_id = "github.com/musitdev/rust-portmidi#portmidi:0.1"]
+#![crate_name = "portmidi"]
 #![comment = "PortMidi binding for Rust"]
 #![license = "MIT"]
 #![crate_type = "lib"]
