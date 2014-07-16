@@ -1,9 +1,6 @@
 [package]
 
-name = "rust-portmidi"
+name = "portmidi"
 version = "0.0.1"
 authors = ["Philippe Delrieu"]
 
-[[lib]]
-
-name = "portmidi"
