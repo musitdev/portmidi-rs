@@ -16,7 +16,6 @@ install:
   - sudo apt-get install libportmidi-dev
 script:
   - cargo build --verbose
-  - cargo test
 after_script:
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
 
