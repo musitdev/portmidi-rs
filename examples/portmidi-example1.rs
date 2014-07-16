@@ -1,4 +1,4 @@
-#![crate_id = "portmidi-example1#0.0.1"]
+#![crate_name = "portmidi-example1"]
 #![license = "MIT"]
 
 #![feature(globs)]
