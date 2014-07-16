@@ -9,10 +9,14 @@ before_install:
   - sudo apt-get update
 install:
   - sudo apt-get install rust-nightly
+  - git clone --recursive https://github.com/rust-lang/cargo
+  - cd cargo
+  - make && sudo make install
+  - cd -
   - sudo apt-get install libportmidi-dev
 script:
-  - make lib
-  - make doc
+  - cargo build --verbose
+  - cargo test
 after_script:
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
 
