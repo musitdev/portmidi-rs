@@ -4,3 +4,8 @@ name = "portmidi"
 version = "0.0.1"
 authors = ["Philippe Delrieu"]
 
+[[lib]]
+name = "portmidi"
+crate-type = ["dylib", "rlib"]
+path = "src/lib.rs"
+
