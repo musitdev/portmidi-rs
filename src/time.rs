@@ -4,6 +4,7 @@
 extern crate time;
 
 use std::io::timer;
+use std::time::duration;
 use std::comm;
 use std::comm::{channel, Sender, Receiver};
 
@@ -22,8 +23,8 @@ pub enum PtError {
     of the pause may be rounded to the nearest or next clock tick
     as determined by resolution in Pt_Start().
 */
-pub fn Pt_Sleep(duration: u64)	{
-	timer::sleep(duration);
+pub fn Pt_Sleep(duration: i32)	{
+	timer::sleep(duration::Duration::milliseconds(duration));
 }
 
 pub struct PtTimer	{
@@ -46,9 +47,7 @@ impl PtTimer	{
 
 	    return value: timer always start
 	*/
-	pub fn Pt_start<T:Send> (resolution : u64, userData : T , callback: extern "Rust" fn(u64, &mut T)) -> PtTimer {
-//	pub fn Pt_start<T:Send> (&self, resolution : u64, userData : T , callback: 'static |u64, &T|) {
-
+	pub fn Pt_start<T:Send> (resolution : i32, userData : T , callback: extern "Rust" fn(u64, &mut T)) -> PtTimer {
 	    let (newchan, newport): (Sender<String>, Receiver<String>) = channel();
 	    let ptimer = PtTimer {
 	    	channel: newchan,
@@ -58,7 +57,7 @@ impl PtTimer	{
 
 	    spawn (proc() {
 			let mut timer = timer::Timer::new().unwrap();
-			let periodic = timer.periodic(resolution);
+			let periodic = timer.periodic(duration::Duration::milliseconds(resolution));
 			let mut stop : bool = false;
 			let starttime = time::precise_time_ns();
 			let mut mutdata = userData;

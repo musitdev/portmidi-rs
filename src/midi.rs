@@ -3,9 +3,10 @@
 */
 
 
-use std::{ptr, str};
+use std::{ptr};
 use core::mem::transmute;
 use libc::c_char;
+use std::string::raw;
 
 #[deriving(PartialEq, Eq, FromPrimitive)]
 pub enum PmError {
@@ -139,7 +140,7 @@ pub fn terminate() -> PmError {
 #[inline(never)]
 pub fn get_error_text(error_code : PmError) -> String {
     unsafe { 
-        str::raw::from_c_str(ffi::Pm_GetErrorText(error_code.wrap()))
+        raw::from_buf((ffi::Pm_GetErrorText(error_code.wrap()) as *const u8))
     }
 }
 
@@ -195,8 +196,8 @@ impl PmDeviceInfo {
         unsafe {
             PmDeviceInfo {
                 structVersion: (*cdevice_info).structVersion as int,
-                interf : str::raw::from_c_str((*cdevice_info).interf),
-                name : str::raw::from_c_str((*cdevice_info).name), 
+                interf : raw::from_buf((*cdevice_info).interf as *const u8),
+                name : raw::from_buf((*cdevice_info).name as *const u8), 
                 input : (*cdevice_info).input as int,
                 output : (*cdevice_info).output as int,
                 opened : (*cdevice_info).opened as int,
