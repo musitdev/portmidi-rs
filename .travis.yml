@@ -4,6 +4,8 @@ env:
 notifications:
   email:
     - philippe.delrieu@free.fr
+install:
+  - sudo apt-get install libportmidi-dev
 language: rust
 os:
   - linux
