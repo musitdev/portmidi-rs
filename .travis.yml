@@ -7,6 +7,8 @@ notifications:
 install:
   - sudo apt-get install libportmidi-dev
 language: rust
+script:
+  - cargo build
 os:
   - linux
 
