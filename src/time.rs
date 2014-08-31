@@ -23,7 +23,7 @@ pub enum PtError {
     of the pause may be rounded to the nearest or next clock tick
     as determined by resolution in Pt_Start().
 */
-pub fn Pt_Sleep(duration: i32)	{
+pub fn Pt_Sleep(duration: i64)	{
 	timer::sleep(duration::Duration::milliseconds(duration));
 }
 
@@ -47,7 +47,7 @@ impl PtTimer	{
 
 	    return value: timer always start
 	*/
-	pub fn Pt_start<T:Send> (resolution : i32, userData : T , callback: extern "Rust" fn(u64, &mut T)) -> PtTimer {
+	pub fn Pt_start<T:Send> (resolution : i64, userData : T , callback: extern "Rust" fn(u64, &mut T)) -> PtTimer {
 	    let (newchan, newport): (Sender<String>, Receiver<String>) = channel();
 	    let ptimer = PtTimer {
 	    	channel: newchan,
