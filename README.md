@@ -41,7 +41,7 @@ It's reported to work on Mac.
 
 Documentation
 =======
-Auto generated documentation can be found at rust-ci: http://www.rust-ci.org/musitdev/rust-portmidi/doc/portmidi
+Auto generated documentation can be found at rust-ci: http://www.rust-ci.org/musitdev/rust-portmidi/doc/portmidi/
 
 License
 =======
