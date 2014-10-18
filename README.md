@@ -39,6 +39,10 @@ Test suite. Contains example of use.
 PortMidi works on Linux, windows and OSX. The binding has been only tested on Linux
 It's reported to work on Mac.
 
+Documentation
+=======
+Auto generated documentation can be found at rust-ci: http://www.rust-ci.org/musitdev/rust-portmidi/doc/portmidi
+
 License
 =======
 
