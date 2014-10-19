@@ -8,7 +8,7 @@ use core::mem::transmute;
 use libc::c_char;
 use std::string::raw;
 
-#[deriving(PartialEq, Eq, FromPrimitive)]
+#[deriving(Show, PartialEq, Eq, FromPrimitive)]
 pub enum PmError {
     PmNoError = ffi::PmNoError as int,
     PmGotData = ffi::PmGotData as int, /* < A "no error" return that also indicates data available */
@@ -65,7 +65,7 @@ mod ffi {
       pub timestamp : C_PmTimestamp,
   }
 
-  #[deriving(FromPrimitive)]
+  #[deriving(Show, FromPrimitive)]
   #[repr(C)]
   pub enum PmError {
       PmNoError = 0,
@@ -171,6 +171,7 @@ pub type C_PmDeviceID = i32;
 pub type PmDeviceID = int;
 pub static pmNoDevice :i32 = -1;
 
+#[deriving(Show)]
 pub struct PmDeviceInfo {
     structVersion: int, /* < this internal structure version */ 
     interf : String, /* < underlying MIDI API, e.g. MMSystem or DirectX */
@@ -399,7 +400,7 @@ impl PmMessage {
    non-decreasing.
  */
 #[allow(visible_private_types)]
-#[deriving(Clone, PartialEq, Eq, Decodable, Encodable)]
+#[deriving(Clone, PartialEq, Eq, Decodable, Encodable, Show)]
 pub  struct PmEvent {
     pub message : PmMessage,
     pub timestamp : ffi::C_PmTimestamp,

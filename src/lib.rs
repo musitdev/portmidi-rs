@@ -7,7 +7,6 @@
 extern crate libc;
 extern crate core;
 extern crate serialize;
-extern crate debug;
 
 #[allow(non_camel_case_types)]
 pub mod midi;
@@ -27,16 +26,16 @@ mod tests {
     }
 
     fn sequencer_callback(time:u64, data:&mut Sequencer)   {
-        println!("sequencer_callback time:{:?}", time);
+        println!("sequencer_callback time:{}", time);
      //   let inport = *data.inport;
         let _ = data.midi_notes; // avoid dead code warning
 
         while match data.inport.poll() { midi::PmGotData => true, _ => false }    {
-            // println!("portmidi input note {:?}", readMidi);
+            // println!("portmidi input note {}", readMidi);
             match data.inport.read()    {
-                Ok(notes) => println!("portmidi read midi note {:?}", notes),
-                Err(midi::PmNoError) => println!("portmidi read midi no note {:?}", midi::PmNoError),
-                Err(err) => println!("portmidi read midi error {:?}", err)
+                Ok(notes) => println!("portmidi read midi note {}", notes),
+                Err(midi::PmNoError) => println!("portmidi read midi no note {}", midi::PmNoError),
+                Err(err) => println!("portmidi read midi error {}", err)
             } 
         }
 
@@ -49,17 +48,17 @@ mod tests {
     	assert_eq!(error as int, midi::PmNoError as int);
 
     	let nbdevice : int = midi::count_devices();
-    	println!("portmidi nb device {:?}", nbdevice);
+    	println!("portmidi nb device {}", nbdevice);
     	let defdevin : int = midi::get_default_input_device_id();
-    	println!("portmidi default input device {:?}", defdevin);
+    	println!("portmidi default input device {}", defdevin);
     	let defdevout : int = midi::get_default_output_device_id();
-    	println!("portmidi default output device {:?}", defdevout);
+    	println!("portmidi default output device {}", defdevout);
 
         let ininfo = midi::get_device_info(defdevin);
-        println!("portmidi default input device info {:?}", ininfo);
+        println!("portmidi default input device info {}", ininfo);
 
         let outinfo = midi::get_device_info(defdevout);
-        println!("portmidi default output device info {:?}", outinfo);
+        println!("portmidi default output device info {}", outinfo);
 
         let mut inport : midi::PmInputPort = midi::PmInputPort::new(defdevin, 0);
         let inerror = inport.open();
@@ -67,15 +66,15 @@ mod tests {
 
         let mut outport : midi::PmOutputPort = midi::PmOutputPort::new(defdevout, 100);
         let outerror = outport.open();
-        println!("portmidi new output device {:?}", outerror);
+        println!("portmidi new output device {}", outerror);
         assert_eq!(outerror as int, midi::PmNoError as int);
 
         let readMidi = inport.read();
-        println!("portmidi input note {:?}", readMidi);
+        println!("portmidi input note {}", readMidi);
         match readMidi    {
-            Ok(notes) => println!("portmidi read midi note {:?}", notes),
-            Err(midi::PmNoError) => println!("portmidi read midi no note {:?}", midi::PmNoError),
-            Err(err) => println!("portmidi read midi error {:?}", err)
+            Ok(notes) => println!("portmidi read midi note {}", notes),
+            Err(midi::PmNoError) => println!("portmidi read midi no note {}", midi::PmNoError),
+            Err(err) => println!("portmidi read midi error {}", err)
         }
 
         let innote = inport.poll();
@@ -131,9 +130,9 @@ mod tests {
 
         let readMidi = queue.dequeue();
         match readMidi    {
-            Ok(notes) => println!("portmidi read midi note {:?}", notes),
+            Ok(notes) => println!("portmidi read midi note {}", notes),
             Err(midi::PmNoError) => assert_eq!(midi::PmNoError as int, midi::PmNoError as int),
-            Err(err) => fail!("portmidi read midi error {:?}", err)
+            Err(err) => fail!("portmidi read midi error {}", err)
         }
 
         assert_eq!(queue.is_empty(), true);
@@ -169,8 +168,8 @@ mod tests {
         let readqueue = queue.dequeue();
         match readqueue    {
             Ok(notes) => assert_eq!(notes.data1, 36),
-            Err(midi::PmNoError) => fail!("dequeue error no object found {:?}", readqueue),
-            Err(err) => fail!("portmidi read midi error {:?}", err)
+            Err(midi::PmNoError) => fail!("dequeue error no object found {}", readqueue),
+            Err(err) => fail!("portmidi read midi error {}", err)
         }
 
         assert_eq!(queue.is_empty(), true);
@@ -180,13 +179,14 @@ mod tests {
         assert_eq!(queudesterr as int, midi::PmNoError as int);
    }
 
+   #[deriving(Show)]
    struct TestMutCallback   {
         data: int,
    }
 
     fn test_callback(time:u64, data:&mut TestMutCallback)   {
         data.data = data.data + 1;
-        println!("testcallback time:{:?} data:{:?}", time, data);
+        println!("testcallback time:{} data:{}", time, data);
         let cal: int = (time / 1000) as int;
         assert_eq!(data.data, cal);
     }
@@ -197,12 +197,12 @@ mod tests {
         let mut timer = time::PtTimer::Pt_start(1000, data, test_callback);
         assert_eq!(timer.Pt_Started(), true);
 
-        println!("test_timer start time:{:?} ", timer.Pt_Time());
+        println!("test_timer start time:{} ", timer.Pt_Time());
 
         time::Pt_Sleep(5000);
         timer.Pt_Stop();
         assert_eq!(timer.Pt_Started(), false);
-        println!("test_timer end time:{:?} ", timer.Pt_Time());
+        println!("test_timer end time:{} ", timer.Pt_Time());
         assert_eq!(timer.Pt_Time() >= 5000, true);
         assert_eq!(timer.Pt_Time() < 6000, true);
         assert_eq!(data.data, 0);
