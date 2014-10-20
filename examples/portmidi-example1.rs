@@ -3,7 +3,6 @@
 
 #![feature(globs)]
 
-extern crate debug;
 extern crate portmidi;
 
 use portmidi::midi;
@@ -13,5 +12,5 @@ use std::io::stdio::println;
 fn main() {
     println("hello?");
     let error:midi::PmError = midi::initialize();
-    println!("res :{:?}", error);
+    println!("res {}", error);
 }
