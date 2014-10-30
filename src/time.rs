@@ -74,7 +74,7 @@ impl PtTimer	{
 		            	}
 			    	},	
 			    	Err(comm::Empty) => (),
-			    	Err(comm::Disconnected) => fail!("Action channel disconnect error.")
+			    	Err(comm::Disconnected) => panic!("Action channel disconnect error.")
             	}
             	if stop	{
             		break;
