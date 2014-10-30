@@ -132,7 +132,7 @@ mod tests {
         match readMidi    {
             Ok(notes) => println!("portmidi read midi note {}", notes),
             Err(midi::PmNoError) => assert_eq!(midi::PmNoError as int, midi::PmNoError as int),
-            Err(err) => fail!("portmidi read midi error {}", err)
+            Err(err) => panic!("portmidi read midi error {}", err)
         }
 
         assert_eq!(queue.is_empty(), true);
@@ -141,7 +141,7 @@ mod tests {
         let peek1 = queue.peek();
         match peek1   {
             None => assert_eq!(peek1, None),
-            _ => fail!("queue.peek  bad result. not None"),
+            _ => panic!("queue.peek  bad result. not None"),
         }
 
         let enqueuerr = queue.enqueue (
@@ -159,7 +159,7 @@ mod tests {
         let peek1 = queue.peek();
         match peek1   {
             Some(notes) => assert_eq!(notes.data1, 36),
-            None => fail!("queue.peek2  bad result. None"),
+            None => panic!("queue.peek2  bad result. None"),
         }
 
         assert_eq!(queue.is_empty(), false);
@@ -168,8 +168,8 @@ mod tests {
         let readqueue = queue.dequeue();
         match readqueue    {
             Ok(notes) => assert_eq!(notes.data1, 36),
-            Err(midi::PmNoError) => fail!("dequeue error no object found {}", readqueue),
-            Err(err) => fail!("portmidi read midi error {}", err)
+            Err(midi::PmNoError) => panic!("dequeue error no object found {}", readqueue),
+            Err(err) => panic!("portmidi read midi error {}", err)
         }
 
         assert_eq!(queue.is_empty(), true);
