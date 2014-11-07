@@ -60,7 +60,7 @@ mod ffi {
 // no TimeProc for first impl : typedef PmTimestamp (*PmTimeProcPtr)(void *time_info);
 
   #[doc(hidden)]
-  pub  struct C_PmEvent {
+  #[repr(C)] pub struct C_PmEvent {
       pub message : C_PmMessage,
       pub timestamp : C_PmTimestamp,
   }
@@ -155,11 +155,11 @@ pub fn get_host_error_text(msg : *const c_char , len : i32 ) {
     }
 }
 
-pub static HDRLENGTH : i32 = 50;
+pub const HDRLENGTH : i32 = 50;
 
 /* any host error msg will occupy less 
 than this number of characters */
-pub static PM_HOST_ERROR_MSG_LEN : i32 = 256;
+pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 
 /**
     Device enumeration mechanism.
@@ -169,7 +169,7 @@ pub static PM_HOST_ERROR_MSG_LEN : i32 = 256;
 */
 pub type C_PmDeviceID = i32;
 pub type PmDeviceID = int;
-pub static pmNoDevice :i32 = -1;
+pub const pmNoDevice : i32 = -1;
 
 #[deriving(Show)]
 pub struct PmDeviceInfo {
@@ -182,7 +182,7 @@ pub struct PmDeviceInfo {
 }
 
 #[doc(hidden)]
-pub struct C_PmDeviceInfo {
+#[repr(C)] pub struct C_PmDeviceInfo {
     structVersion: i32, /* < this internal structure version */ 
     interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
     pub name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
