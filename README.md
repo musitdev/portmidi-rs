@@ -18,23 +18,7 @@ pmutil.h : PmQueue functions
 Installation
 ============
 
-PortMidi binding is build with the provided makefile :
-
-```Shell
-> make lib
-```
-
-Examples are build too with makefile :
-
-```Shell
-> make examples
-> ./bin/example1
-```
-Test suite. Contains example of use.
-```Shell
-> make test
-> ./bin/test
-```
+Use `cargo build` to compile library, to compile and run tests use `cargo test`.
 
 PortMidi works on Linux, windows and OSX. The binding has been only tested on Linux
 It's reported to work on Mac.

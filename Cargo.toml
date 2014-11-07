@@ -2,10 +2,9 @@
 
 name = "portmidi"
 version = "0.0.1"
-authors = ["Philippe Delrieu"]
+authors = ["Philippe Delrieu <philippe.delrieu@free.fr>"]
 
-[[lib]]
+[lib]
 name = "portmidi"
 crate-type = ["dylib", "rlib"]
 path = "src/lib.rs"
-
