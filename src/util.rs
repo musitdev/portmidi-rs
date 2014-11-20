@@ -104,8 +104,8 @@ impl PmQueue{
             FromPrimitive::from_i64(ffi::Pm_Dequeue(self.queue, &mut cmes) as i64).unwrap()
         };
         match retdata {
-            midi::PmNoError => Err(midi::PmNoError),
-            midi::PmGotData => Ok(midi::PmMessage::wrap(cmes)),
+            midi::PmError::PmNoError => Err(midi::PmError::PmNoError),
+            midi::PmError::PmGotData => Ok(midi::PmMessage::wrap(cmes)),
             _ => Err(retdata)
         }
    }

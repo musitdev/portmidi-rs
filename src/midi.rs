@@ -8,40 +8,6 @@ use core::mem::transmute;
 use libc::c_char;
 use std::string::raw;
 
-#[deriving(Show, PartialEq, Eq, FromPrimitive)]
-pub enum PmError {
-    PmNoError = ffi::PmNoError as int,
-    PmGotData = ffi::PmGotData as int, /* < A "no error" return that also indicates data available */
-    PmHostError = ffi::PmHostError as int,
-    PmInvalidDeviceId = ffi::PmInvalidDeviceId as int, /** out of range or 
-                        * output device when input is requested or 
-                        * input device when output is requested or
-                        * device is already opened 
-                        */
-    PmInsufficientMemory = ffi::PmInsufficientMemory as int,
-    PmBufferTooSmall = ffi::PmBufferTooSmall as int,
-    PmBufferOverflow = ffi::PmBufferOverflow as int,
-    PmBadPtr = ffi::PmBadPtr as int, /* PortMidiStream parameter is NULL or
-               * stream is not opened or
-               * stream is output when input is required or
-               * stream is input when output is required */
-    PmBadData = ffi::PmBadData as int, /* illegal midi data, e.g. missing EOX */
-    PmInternalError = ffi::PmInternalError as int,
-    PmBufferMaxSize = ffi::PmBufferMaxSize as int, /* buffer is already as large as it can be */
-    /* NOTE: If you add a new error type, be sure to update Pm_GetErrorText() */
-}
-
-impl PmError{
-  fn unwrap(error: ffi::PmError) -> PmError  {
-    FromPrimitive::from_i64(error as i64).unwrap()
-  }
-
-  fn wrap(&self) -> ffi::PmError  {
-    FromPrimitive::from_i64(*self as i64).unwrap()
-  }
-
-}
-
 mod ffi {
     use libc::{c_char, c_void};
 
@@ -120,6 +86,41 @@ pub fn initialize() -> PmError {
     unsafe {
         PmError::unwrap(ffi::Pm_Initialize())
     }
+}
+
+
+#[deriving(Show, PartialEq, Eq, FromPrimitive)]
+pub enum PmError {
+    PmNoError = ffi::PmError::PmNoError as int,
+    PmGotData = ffi::PmError::PmGotData as int, /* < A "no error" return that also indicates data available */
+    PmHostError = ffi::PmError::PmHostError as int,
+    PmInvalidDeviceId = ffi::PmError::PmInvalidDeviceId as int, /** out of range or 
+                        * output device when input is requested or 
+                        * input device when output is requested or
+                        * device is already opened 
+                        */
+    PmInsufficientMemory = ffi::PmError::PmInsufficientMemory as int,
+    PmBufferTooSmall = ffi::PmError::PmBufferTooSmall as int,
+    PmBufferOverflow = ffi::PmError::PmBufferOverflow as int,
+    PmBadPtr = ffi::PmError::PmBadPtr as int, /* PortMidiStream parameter is NULL or
+               * stream is not opened or
+               * stream is output when input is required or
+               * stream is input when output is required */
+    PmBadData = ffi::PmError::PmBadData as int, /* illegal midi data, e.g. missing EOX */
+    PmInternalError = ffi::PmError::PmInternalError as int,
+    PmBufferMaxSize = ffi::PmError::PmBufferMaxSize as int, /* buffer is already as large as it can be */
+    /* NOTE: If you add a new error type, be sure to update Pm_GetErrorText() */
+}
+
+impl PmError{
+  fn unwrap(error: ffi::PmError) -> PmError  {
+    FromPrimitive::from_i64(error as i64).unwrap()
+  }
+
+  fn wrap(&self) -> ffi::PmError  {
+    FromPrimitive::from_i64(*self as i64).unwrap()
+  }
+
 }
 
 /**
@@ -516,7 +517,7 @@ impl PmInputPort {
         };
 //        println!("portmidi::midi after read");
         match nbnote {
-            y if y == 0 => Err(PmNoError),
+            y if y == 0 => Err(PmError::PmNoError),
             y if y > 0 => Ok(PmEvent::wrap(pevent)),
             _ => Err(unsafe { transmute::<i16, PmError>(nbnote) })
         }
