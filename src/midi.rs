@@ -217,6 +217,14 @@ impl PmDeviceInfo {
             opened : self.opened as i32,
         }
     }
+
+    pub fn is_input(&self) -> bool {
+        self.input > 0
+    }
+
+    pub fn is_output(&self) -> bool {
+        self.output > 0
+    }
 }
 
 /**  Get devices count, ids range from 0 to Pm_CountDevices()-1. */
