@@ -11,7 +11,6 @@ extern crate serialize;
 use std::ptr;
 use core::mem::transmute;
 use libc::c_char;
-use std::string::raw;
 
 
 /**
@@ -78,7 +77,7 @@ pub fn terminate() -> PmError {
 #[inline(never)]
 pub fn get_error_text(error_code : PmError) -> String {
     unsafe {
-        raw::from_buf((ffi::Pm_GetErrorText(error_code.wrap()) as *const u8))
+        String::from_raw_buf((ffi::Pm_GetErrorText(error_code.wrap()) as *const u8))
     }
 }
 
@@ -136,8 +135,8 @@ impl PmDeviceInfo {
         unsafe {
             PmDeviceInfo {
                 structVersion: (*cdevice_info).structVersion as int,
-                interf : raw::from_buf((*cdevice_info).interf as *const u8),
-                name : raw::from_buf((*cdevice_info).name as *const u8),
+                interf : String::from_raw_buf((*cdevice_info).interf as *const u8),
+                name : String::from_raw_buf((*cdevice_info).name as *const u8),
                 input : (*cdevice_info).input as int,
                 output : (*cdevice_info).output as int,
                 opened : (*cdevice_info).opened as int,
@@ -148,8 +147,8 @@ impl PmDeviceInfo {
     pub fn unwrap(&self) -> C_PmDeviceInfo {
         C_PmDeviceInfo {
             structVersion: self.structVersion as i32,
-            interf :  unsafe { self.interf.to_c_str().unwrap() },
-            name :  unsafe { self.name.to_c_str().unwrap() },
+            interf :  unsafe { self.interf.to_c_str().into_inner() },
+            name :  unsafe { self.name.to_c_str().into_inner() },
             input : self.input as i32,
             output : self.output as i32,
             opened : self.opened as i32,
