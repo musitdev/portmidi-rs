@@ -104,13 +104,13 @@ pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
     Device ids range from 0 to Pm_CountDevices()-1.
 
 */
-pub type C_PmDeviceID = i32;
+pub type CPmDeviceID = i32;
 pub type PmDeviceID = int;
-pub const pmNoDevice : i32 = -1;
+pub const PM_NO_DEVICE : i32 = -1;
 
 #[deriving(Show)]
 pub struct PmDeviceInfo {
-    structVersion: int, /* < this internal structure version */
+    struct_version: int, /* < this internal structure version */
     interf : String, /* < underlying MIDI API, e.g. MMSystem or DirectX */
     pub name : String,    /* < device name, e.g. USB MidiSport 1x1 */
     input : int, /* < true iff input is available */
@@ -120,8 +120,8 @@ pub struct PmDeviceInfo {
 
 #[doc(hidden)]
 #[repr(C)]
-pub struct C_PmDeviceInfo {
-    structVersion: i32, /* < this internal structure version */
+pub struct CPmDeviceInfo {
+    struct_version: i32, /* < this internal structure version */
     interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
     pub name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
     input : i32, /* < true iff input is available */
@@ -131,10 +131,10 @@ pub struct C_PmDeviceInfo {
 
 #[doc(hidden)]
 impl PmDeviceInfo {
-    pub fn wrap(cdevice_info : *const C_PmDeviceInfo) -> PmDeviceInfo {
+    pub fn wrap(cdevice_info : *const CPmDeviceInfo) -> PmDeviceInfo {
         unsafe {
             PmDeviceInfo {
-                structVersion: (*cdevice_info).structVersion as int,
+                struct_version: (*cdevice_info).struct_version as int,
                 interf : String::from_raw_buf((*cdevice_info).interf as *const u8),
                 name : String::from_raw_buf((*cdevice_info).name as *const u8),
                 input : (*cdevice_info).input as int,
@@ -144,9 +144,9 @@ impl PmDeviceInfo {
         }
     }
 
-    pub fn unwrap(&self) -> C_PmDeviceInfo {
-        C_PmDeviceInfo {
-            structVersion: self.structVersion as i32,
+    pub fn unwrap(&self) -> CPmDeviceInfo {
+        CPmDeviceInfo {
+            struct_version: self.struct_version as i32,
             interf :  unsafe { self.interf.to_c_str().into_inner() },
             name :  unsafe { self.name.to_c_str().into_inner() },
             input : self.input as i32,
@@ -262,7 +262,7 @@ pub struct PmMessage { /**< see PmEvent */
 */
 #[doc(hidden)]
 impl PmMessage {
-    pub fn wrap(cmessage : ffi::C_PmMessage) -> PmMessage {
+    pub fn wrap(cmessage : ffi::CPmMessage) -> PmMessage {
         PmMessage {
             status:  ((cmessage) & 0xFF) as i8,
             data1 : (((cmessage) >> 8) & 0xFF) as i8,
@@ -270,7 +270,7 @@ impl PmMessage {
         }
     }
 
-    pub fn unwrap(&self) -> ffi::C_PmMessage {
+    pub fn unwrap(&self) -> ffi::CPmMessage {
         ((((self.data2 as i32) << 16) & 0xFF0000) |
           (((self.data1 as i32) << 8) & 0xFF00) |
           ((self.status as i32) & 0xFF)) as i32
@@ -346,20 +346,20 @@ impl PmMessage {
 #[deriving(Clone, PartialEq, Eq, Decodable, Encodable, Show)]
 pub  struct PmEvent {
     pub message : PmMessage,
-    pub timestamp : ffi::C_PmTimestamp,
+    pub timestamp : ffi::CPmTimestamp,
 }
 
 #[doc(hidden)]
 impl PmEvent {
-    pub fn wrap(cevent : ffi::C_PmEvent) -> PmEvent {
+    pub fn wrap(cevent : ffi::CPmEvent) -> PmEvent {
         PmEvent {
             message:  PmMessage::wrap(cevent.message),
             timestamp : cevent.timestamp,
         }
     }
 
-    pub fn unwrap(&self) -> ffi::C_PmEvent {
-        ffi::C_PmEvent {
+    pub fn unwrap(&self) -> ffi::CPmEvent {
+        ffi::CPmEvent {
             message:  self.message.unwrap(),
             timestamp : self.timestamp,
         }
@@ -369,9 +369,9 @@ impl PmEvent {
 
 /// Representation of an input midi port.
 pub struct PmInputPort {
-    c_pm_stream : *const ffi::C_PortMidiStream,
-    inputDevice : C_PmDeviceID,
-    bufferSize : i32,
+    c_pm_stream : *const ffi::CPortMidiStream,
+    input_device : CPmDeviceID,
+    buffer_size : i32,
 }
 
 impl PmInputPort {
@@ -383,15 +383,15 @@ impl PmInputPort {
     pub fn new(input_device : PmDeviceID, buffer_size: int) -> PmInputPort {
         PmInputPort {
             c_pm_stream : ptr::null(),
-            inputDevice : input_device as i32,
-            bufferSize : buffer_size as i32,
+            input_device : input_device as i32,
+            buffer_size : buffer_size as i32,
         }
     }
 
     #[inline(never)]
     pub fn open(&mut self)  -> PmError {
         unsafe {
-            PmError::unwrap(ffi::Pm_OpenInput(&self.c_pm_stream, self.inputDevice, ptr::null(), self.bufferSize, ptr::null(), ptr::null()))
+            PmError::unwrap(ffi::Pm_OpenInput(&self.c_pm_stream, self.input_device, ptr::null(), self.buffer_size, ptr::null(), ptr::null()))
         }
     }
 
@@ -447,7 +447,7 @@ impl PmInputPort {
     pub fn read(&mut self) -> Result<PmEvent, PmError> {
 
         //get one note a the time
-         let mut pevent : ffi::C_PmEvent = ffi::C_PmEvent {
+         let mut pevent : ffi::CPmEvent = ffi::CPmEvent {
             message : 0,
             timestamp : 0,
         };
@@ -489,9 +489,9 @@ impl PmInputPort {
 
 /// Representation of an output midi port.
 pub struct PmOutputPort {
-    c_pm_stream : *const ffi::C_PortMidiStream,
-    outputDevice : C_PmDeviceID,
-    bufferSize : i32,
+    c_pm_stream : *const ffi::CPortMidiStream,
+    output_device : CPmDeviceID,
+    buffer_size : i32,
 }
 
 impl PmOutputPort {
@@ -503,8 +503,8 @@ impl PmOutputPort {
     pub fn new(output_device : PmDeviceID, buffer_size: int) -> PmOutputPort {
         PmOutputPort {
             c_pm_stream : ptr::null(),
-            outputDevice : output_device as i32,
-            bufferSize : buffer_size as i32,
+            output_device : output_device as i32,
+            buffer_size : buffer_size as i32,
         }
     }
 
@@ -512,7 +512,7 @@ impl PmOutputPort {
     pub fn open(&mut self)  -> PmError {
 
         unsafe {
-            PmError::unwrap(ffi::Pm_OpenOutput(&self.c_pm_stream, self.outputDevice, ptr::null(), self.bufferSize, ptr::null(), ptr::null(), 0))
+            PmError::unwrap(ffi::Pm_OpenOutput(&self.c_pm_stream, self.output_device, ptr::null(), self.buffer_size, ptr::null(), ptr::null(), 0))
         }
     }
 
@@ -577,7 +577,7 @@ impl PmOutputPort {
         Sysex data may contain embedded real-time messages.
     */
     pub fn write_event(&mut self, midievent : PmEvent)  -> PmError  {
-        let cevent : ffi::C_PmEvent = midievent.unwrap();
+        let cevent : ffi::CPmEvent = midievent.unwrap();
         unsafe {
             PmError::unwrap(ffi::Pm_Write(self.c_pm_stream, &cevent, 1))
         }
@@ -590,7 +590,7 @@ impl PmOutputPort {
         with latency = 0.)
     */
     pub fn write_message(&mut self, midimessage : PmMessage)  -> PmError  {
-        let cevent : ffi::C_PmMessage = midimessage.unwrap();
+        let cevent : ffi::CPmMessage = midimessage.unwrap();
         unsafe {
             PmError::unwrap(ffi::Pm_WriteShort(self.c_pm_stream, 0, cevent))
         }
@@ -601,18 +601,18 @@ impl PmOutputPort {
 mod ffi {
     use libc::{c_char, c_void};
 
-    pub type C_PortMidiStream = c_void;
+    pub type CPortMidiStream = c_void;
 
     #[doc(hidden)]
-    pub type C_PmMessage = i32;
+    pub type CPmMessage = i32;
 
-    pub type C_PmTimestamp = u32;
+    pub type CPmTimestamp = u32;
 
     #[doc(hidden)]
     #[repr(C)]
-    pub struct C_PmEvent {
-        pub message : C_PmMessage,
-        pub timestamp : C_PmTimestamp,
+    pub struct CPmEvent {
+        pub message : CPmMessage,
+        pub timestamp : CPmTimestamp,
     }
 
     #[deriving(Show, FromPrimitive)]
@@ -642,21 +642,21 @@ mod ffi {
     extern "C" {
         pub fn Pm_Initialize() -> PmError;
         pub fn Pm_Terminate()-> PmError;
-        pub fn Pm_HasHostError(stream : *const C_PortMidiStream ) -> i32;
+        pub fn Pm_HasHostError(stream : *const CPortMidiStream ) -> i32;
         pub fn Pm_GetErrorText(errorCode : PmError) -> *const c_char;
         pub fn Pm_GetHostErrorText(msg : *const c_char , len : i32 );
         pub fn Pm_CountDevices() -> u32;
-        pub fn Pm_GetDefaultInputDeviceID() -> super::C_PmDeviceID;
-        pub fn Pm_GetDefaultOutputDeviceID() -> super::C_PmDeviceID;
-        pub fn Pm_GetDeviceInfo(id:super::C_PmDeviceID) -> *const super::C_PmDeviceInfo;
-        pub fn Pm_OpenInput(stream: *const *const C_PortMidiStream, inputDevice : super::C_PmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void) -> PmError;
-        pub fn Pm_OpenOutput(stream : *const *const C_PortMidiStream, outputDevice : super::C_PmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void, latency:i32) -> PmError;
-        pub fn Pm_Read(stream : *const C_PortMidiStream, buffer : *mut C_PmEvent , length : i32) -> i16;
-        pub fn Pm_Abort(stream : *const C_PortMidiStream) -> PmError;
-        pub fn Pm_Close(stream : *const C_PortMidiStream) -> PmError;
-        pub fn Pm_Poll(stream : *const C_PortMidiStream) -> PmError;
-        pub fn Pm_Write(stream : *const C_PortMidiStream, buffer : *const C_PmEvent , length : i32) -> PmError;
-        pub fn Pm_WriteShort(stream : *const C_PortMidiStream, timestamp : C_PmTimestamp , message : C_PmMessage) -> PmError;
+        pub fn Pm_GetDefaultInputDeviceID() -> super::CPmDeviceID;
+        pub fn Pm_GetDefaultOutputDeviceID() -> super::CPmDeviceID;
+        pub fn Pm_GetDeviceInfo(id:super::CPmDeviceID) -> *const super::CPmDeviceInfo;
+        pub fn Pm_OpenInput(stream: *const *const CPortMidiStream, inputDevice : super::CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void) -> PmError;
+        pub fn Pm_OpenOutput(stream : *const *const CPortMidiStream, outputDevice : super::CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void, latency:i32) -> PmError;
+        pub fn Pm_Read(stream : *const CPortMidiStream, buffer : *mut CPmEvent , length : i32) -> i16;
+        pub fn Pm_Abort(stream : *const CPortMidiStream) -> PmError;
+        pub fn Pm_Close(stream : *const CPortMidiStream) -> PmError;
+        pub fn Pm_Poll(stream : *const CPortMidiStream) -> PmError;
+        pub fn Pm_Write(stream : *const CPortMidiStream, buffer : *const CPmEvent , length : i32) -> PmError;
+        pub fn Pm_WriteShort(stream : *const CPortMidiStream, timestamp : CPmTimestamp , message : CPmMessage) -> PmError;
     }
 }
 
