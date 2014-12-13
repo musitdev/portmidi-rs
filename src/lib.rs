@@ -25,7 +25,7 @@ pub fn initialize() -> PmError {
 }
 
 
-#[deriving(Show, PartialEq, Eq, FromPrimitive)]
+#[deriving(Copy, Show, PartialEq, Eq, FromPrimitive)]
 pub enum PmError {
     PmNoError = ffi::PmError::PmNoError as int,
     PmGotData = ffi::PmError::PmGotData as int, /* < A "no error" return that also indicates data available */
