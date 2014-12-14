@@ -1,6 +1,8 @@
 rust-portmidi
 =============
 
+[![Build Status](https://api.travis-ci.org/musitdev/rust-portmidi.svg?branch=master)](https://travis-ci.org/musitdev/rust-portmidi)
+
 PortMidi bindings for Rust
 
 This is a Rust binding for PortMidi lib.
