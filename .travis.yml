@@ -8,8 +8,9 @@ notifications:
 install:
   - sudo apt-get install libportmidi-dev
 script:
-  - cargo build
-after_script:
+  - cargo build --verbose
+  - cargo doc
+after_success:
   - mv target/doc doc
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
 os:
