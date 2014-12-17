@@ -93,13 +93,6 @@ pub const HDRLENGTH : i32 = 50;
 than this number of characters */
 pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 
-/**
-    Device enumeration mechanism.
-
-    Device ids range from 0 to Pm_CountDevices()-1.
-
-*/
-type CPmDeviceID = i32;
 pub type PmDeviceID = int;
 pub const PM_NO_DEVICE : i32 = -1;
 
@@ -113,18 +106,8 @@ pub struct PmDeviceInfo {
     opened : int, /* < used by generic PortMidi code to do error checking on arguments */
 }
 
-#[repr(C)]
-struct CPmDeviceInfo {
-    struct_version: i32, /* < this internal structure version */
-    interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
-    name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
-    input : i32, /* < true iff input is available */
-    output : i32, /* < true iff output is available */
-    opened : i32, /* < used by generic PortMidi code to do error checking on arguments */
-}
-
 impl PmDeviceInfo {
-    fn wrap(cdevice_info : *const CPmDeviceInfo) -> PmDeviceInfo {
+    fn wrap(cdevice_info : *const ffi::CPmDeviceInfo) -> PmDeviceInfo {
         unsafe {
             PmDeviceInfo {
                 struct_version: (*cdevice_info).struct_version as int,
@@ -352,7 +335,7 @@ impl PmEvent {
 #[allow(missing_copy_implementations)]
 pub struct PmInputPort {
     c_pm_stream : *const ffi::CPortMidiStream,
-    input_device : CPmDeviceID,
+    input_device : ffi::CPmDeviceID,
     buffer_size : i32,
 }
 
@@ -473,7 +456,7 @@ impl PmInputPort {
 #[allow(missing_copy_implementations)]
 pub struct PmOutputPort {
     c_pm_stream : *const ffi::CPortMidiStream,
-    output_device : CPmDeviceID,
+    output_device : ffi::CPmDeviceID,
     buffer_size : i32,
 }
 

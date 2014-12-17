@@ -1,5 +1,7 @@
 use libc::{c_char, c_void};
 
+pub type CPmDeviceID = i32;
+
 pub type CPortMidiStream = c_void;
 
 #[doc(hidden)]
@@ -12,6 +14,16 @@ pub type CPmTimestamp = u32;
 pub struct CPmEvent {
     pub message : CPmMessage,
     pub timestamp : CPmTimestamp,
+}
+
+#[repr(C)]
+pub struct CPmDeviceInfo {
+    pub struct_version: i32, /* < this internal structure version */
+    pub interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
+    pub name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
+    pub input : i32, /* < true iff input is available */
+    pub output : i32, /* < true iff output is available */
+    pub opened : i32, /* < used by generic PortMidi code to do error checking on arguments */
 }
 
 #[deriving(Show, FromPrimitive)]
@@ -45,11 +57,11 @@ extern "C" {
     pub fn Pm_GetErrorText(errorCode : PmError) -> *const c_char;
     pub fn Pm_GetHostErrorText(msg : *const c_char , len : i32 );
     pub fn Pm_CountDevices() -> u32;
-    pub fn Pm_GetDefaultInputDeviceID() -> super::CPmDeviceID;
-    pub fn Pm_GetDefaultOutputDeviceID() -> super::CPmDeviceID;
-    pub fn Pm_GetDeviceInfo(id:super::CPmDeviceID) -> *const super::CPmDeviceInfo;
-    pub fn Pm_OpenInput(stream: *const *const CPortMidiStream, inputDevice : super::CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void) -> PmError;
-    pub fn Pm_OpenOutput(stream : *const *const CPortMidiStream, outputDevice : super::CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void, latency:i32) -> PmError;
+    pub fn Pm_GetDefaultInputDeviceID() -> CPmDeviceID;
+    pub fn Pm_GetDefaultOutputDeviceID() -> CPmDeviceID;
+    pub fn Pm_GetDeviceInfo(id:CPmDeviceID) -> *const CPmDeviceInfo;
+    pub fn Pm_OpenInput(stream: *const *const CPortMidiStream, inputDevice : CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void) -> PmError;
+    pub fn Pm_OpenOutput(stream : *const *const CPortMidiStream, outputDevice : CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void, latency:i32) -> PmError;
     pub fn Pm_Read(stream : *const CPortMidiStream, buffer : *mut CPmEvent , length : i32) -> i16;
     pub fn Pm_Abort(stream : *const CPortMidiStream) -> PmError;
     pub fn Pm_Close(stream : *const CPortMidiStream) -> PmError;
