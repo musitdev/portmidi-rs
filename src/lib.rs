@@ -99,7 +99,7 @@ pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
     Device ids range from 0 to Pm_CountDevices()-1.
 
 */
-pub type CPmDeviceID = i32;
+type CPmDeviceID = i32;
 pub type PmDeviceID = int;
 pub const PM_NO_DEVICE : i32 = -1;
 
@@ -113,21 +113,18 @@ pub struct PmDeviceInfo {
     opened : int, /* < used by generic PortMidi code to do error checking on arguments */
 }
 
-#[doc(hidden)]
 #[repr(C)]
-#[allow(missing_copy_implementations)]
-pub struct CPmDeviceInfo {
+struct CPmDeviceInfo {
     struct_version: i32, /* < this internal structure version */
     interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
-    pub name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
+    name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
     input : i32, /* < true iff input is available */
     output : i32, /* < true iff output is available */
     opened : i32, /* < used by generic PortMidi code to do error checking on arguments */
 }
 
-#[doc(hidden)]
 impl PmDeviceInfo {
-    pub fn wrap(cdevice_info : *const CPmDeviceInfo) -> PmDeviceInfo {
+    fn wrap(cdevice_info : *const CPmDeviceInfo) -> PmDeviceInfo {
         unsafe {
             PmDeviceInfo {
                 struct_version: (*cdevice_info).struct_version as int,
@@ -137,17 +134,6 @@ impl PmDeviceInfo {
                 output : (*cdevice_info).output as int,
                 opened : (*cdevice_info).opened as int,
             }
-        }
-    }
-
-    pub fn unwrap(&self) -> CPmDeviceInfo {
-        CPmDeviceInfo {
-            struct_version: self.struct_version as i32,
-            interf :  unsafe { self.interf.to_c_str().into_inner() },
-            name :  unsafe { self.name.to_c_str().into_inner() },
-            input : self.input as i32,
-            output : self.output as i32,
-            opened : self.opened as i32,
         }
     }
 
@@ -256,9 +242,8 @@ pub struct PmMessage { /**< see PmEvent */
     Pm_MessageStatus(), Pm_MessageData1(), and
     Pm_MessageData2() extract fields from a 32-bit midi message.
 */
-#[doc(hidden)]
 impl PmMessage {
-    pub fn wrap(cmessage : ffi::CPmMessage) -> PmMessage {
+    fn wrap(cmessage : ffi::CPmMessage) -> PmMessage {
         PmMessage {
             status:  ((cmessage) & 0xFF) as i8,
             data1 : (((cmessage) >> 8) & 0xFF) as i8,
@@ -266,7 +251,7 @@ impl PmMessage {
         }
     }
 
-    pub fn unwrap(&self) -> ffi::CPmMessage {
+    fn unwrap(&self) -> ffi::CPmMessage {
         ((((self.data2 as i32) << 16) & 0xFF0000) |
           (((self.data1 as i32) << 8) & 0xFF00) |
           ((self.status as i32) & 0xFF)) as i32
@@ -347,14 +332,14 @@ pub  struct PmEvent {
 
 #[doc(hidden)]
 impl PmEvent {
-    pub fn wrap(cevent : ffi::CPmEvent) -> PmEvent {
+    fn wrap(cevent : ffi::CPmEvent) -> PmEvent {
         PmEvent {
             message:  PmMessage::wrap(cevent.message),
             timestamp : cevent.timestamp,
         }
     }
 
-    pub fn unwrap(&self) -> ffi::CPmEvent {
+    fn unwrap(&self) -> ffi::CPmEvent {
         ffi::CPmEvent {
             message:  self.message.unwrap(),
             timestamp : self.timestamp,
