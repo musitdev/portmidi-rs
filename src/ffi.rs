@@ -56,7 +56,7 @@ extern "C" {
     pub fn Pm_HasHostError(stream : *const CPortMidiStream ) -> i32;
     pub fn Pm_GetErrorText(errorCode : PmError) -> *const c_char;
     pub fn Pm_GetHostErrorText(msg : *const c_char , len : i32 );
-    pub fn Pm_CountDevices() -> u32;
+    pub fn Pm_CountDevices() -> i32;
     pub fn Pm_GetDefaultInputDeviceID() -> CPmDeviceID;
     pub fn Pm_GetDefaultOutputDeviceID() -> CPmDeviceID;
     pub fn Pm_GetDeviceInfo(id:CPmDeviceID) -> *const CPmDeviceInfo;
