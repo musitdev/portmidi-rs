@@ -115,6 +115,7 @@ pub struct PmDeviceInfo {
 
 #[doc(hidden)]
 #[repr(C)]
+#[allow(missing_copy_implementations)]
 pub struct CPmDeviceInfo {
     struct_version: i32, /* < this internal structure version */
     interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
@@ -241,7 +242,7 @@ pub fn get_device_info(device : PmDeviceID) -> Option<PmDeviceInfo> {
     }
 }
 
-#[deriving(Clone, PartialEq, Eq, Decodable, Encodable, Show)]
+#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
 pub struct PmMessage { /**< see PmEvent */
     pub status : i8,
     pub data1 : i8,
@@ -338,7 +339,7 @@ impl PmMessage {
    the interrupting real-time message to insure that timestamps are
    non-decreasing.
  */
-#[deriving(Clone, PartialEq, Eq, Decodable, Encodable, Show)]
+#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
 pub  struct PmEvent {
     pub message : PmMessage,
     pub timestamp : ffi::CPmTimestamp,
@@ -363,6 +364,7 @@ impl PmEvent {
 
 
 /// Representation of an input midi port.
+#[allow(missing_copy_implementations)]
 pub struct PmInputPort {
     c_pm_stream : *const ffi::CPortMidiStream,
     input_device : CPmDeviceID,
@@ -483,6 +485,7 @@ impl PmInputPort {
 
 
 /// Representation of an output midi port.
+#[allow(missing_copy_implementations)]
 pub struct PmOutputPort {
     c_pm_stream : *const ffi::CPortMidiStream,
     output_device : CPmDeviceID,
