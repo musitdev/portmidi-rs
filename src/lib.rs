@@ -12,7 +12,6 @@ mod ffi;
 *    initialize() is the library initialisation function - call this before
 *    using the library.
 */
-#[inline(never)]
 pub fn initialize() -> PmError {
     unsafe {
         PmError::unwrap(ffi::Pm_Initialize())
@@ -58,7 +57,6 @@ impl PmError{
 *   terminate() is the library termination function - call this after
 *   using the library.
 */
-#[inline(never)]
 pub fn terminate() -> PmError {
     unsafe {
         PmError::unwrap(ffi::Pm_Terminate())
@@ -69,7 +67,6 @@ pub fn terminate() -> PmError {
 *    These strings are constants (set at compile time) so client has
 *    no need to allocate storage
 */
-#[inline(never)]
 pub fn get_error_text(error_code : PmError) -> String {
     unsafe {
         String::from_raw_buf((ffi::Pm_GetErrorText(error_code.wrap()) as *const u8))
@@ -80,7 +77,6 @@ pub fn get_error_text(error_code : PmError) -> String {
     These strings are computed at run time, so client has to allocate storage.
     After this routine executes, the host error is cleared.
 */
-#[inline(never)]
 pub fn get_host_error_text(msg : *const c_char , len : i32 ) {
     unsafe {
         ffi::Pm_GetHostErrorText(msg, len);
@@ -186,7 +182,6 @@ pub fn get_default_output_device_id() -> PmDeviceID {
     not be manipulated or freed. The pointer is guaranteed to be valid
     between calls to Pm_Initialize() and Pm_Terminate().
 */
-#[inline(never)]
 pub fn get_device_info(device : PmDeviceID) -> Option<PmDeviceInfo> {
     let c_info = unsafe { ffi::Pm_GetDeviceInfo(device as i32) };
     if c_info.is_null() {
@@ -339,7 +334,6 @@ impl PmInputPort {
         }
     }
 
-    #[inline(never)]
     pub fn open(&mut self)  -> PmError {
         unsafe {
             PmError::unwrap(ffi::Pm_OpenInput(&self.c_pm_stream, self.input_device, ptr::null(), self.buffer_size, ptr::null(), ptr::null()))
@@ -360,7 +354,6 @@ impl PmInputPort {
     *    the stream, e.g. an input or output operation. Until the error is cleared,
     *    no new error codes will be obtained, even for a different stream.
     */
-    #[inline(never)]
     pub fn has_host_error(&self) -> i32  {
         unsafe {
             ffi::Pm_HasHostError(self.c_pm_stream)
@@ -460,7 +453,6 @@ impl PmOutputPort {
         }
     }
 
-    #[inline(never)]
     pub fn open(&mut self)  -> PmError {
 
         unsafe {
@@ -482,7 +474,6 @@ impl PmOutputPort {
     *    the stream, e.g. an input or output operation. Until the error is cleared,
     *    no new error codes will be obtained, even for a different stream.
     */
-    #[inline(never)]
     pub fn has_host_error(&self) -> i32  {
         unsafe {
             ffi::Pm_HasHostError(self.c_pm_stream)
