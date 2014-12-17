@@ -8,14 +8,52 @@ use libc::c_char;
 
 mod ffi;
 
-/**
-*    initialize() is the library initialisation function - call this before
-*    using the library.
-*/
-pub fn initialize() -> PmError {
-    unsafe {
-        PmError::unwrap(ffi::Pm_Initialize())
+pub type PortMidiResult<T> = Result<T, PortMidiError>;
+
+#[deriving(Copy, Show)]
+pub enum PortMidiError {
+    HostError,
+    InvalidDeviceId,
+    InsufficientMemory,
+    BufferTooSmall,
+    BufferOverflow,
+    BadPtr,
+    BadData,
+    InternalError,
+    BufferMaxSize
+}
+
+fn from_pm_error(pm_error: ffi::PmError) -> PortMidiResult<()> {
+    match pm_error {
+        ffi::PmError::PmNoError => Ok(()),
+        ffi::PmError::PmGotData => Ok(()),
+        ffi::PmError::PmHostError => Err(PortMidiError::HostError),
+        ffi::PmError::PmInvalidDeviceId => Err(PortMidiError::InvalidDeviceId),
+        ffi::PmError::PmInsufficientMemory => Err(PortMidiError::InsufficientMemory),
+        ffi::PmError::PmBufferTooSmall => Err(PortMidiError::BufferTooSmall),
+        ffi::PmError::PmBufferOverflow => Err(PortMidiError::BufferOverflow),
+        ffi::PmError::PmBadPtr => Err(PortMidiError::BadPtr),
+        ffi::PmError::PmBadData => Err(PortMidiError::BadData),
+        ffi::PmError::PmInternalError => Err(PortMidiError::InternalError),
+        ffi::PmError::PmBufferMaxSize => Err(PortMidiError::BufferMaxSize),
     }
+}
+
+/// `initialize` initalizes the underlying PortMidi C library, call this
+/// before using the library.
+pub fn initialize() -> PortMidiResult<()> {
+    from_pm_error(unsafe {
+        ffi::Pm_Initialize()
+    })
+}
+
+
+/// `terminate` terminates the underlying PortMidi C library, call this
+/// after using the library.
+pub fn terminate() -> PortMidiResult<()> {
+    from_pm_error(unsafe {
+        ffi::Pm_Terminate()
+    })
 }
 
 
@@ -53,15 +91,6 @@ impl PmError{
 
 }
 
-/**
-*   terminate() is the library termination function - call this after
-*   using the library.
-*/
-pub fn terminate() -> PmError {
-    unsafe {
-        PmError::unwrap(ffi::Pm_Terminate())
-    }
-}
 
 /**  Translate portmidi error number into human readable message.
 *    These strings are constants (set at compile time) so client has

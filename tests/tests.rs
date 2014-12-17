@@ -2,8 +2,7 @@ extern crate portmidi;
 
 #[test]
 fn test_midiin() {
-    let error:portmidi::PmError = portmidi::initialize();
-    assert_eq!(error as int, portmidi::PmError::PmNoError as int);
+    portmidi::initialize().ok();
 
     let nbdevice : int = portmidi::count_devices();
     println!("portmidi nb device {}", nbdevice);
@@ -69,6 +68,5 @@ fn test_midiin() {
     assert_eq!(incloseerr as int, portmidi::PmError::PmNoError as int);
 
     //terminate midi
-    let error:portmidi::PmError = portmidi::terminate();
-    assert_eq!(error as int, portmidi::PmError::PmNoError as int);
+    portmidi::terminate().ok();
 }
