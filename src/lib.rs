@@ -1,9 +1,3 @@
-#![crate_name = "portmidi"]
-#![comment = "PortMidi binding for Rust"]
-#![license = "MIT"]
-#![crate_type = "lib"]
-#![crate_type = "dylib"]
-
 extern crate libc;
 extern crate core;
 extern crate serialize;

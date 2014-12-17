@@ -1,6 +1,3 @@
-#![crate_name = "portmidi-example1"]
-#![license = "MIT"]
-
 extern crate portmidi;
 
 #[main]
