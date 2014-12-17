@@ -96,36 +96,22 @@ pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 pub type PmDeviceID = int;
 pub const PM_NO_DEVICE : i32 = -1;
 
-#[deriving(Show)]
+#[deriving(Clone, Show)]
 pub struct PmDeviceInfo {
-    struct_version: int, /* < this internal structure version */
-    interf : String, /* < underlying MIDI API, e.g. MMSystem or DirectX */
-    pub name : String,    /* < device name, e.g. USB MidiSport 1x1 */
-    input : int, /* < true iff input is available */
-    output : int, /* < true iff output is available */
-    opened : int, /* < used by generic PortMidi code to do error checking on arguments */
+    pub name: String,
+    pub input: bool,
+    pub output: bool
 }
 
 impl PmDeviceInfo {
-    fn wrap(cdevice_info : *const ffi::CPmDeviceInfo) -> PmDeviceInfo {
+    fn wrap(cdevice_info: *const ffi::CPmDeviceInfo) -> PmDeviceInfo {
         unsafe {
             PmDeviceInfo {
-                struct_version: (*cdevice_info).struct_version as int,
-                interf : String::from_raw_buf((*cdevice_info).interf as *const u8),
-                name : String::from_raw_buf((*cdevice_info).name as *const u8),
-                input : (*cdevice_info).input as int,
-                output : (*cdevice_info).output as int,
-                opened : (*cdevice_info).opened as int,
+                name: String::from_raw_buf((*cdevice_info).name as *const u8),
+                input: (*cdevice_info).input > 0,
+                output: (*cdevice_info).output > 0
             }
         }
-    }
-
-    pub fn is_input(&self) -> bool {
-        self.input > 0
-    }
-
-    pub fn is_output(&self) -> bool {
-        self.output > 0
     }
 }
 
