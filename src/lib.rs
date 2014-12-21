@@ -8,9 +8,15 @@ use libc::c_char;
 
 mod ffi;
 
+
+// Types
+// -----
 pub type PortMidiDeviceId = i32;
 pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
+
+// Errors
+// ------
 #[deriving(Copy, Show)]
 pub enum PortMidiError {
     HostError,
@@ -40,6 +46,9 @@ fn from_pm_error(pm_error: ffi::PmError) -> PortMidiResult<()> {
     }
 }
 
+
+// Global fns
+// ----------
 /// `initialize` initalizes the underlying PortMidi C library, call this
 /// before using the library.
 pub fn initialize() -> PortMidiResult<()> {
@@ -63,6 +72,9 @@ pub fn count_devices() -> i32 {
     }
 }
 
+
+// DeviceInfo
+// ----------
 /// Represents what we know about a device
 #[deriving(Clone, Show)]
 pub struct DeviceInfo {
@@ -96,7 +108,8 @@ pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
 }
 
 
-
+// Old code
+// --------
 #[deriving(Copy, Show, PartialEq, Eq, FromPrimitive)]
 pub enum PmError {
     PmNoError = ffi::PmError::PmNoError as int,
