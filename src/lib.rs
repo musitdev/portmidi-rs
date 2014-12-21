@@ -47,7 +47,6 @@ pub fn initialize() -> PortMidiResult<()> {
     })
 }
 
-
 /// `terminate` terminates the underlying PortMidi C library, call this
 /// after using the library.
 pub fn terminate() -> PortMidiResult<()> {
@@ -56,6 +55,12 @@ pub fn terminate() -> PortMidiResult<()> {
     })
 }
 
+/// Return the number of devices
+pub fn count_devices() -> i32 {
+    unsafe {
+        ffi::Pm_CountDevices()
+    }
+}
 
 #[deriving(Copy, Show, PartialEq, Eq, FromPrimitive)]
 pub enum PmError {
@@ -140,12 +145,6 @@ impl PmDeviceInfo {
     }
 }
 
-/**  Get devices count, ids range from 0 to Pm_CountDevices()-1. */
-pub fn count_devices() -> int {
-    unsafe {
-        ffi::Pm_CountDevices() as int
-    }
-}
 
 /*
     Pm_GetDefaultInputDeviceID(), Pm_GetDefaultOutputDeviceID()

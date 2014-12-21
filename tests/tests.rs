@@ -4,7 +4,7 @@ extern crate portmidi;
 fn test_midiin() {
     portmidi::initialize().ok();
 
-    let nbdevice : int = portmidi::count_devices();
+    let nbdevice = portmidi::count_devices();
     println!("portmidi nb device {}", nbdevice);
     let defdevin : int = portmidi::get_default_input_device_id();
     println!("portmidi default input device {}", defdevin);
