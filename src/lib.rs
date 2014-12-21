@@ -381,64 +381,26 @@ impl OutputPort {
 
 // Old code
 // --------
-#[deriving(Copy, Show, PartialEq, Eq, FromPrimitive)]
-pub enum PmError {
-    PmNoError = ffi::PmError::PmNoError as int,
-    PmGotData = ffi::PmError::PmGotData as int, /* < A "no error" return that also indicates data available */
-    PmHostError = ffi::PmError::PmHostError as int,
-    PmInvalidDeviceId = ffi::PmError::PmInvalidDeviceId as int, /** out of range or
-                        * output device when input is requested or
-                        * input device when output is requested or
-                        * device is already opened
-                        */
-    PmInsufficientMemory = ffi::PmError::PmInsufficientMemory as int,
-    PmBufferTooSmall = ffi::PmError::PmBufferTooSmall as int,
-    PmBufferOverflow = ffi::PmError::PmBufferOverflow as int,
-    PmBadPtr = ffi::PmError::PmBadPtr as int, /* PortMidiStream parameter is NULL or
-               * stream is not opened or
-               * stream is output when input is required or
-               * stream is input when output is required */
-    PmBadData = ffi::PmError::PmBadData as int, /* illegal midi data, e.g. missing EOX */
-    PmInternalError = ffi::PmError::PmInternalError as int,
-    PmBufferMaxSize = ffi::PmError::PmBufferMaxSize as int, /* buffer is already as large as it can be */
-    /* NOTE: If you add a new error type, be sure to update Pm_GetErrorText() */
-}
-
-impl PmError{
-  fn unwrap(error: ffi::PmError) -> PmError  {
-    FromPrimitive::from_i64(error as i64).unwrap()
-  }
-
-  fn wrap(&self) -> ffi::PmError  {
-    FromPrimitive::from_i64(*self as i64).unwrap()
-  }
-
-}
-
-
 /**  Translate portmidi error number into human readable message.
 *    These strings are constants (set at compile time) so client has
 *    no need to allocate storage
 */
-pub fn get_error_text(error_code : PmError) -> String {
+pub fn get_error_text(error_code: ffi::PmError) -> String {
     unsafe {
-        String::from_raw_buf((ffi::Pm_GetErrorText(error_code.wrap()) as *const u8))
+        String::from_raw_buf((ffi::Pm_GetErrorText(error_code) as *const u8))
     }
 }
 
 /**  Translate portmidi host error into human readable message.
-    These strings are computed at run time, so client has to allocate storage.
-    After this routine executes, the host error is cleared.
+     These strings are computed at run time, so client has to allocate storage.
+     After this routine executes, the host error is cleared.
 */
-pub fn get_host_error_text(msg : *const c_char , len : i32 ) {
+pub fn get_host_error_text(msg: *const c_char, len: i32) {
     unsafe {
         ffi::Pm_GetHostErrorText(msg, len);
     }
 }
 
-pub const HDRLENGTH : i32 = 50;
-
-/* any host error msg will occupy less
-than this number of characters */
-pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
+pub const HDRLENGTH: i32 = 50;
+pub const PM_HOST_ERROR_MSG_LEN: i32 = 256;
 
