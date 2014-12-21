@@ -63,6 +63,40 @@ pub fn count_devices() -> i32 {
     }
 }
 
+/// Represents what we know about a device
+#[deriving(Clone, Show)]
+pub struct DeviceInfo {
+    pub name: String,
+    pub input: bool,
+    pub output: bool
+}
+
+impl DeviceInfo {
+    fn wrap(device_info: *const ffi::CPmDeviceInfo) -> DeviceInfo {
+        unsafe {
+            DeviceInfo {
+                name: String::from_raw_buf((*device_info).name as *const u8),
+                input: (*device_info).input > 0,
+                output: (*device_info).output > 0
+            }
+        }
+    }
+}
+
+/// Returns a `DeviceInfo` with information about a device, or `None` if
+/// it does not exist
+pub fn get_device_info(device : PmDeviceId) -> Option<DeviceInfo> {
+    let c_info = unsafe { ffi::Pm_GetDeviceInfo(device) };
+    if c_info.is_null() {
+        None
+    }
+    else {
+        Some(DeviceInfo::wrap(c_info))
+    }
+}
+
+
+
 #[deriving(Copy, Show, PartialEq, Eq, FromPrimitive)]
 pub enum PmError {
     PmNoError = ffi::PmError::PmNoError as int,
@@ -126,24 +160,6 @@ pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 
 pub const PM_NO_DEVICE : i32 = -1;
 
-#[deriving(Clone, Show)]
-pub struct PmDeviceInfo {
-    pub name: String,
-    pub input: bool,
-    pub output: bool
-}
-
-impl PmDeviceInfo {
-    fn wrap(cdevice_info: *const ffi::CPmDeviceInfo) -> PmDeviceInfo {
-        unsafe {
-            PmDeviceInfo {
-                name: String::from_raw_buf((*cdevice_info).name as *const u8),
-                input: (*cdevice_info).input > 0,
-                output: (*cdevice_info).output > 0
-            }
-        }
-    }
-}
 
 
 /*
@@ -201,24 +217,6 @@ pub fn get_default_output_device_id() -> PmDeviceId {
 }
 
 
-/**
-    Pm_GetDeviceInfo() returns a pointer to a PmDeviceInfo structure
-    referring to the device specified by id.
-    If id is out of range the function returns NULL.
-
-    The returned structure is owned by the PortMidi implementation and must
-    not be manipulated or freed. The pointer is guaranteed to be valid
-    between calls to Pm_Initialize() and Pm_Terminate().
-*/
-pub fn get_device_info(device : PmDeviceId) -> Option<PmDeviceInfo> {
-    let c_info = unsafe { ffi::Pm_GetDeviceInfo(device as i32) };
-    if c_info.is_null() {
-        None
-    }
-    else {
-        Some(PmDeviceInfo::wrap(c_info))
-    }
-}
 
 #[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
 pub struct PmMessage { /**< see PmEvent */
