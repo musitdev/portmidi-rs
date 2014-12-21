@@ -354,11 +354,11 @@ impl PmInputPort {
     *
     * Return a new PmInputPort.
     */
-    pub fn new(input_device : PmDeviceId, buffer_size: int) -> PmInputPort {
+    pub fn new(input_device : PmDeviceId, buffer_size: i32) -> PmInputPort {
         PmInputPort {
             c_pm_stream : ptr::null(),
-            input_device : input_device as i32,
-            buffer_size : buffer_size as i32,
+            input_device : input_device,
+            buffer_size : buffer_size,
         }
     }
 
@@ -473,11 +473,11 @@ impl PmOutputPort {
     *
     * Return a new PmOutputPort.
     */
-    pub fn new(output_device : PmDeviceId, buffer_size: int) -> PmOutputPort {
+    pub fn new(output_device : PmDeviceId, buffer_size: i32) -> PmOutputPort {
         PmOutputPort {
             c_pm_stream : ptr::null(),
-            output_device : output_device as i32,
-            buffer_size : buffer_size as i32,
+            output_device : output_device,
+            buffer_size : buffer_size,
         }
     }
 
