@@ -6,9 +6,9 @@ fn test_midiin() {
 
     let nbdevice = portmidi::count_devices();
     println!("portmidi nb device {}", nbdevice);
-    let defdevin = portmidi::get_default_input_device_id();
+    let defdevin = portmidi::get_default_input_device_id().unwrap();
     println!("portmidi default input device {}", defdevin);
-    let defdevout = portmidi::get_default_output_device_id();
+    let defdevout = portmidi::get_default_output_device_id().unwrap();
     println!("portmidi default output device {}", defdevout);
 
     let ininfo = portmidi::get_device_info(defdevin);

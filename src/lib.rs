@@ -14,7 +14,6 @@ mod ffi;
 pub type PortMidiDeviceId = i32;
 pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
-
 // Errors
 // ------
 #[deriving(Copy, Show)]
@@ -69,6 +68,34 @@ pub fn terminate() -> PortMidiResult<()> {
 pub fn count_devices() -> i32 {
     unsafe {
         ffi::Pm_CountDevices()
+    }
+}
+
+/// Gets the `PortMidiDeviceId` for the default input, or `None` if
+/// there isn't one
+///
+/// See the PortMidi documentation for details of how to set the default device
+pub fn get_default_input_device_id() -> Option<PortMidiDeviceId> {
+    let id = unsafe { ffi::Pm_GetDefaultInputDeviceID() };
+    if id == ffi::PM_NO_DEVICE {
+        None
+    }
+    else {
+        Some(id)
+    }
+}
+
+/// Gets the `PortMidiDeviceId` for the default output, or `None` if
+/// there isn't one
+///
+/// See the PortMidi documentation for details of how to set the default device
+pub fn get_default_output_device_id() -> Option<PortMidiDeviceId> {
+    let id = unsafe { ffi::Pm_GetDefaultOutputDeviceID() };
+    if id == ffi::PM_NO_DEVICE {
+        None
+    }
+    else {
+        Some(id)
     }
 }
 
@@ -171,63 +198,9 @@ pub const HDRLENGTH : i32 = 50;
 than this number of characters */
 pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 
-pub const PM_NO_DEVICE : i32 = -1;
 
 
 
-/*
-    Pm_GetDefaultInputDeviceID(), Pm_GetDefaultOutputDeviceID()
-
-    Return the default device ID or pmNoDevice if there are no devices.
-    The result (but not pmNoDevice) can be passed to Pm_OpenMidi().
-
-    The default device can be specified using a small application
-    named pmdefaults that is part of the PortMidi distribution. This
-    program in turn uses the Java Preferences object created by
-    java.util.prefs.Preferences.userRoot().node("/PortMidi"); the
-    preference is set by calling
-        prefs.put("PM_RECOMMENDED_OUTPUT_DEVICE", prefName);
-    or  prefs.put("PM_RECOMMENDED_INPUT_DEVICE", prefName);
-
-    In the statements above, prefName is a string describing the
-    MIDI device in the form "interf, name" where interf identifies
-    the underlying software system or API used by PortMdi to access
-    devices and name is the name of the device. These correspond to
-    the interf and name fields of a PmDeviceInfo. (Currently supported
-    interfaces are "MMSystem" for Win32, "ALSA" for Linux, and
-    "CoreMIDI" for OS X, so in fact, there is no choice of interface.)
-    In "interf, name", the strings are actually substrings of
-    the full interface and name strings. For example, the preference
-    "Core, Sport" will match a device with interface "CoreMIDI"
-    and name "In USB MidiSport 1x1". It will also match "CoreMIDI"
-    and "In USB MidiSport 2x2". The devices are enumerated in device
-    ID order, so the lowest device ID that matches the pattern becomes
-    the default device. Finally, if the comma-space (", ") separator
-    between interface and name parts of the preference is not found,
-    the entire preference string is interpreted as a name, and the
-    interface part is the empty string, which matches anything.
-
-    On the MAC, preferences are stored in
-      /Users/$NAME/Library/Preferences/com.apple.java.util.prefs.plist
-    which is a binary file. In addition to the pmdefaults program,
-    there are utilities that can read and edit this preference file.
-
-    On the PC,
-
-    On Linux,
-
-*/
-pub fn get_default_input_device_id() -> PortMidiDeviceId {
-    unsafe {
-        ffi::Pm_GetDefaultInputDeviceID()
-    }
-}
-
-pub fn get_default_output_device_id() -> PortMidiDeviceId {
-    unsafe {
-        ffi::Pm_GetDefaultOutputDeviceID()
-    }
-}
 
 
 

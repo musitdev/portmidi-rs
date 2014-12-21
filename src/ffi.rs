@@ -9,6 +9,8 @@ pub type CPmMessage = i32;
 
 pub type CPmTimestamp = u32;
 
+pub const PM_NO_DEVICE : CPmDeviceID = -1;
+
 #[doc(hidden)]
 #[repr(C)]
 pub struct CPmEvent {
