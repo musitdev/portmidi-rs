@@ -22,10 +22,9 @@ fn test_midiin() {
     let result = inport.open();
     assert_eq!(result, Ok(()));
 
-    let mut outport : portmidi::PmOutputPort = portmidi::PmOutputPort::new(defdevout, 100);
-    let outerror = outport.open();
-    println!("portmidi new output device {}", outerror);
-    assert_eq!(outerror as int, portmidi::PmError::PmNoError as int);
+    let mut outport = portmidi::OutputPort::new(defdevout, 100);
+    let result = outport.open();
+    assert_eq!(result, Ok(()));
 
     let read_midi = inport.read();
     println!("portmidi input note {}", read_midi);
@@ -47,22 +46,23 @@ fn test_midiin() {
         },
         timestamp : 0
     };
-    let sendnoteerr = outport.write_event(note1);
-    assert_eq!(sendnoteerr as int, portmidi::PmError::PmNoError as int);
+    let result = outport.write_event(note1);
+    assert_eq!(result, Ok(()));
 
     let note2 = portmidi::MidiMessage {
         status : 1 | 0x80, //chanell and note off
         data1 : 36, //note number
         data2 : 0, // velocity
     };
-    let sendnote2err = outport.write_message(note2);
-    assert_eq!(sendnote2err as int, portmidi::PmError::PmNoError as int);
+    let result = outport.write_message(note2);
+    assert_eq!(result, Ok(()));
 
     //close out port
-    let aborterr = outport.abort();
-    assert_eq!(aborterr as int, portmidi::PmError::PmNoError as int);
-    let outcloseerr = outport.close();
-    assert_eq!(outcloseerr as int, portmidi::PmError::PmNoError as int);
+    let result = outport.abort();
+    assert_eq!(result, Ok(()));
+
+    let result = outport.close();
+    assert_eq!(result, Ok(()));
 
     //close in port
     let result = inport.close();

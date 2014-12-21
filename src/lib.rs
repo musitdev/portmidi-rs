@@ -261,8 +261,8 @@ impl InputPort {
 
     /// Closes the input, flushing any pending buffers
     ///
-    /// PortMidi attempts to close open streams when the application exists,
-    /// but this can be difficult under Windows
+    /// PortMidi attempts to close open streams when the application
+    /// exits, but this can be difficult under Windows
     /// (according to the PortMidi documentation).
     pub fn close(&mut self) -> PortMidiResult<()> {
         from_pm_error(unsafe {
@@ -291,6 +291,92 @@ impl InputPort {
     }
 }
 
+
+// Output
+// ------
+/// Representation of an output midi port.
+#[allow(missing_copy_implementations)]
+pub struct OutputPort {
+    c_pm_stream: *const ffi::CPortMidiStream,
+    output_device: ffi::CPmDeviceID,
+    buffer_size: i32,
+}
+
+impl OutputPort {
+    /// Construct a new `InputPort` for `input_device`
+    pub fn new(output_device: PortMidiDeviceId, buffer_size: i32) -> OutputPort {
+        OutputPort {
+            c_pm_stream: ptr::null(),
+            output_device: output_device,
+            buffer_size: buffer_size,
+        }
+    }
+
+    /// Open the port returning an error if there is a problem
+    pub fn open(&mut self)  -> PortMidiResult<()> {
+        from_pm_error(unsafe {
+            ffi::Pm_OpenOutput(&self.c_pm_stream, self.output_device, ptr::null(),
+                               self.buffer_size, ptr::null(), ptr::null(), 0)
+        })
+    }
+
+    /// Terminates outgoing messages immediately
+    ///
+    /// The caller should immediately close the output port, this may
+    /// result in transmission of a partial midi message.
+    pub fn abort(&mut self) -> PortMidiResult<()> {
+        from_pm_error(unsafe {
+            ffi::Pm_Abort(self.c_pm_stream)
+        })
+    }
+
+    /// Closes the midi stream, flushing any pending buffers
+    ///
+    /// PortMidi attempts to close open streams when the application
+    /// exits, but this can be difficult under Windows
+    /// (according to the PortMidi documentation).
+    pub fn close(&mut self) -> PortMidiResult<()> {
+        from_pm_error(unsafe {
+            ffi::Pm_Close(self.c_pm_stream)
+        })
+    }
+
+    /// Write a single `MidiEvent`
+    pub fn write_event(&mut self, midi_event: MidiEvent) -> PortMidiResult<()> {
+        let event = midi_event.unwrap();
+        from_pm_error(unsafe {
+            ffi::Pm_Write(self.c_pm_stream, &event, 1)
+        })
+    }
+
+    /// Write a single `MidiMessage` immediately
+    pub fn write_message(&mut self, midi_message: MidiMessage) -> PortMidiResult<()> {
+        let message = midi_message.unwrap();
+        from_pm_error(unsafe {
+            ffi::Pm_WriteShort(self.c_pm_stream, 0, message)
+        })
+    }
+
+    /*
+    *    Test whether stream has a pending host error. Normally, the client finds
+    *    out about errors through returned error codes, but some errors can occur
+    *    asynchronously where the client does not
+    *    explicitly call a function, and therefore cannot receive an error code.
+    *    The client can test for a pending error using has_host_error(). If true,
+    *    the error can be accessed and cleared by calling get_Error_text().
+    *    Errors are also cleared by calling other functions that can return
+    *    errors, e.g. open_input(), open_output(), read(), write(). The
+    *    client does not need to call Pm_HasHostError(). Any pending error will be
+    *    reported the next time the client performs an explicit function call on
+    *    the stream, e.g. an input or output operation. Until the error is cleared,
+    *    no new error codes will be obtained, even for a different stream.
+    */
+    pub fn has_host_error(&self) -> i32  {
+        unsafe {
+            ffi::Pm_HasHostError(self.c_pm_stream)
+        }
+    }
+}
 
 
 // Old code
@@ -355,125 +441,4 @@ pub const HDRLENGTH : i32 = 50;
 /* any host error msg will occupy less
 than this number of characters */
 pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
-
-
-
-
-
-
-
-
-
-
-
-
-
-/// Representation of an output midi port.
-#[allow(missing_copy_implementations)]
-pub struct PmOutputPort {
-    c_pm_stream : *const ffi::CPortMidiStream,
-    output_device : ffi::CPmDeviceID,
-    buffer_size : i32,
-}
-
-impl PmOutputPort {
-    /**
-    * Constructor for PmOutputPort.
-    *
-    * Return a new PmOutputPort.
-    */
-    pub fn new(output_device : PortMidiDeviceId, buffer_size: i32) -> PmOutputPort {
-        PmOutputPort {
-            c_pm_stream : ptr::null(),
-            output_device : output_device,
-            buffer_size : buffer_size,
-        }
-    }
-
-    pub fn open(&mut self)  -> PmError {
-
-        unsafe {
-            PmError::unwrap(ffi::Pm_OpenOutput(&self.c_pm_stream, self.output_device, ptr::null(), self.buffer_size, ptr::null(), ptr::null(), 0))
-        }
-    }
-
-    /**
-    *    Test whether stream has a pending host error. Normally, the client finds
-    *    out about errors through returned error codes, but some errors can occur
-    *    asynchronously where the client does not
-    *    explicitly call a function, and therefore cannot receive an error code.
-    *    The client can test for a pending error using has_host_error(). If true,
-    *    the error can be accessed and cleared by calling get_Error_text().
-    *    Errors are also cleared by calling other functions that can return
-    *    errors, e.g. open_input(), open_output(), read(), write(). The
-    *    client does not need to call Pm_HasHostError(). Any pending error will be
-    *    reported the next time the client performs an explicit function call on
-    *    the stream, e.g. an input or output operation. Until the error is cleared,
-    *    no new error codes will be obtained, even for a different stream.
-    */
-    pub fn has_host_error(&self) -> i32  {
-        unsafe {
-            ffi::Pm_HasHostError(self.c_pm_stream)
-        }
-
-    }
-
-    /**
-        Pm_Abort() terminates outgoing messages immediately
-        The caller should immediately close the output port;
-        this call may result in transmission of a partial midi message.
-        There is no abort for Midi input because the user can simply
-        ignore messages in the buffer and close an input device at
-        any time.
-     */
-    pub fn abort(&mut self) -> PmError {
-        unsafe {
-            PmError::unwrap(ffi::Pm_Abort(self.c_pm_stream))
-        }
-    }
-
-    /**
-        Pm_Close() closes a midi stream, flushing any pending buffers.
-        (PortMidi attempts to close open streams when the application
-        exits -- this is particularly difficult under Windows.)
-    */
-    pub fn close(&mut self)  -> PmError  {
-        unsafe {
-            PmError::unwrap(ffi::Pm_Close(self.c_pm_stream))
-        }
-    }
-
-    /**
-        Pm_Write() writes midi data from a buffer. This may contain:
-            - short messages
-        or
-            - sysex messages that are converted into a sequence of PmEvent
-              structures, e.g. sending data from a file or forwarding them
-              from midi input.
-
-        Use Pm_WriteSysEx() to write a sysex message stored as a contiguous
-        array of bytes.
-
-        Sysex data may contain embedded real-time messages.
-    */
-    pub fn write_event(&mut self, midievent : MidiEvent)  -> PmError  {
-        let cevent : ffi::CPmEvent = midievent.unwrap();
-        unsafe {
-            PmError::unwrap(ffi::Pm_Write(self.c_pm_stream, &cevent, 1))
-        }
-    }
-
-    /**
-        Pm_WriteShort() writes a timestamped non-system-exclusive midi message.
-        Messages are delivered in order as received, and timestamps must be
-        non-decreasing. (But timestamps are ignored if the stream was opened
-        with latency = 0.)
-    */
-    pub fn write_message(&mut self, midimessage : MidiMessage)  -> PmError  {
-        let cevent : ffi::CPmMessage = midimessage.unwrap();
-        unsafe {
-            PmError::unwrap(ffi::Pm_WriteShort(self.c_pm_stream, 0, cevent))
-        }
-    }
-}
 
