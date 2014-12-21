@@ -111,7 +111,7 @@ pub struct DeviceInfo {
 }
 
 impl DeviceInfo {
-    fn wrap(device_info: *const ffi::CPmDeviceInfo) -> DeviceInfo {
+    fn wrap(device_info: *const ffi::PmDeviceInfo) -> DeviceInfo {
         unsafe {
             DeviceInfo {
                 name: String::from_raw_buf((*device_info).name as *const u8),
@@ -125,12 +125,12 @@ impl DeviceInfo {
 /// Returns a `DeviceInfo` with information about a device, or `None` if
 /// it does not exist
 pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
-    let c_info = unsafe { ffi::Pm_GetDeviceInfo(device) };
-    if c_info.is_null() {
+    let info = unsafe { ffi::Pm_GetDeviceInfo(device) };
+    if info.is_null() {
         None
     }
     else {
-        Some(DeviceInfo::wrap(c_info))
+        Some(DeviceInfo::wrap(info))
     }
 }
 
@@ -142,13 +142,13 @@ pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
 /// TODO: should we use u8?
 #[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
 pub struct MidiMessage {
-    pub status : i8,
-    pub data1 : i8,
-    pub data2 : i8,
+    pub status: i8,
+    pub data1: i8,
+    pub data2: i8,
 }
 
 impl MidiMessage {
-    fn wrap(cmessage : ffi::CPmMessage) -> MidiMessage {
+    fn wrap(cmessage : ffi::PmMessage) -> MidiMessage {
         MidiMessage {
             status:  ((cmessage) & 0xFF) as i8,
             data1 : (((cmessage) >> 8) & 0xFF) as i8,
@@ -156,7 +156,7 @@ impl MidiMessage {
         }
     }
 
-    fn unwrap(&self) -> ffi::CPmMessage {
+    fn unwrap(&self) -> ffi::PmMessage {
         ((((self.data2 as i32) << 16) & 0xFF0000) |
           (((self.data1 as i32) << 8) & 0xFF00) |
           ((self.status as i32) & 0xFF)) as i32
@@ -172,21 +172,21 @@ impl MidiMessage {
 #[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
 pub  struct MidiEvent {
     pub message : MidiMessage,
-    pub timestamp : ffi::CPmTimestamp,
+    pub timestamp : ffi::PmTimestamp,
 }
 
 impl MidiEvent {
-    fn wrap(cevent : ffi::CPmEvent) -> MidiEvent {
+    fn wrap(event: ffi::PmEvent) -> MidiEvent {
         MidiEvent {
-            message:  MidiMessage::wrap(cevent.message),
-            timestamp : cevent.timestamp,
+            message:  MidiMessage::wrap(event.message),
+            timestamp : event.timestamp,
         }
     }
 
-    fn unwrap(&self) -> ffi::CPmEvent {
-        ffi::CPmEvent {
-            message:  self.message.unwrap(),
-            timestamp : self.timestamp,
+    fn unwrap(&self) -> ffi::PmEvent {
+        ffi::PmEvent {
+            message: self.message.unwrap(),
+            timestamp: self.timestamp,
         }
     }
 }
@@ -197,8 +197,8 @@ impl MidiEvent {
 /// Representation of an input midi port.
 #[allow(missing_copy_implementations)]
 pub struct InputPort {
-    c_pm_stream : *const ffi::CPortMidiStream,
-    input_device : ffi::CPmDeviceID,
+    pm_stream : *const ffi::PortMidiStream,
+    input_device : ffi::PmDeviceId,
     buffer_size : i32,
 }
 
@@ -206,7 +206,7 @@ impl InputPort {
     /// Construct a new `InputPort` for `input_device`
     pub fn new(input_device : PortMidiDeviceId, buffer_size: i32) -> InputPort {
         InputPort {
-            c_pm_stream : ptr::null(),
+            pm_stream : ptr::null(),
             input_device : input_device,
             buffer_size : buffer_size,
         }
@@ -215,7 +215,7 @@ impl InputPort {
     /// Open the port returning an error if there is a problem
     pub fn open(&mut self)  -> PortMidiResult<()> {
         from_pm_error(unsafe {
-            ffi::Pm_OpenInput(&self.c_pm_stream, self.input_device, ptr::null(),
+            ffi::Pm_OpenInput(&self.pm_stream, self.input_device, ptr::null(),
                               self.buffer_size, ptr::null(), ptr::null())
         })
     }
@@ -229,8 +229,8 @@ impl InputPort {
     pub fn read(&mut self) -> PortMidiResult<Option<MidiEvent>> {
         use std::num::FromPrimitive;
         //get one note a the time
-        let mut event = ffi::CPmEvent { message : 0, timestamp : 0 };
-        let no_of_notes = unsafe { ffi::Pm_Read(self.c_pm_stream, &mut event, 1) };
+        let mut event = ffi::PmEvent { message : 0, timestamp : 0 };
+        let no_of_notes = unsafe { ffi::Pm_Read(self.pm_stream, &mut event, 1) };
         match no_of_notes {
             y if y == 0 => Ok(None),
             y if y > 0 => Ok(Some(MidiEvent::wrap(event))),
@@ -251,7 +251,7 @@ impl InputPort {
 
     /// `poll` tests if there is input available, either returing a bool or an error
     pub fn poll(&self) -> PortMidiResult<bool> {
-        let pm_error = unsafe { ffi::Pm_Poll(self.c_pm_stream) };
+        let pm_error = unsafe { ffi::Pm_Poll(self.pm_stream) };
         match pm_error {
             ffi::PmError::PmNoError => Ok(false),
             ffi::PmError::PmGotData => Ok(true),
@@ -266,7 +266,7 @@ impl InputPort {
     /// (according to the PortMidi documentation).
     pub fn close(&mut self) -> PortMidiResult<()> {
         from_pm_error(unsafe {
-            ffi::Pm_Close(self.c_pm_stream)
+            ffi::Pm_Close(self.pm_stream)
         })
     }
 
@@ -286,7 +286,7 @@ impl InputPort {
     */
     pub fn has_host_error(&self) -> i32  {
         unsafe {
-            ffi::Pm_HasHostError(self.c_pm_stream)
+            ffi::Pm_HasHostError(self.pm_stream)
         }
     }
 }
@@ -297,8 +297,8 @@ impl InputPort {
 /// Representation of an output midi port.
 #[allow(missing_copy_implementations)]
 pub struct OutputPort {
-    c_pm_stream: *const ffi::CPortMidiStream,
-    output_device: ffi::CPmDeviceID,
+    pm_stream: *const ffi::PortMidiStream,
+    output_device: ffi::PmDeviceId,
     buffer_size: i32,
 }
 
@@ -306,7 +306,7 @@ impl OutputPort {
     /// Construct a new `InputPort` for `input_device`
     pub fn new(output_device: PortMidiDeviceId, buffer_size: i32) -> OutputPort {
         OutputPort {
-            c_pm_stream: ptr::null(),
+            pm_stream: ptr::null(),
             output_device: output_device,
             buffer_size: buffer_size,
         }
@@ -315,7 +315,7 @@ impl OutputPort {
     /// Open the port returning an error if there is a problem
     pub fn open(&mut self)  -> PortMidiResult<()> {
         from_pm_error(unsafe {
-            ffi::Pm_OpenOutput(&self.c_pm_stream, self.output_device, ptr::null(),
+            ffi::Pm_OpenOutput(&self.pm_stream, self.output_device, ptr::null(),
                                self.buffer_size, ptr::null(), ptr::null(), 0)
         })
     }
@@ -326,7 +326,7 @@ impl OutputPort {
     /// result in transmission of a partial midi message.
     pub fn abort(&mut self) -> PortMidiResult<()> {
         from_pm_error(unsafe {
-            ffi::Pm_Abort(self.c_pm_stream)
+            ffi::Pm_Abort(self.pm_stream)
         })
     }
 
@@ -337,7 +337,7 @@ impl OutputPort {
     /// (according to the PortMidi documentation).
     pub fn close(&mut self) -> PortMidiResult<()> {
         from_pm_error(unsafe {
-            ffi::Pm_Close(self.c_pm_stream)
+            ffi::Pm_Close(self.pm_stream)
         })
     }
 
@@ -345,7 +345,7 @@ impl OutputPort {
     pub fn write_event(&mut self, midi_event: MidiEvent) -> PortMidiResult<()> {
         let event = midi_event.unwrap();
         from_pm_error(unsafe {
-            ffi::Pm_Write(self.c_pm_stream, &event, 1)
+            ffi::Pm_Write(self.pm_stream, &event, 1)
         })
     }
 
@@ -353,7 +353,7 @@ impl OutputPort {
     pub fn write_message(&mut self, midi_message: MidiMessage) -> PortMidiResult<()> {
         let message = midi_message.unwrap();
         from_pm_error(unsafe {
-            ffi::Pm_WriteShort(self.c_pm_stream, 0, message)
+            ffi::Pm_WriteShort(self.pm_stream, 0, message)
         })
     }
 
@@ -373,7 +373,7 @@ impl OutputPort {
     */
     pub fn has_host_error(&self) -> i32  {
         unsafe {
-            ffi::Pm_HasHostError(self.c_pm_stream)
+            ffi::Pm_HasHostError(self.pm_stream)
         }
     }
 }
