@@ -3,7 +3,6 @@ extern crate core;
 extern crate serialize;
 
 use std::ptr;
-use core::mem::transmute;
 use libc::c_char;
 
 mod ffi;
@@ -14,9 +13,10 @@ mod ffi;
 pub type PortMidiDeviceId = i32;
 pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
+
 // Errors
 // ------
-#[deriving(Copy, Show)]
+#[deriving(Copy, Show, PartialEq, Eq)]
 pub enum PortMidiError {
     HostError,
     InvalidDeviceId,
@@ -192,6 +192,107 @@ impl MidiEvent {
 }
 
 
+// Input
+// -----
+/// Representation of an input midi port.
+#[allow(missing_copy_implementations)]
+pub struct InputPort {
+    c_pm_stream : *const ffi::CPortMidiStream,
+    input_device : ffi::CPmDeviceID,
+    buffer_size : i32,
+}
+
+impl InputPort {
+    /// Construct a new `InputPort` for `input_device`
+    pub fn new(input_device : PortMidiDeviceId, buffer_size: i32) -> InputPort {
+        InputPort {
+            c_pm_stream : ptr::null(),
+            input_device : input_device,
+            buffer_size : buffer_size,
+        }
+    }
+
+    /// Open the port returning an error if there is a problem
+    pub fn open(&mut self)  -> PortMidiResult<()> {
+        from_pm_error(unsafe {
+            ffi::Pm_OpenInput(&self.c_pm_stream, self.input_device, ptr::null(),
+                              self.buffer_size, ptr::null(), ptr::null())
+        })
+    }
+
+    /// Reads a single `MidiEvent` if one is avaible
+    ///
+    /// A `Result` of `None` means no event was available.
+    ///
+    /// See the PortMidi documentation for information on how it deals with input
+    /// overflows
+    pub fn read(&mut self) -> PortMidiResult<Option<MidiEvent>> {
+        use std::num::FromPrimitive;
+        //get one note a the time
+        let mut event = ffi::CPmEvent { message : 0, timestamp : 0 };
+        let no_of_notes = unsafe { ffi::Pm_Read(self.c_pm_stream, &mut event, 1) };
+        match no_of_notes {
+            y if y == 0 => Ok(None),
+            y if y > 0 => Ok(Some(MidiEvent::wrap(event))),
+            _ => {
+                // if it's negative it's an error, convert it
+                let maybe_pm_error: Option<ffi::PmError> = FromPrimitive::from_i32(no_of_notes);
+                if let Some(pm_error) = maybe_pm_error {
+                    from_pm_error(pm_error).map(|_| None)
+                }
+                else {
+                    // what should we do, if we can't convert the error no?
+                    // should we panic?
+                    Ok(None)
+                }
+            }
+        }
+    }
+
+    /// `poll` tests if there is input available, either returing a bool or an error
+    pub fn poll(&self) -> PortMidiResult<bool> {
+        let pm_error = unsafe { ffi::Pm_Poll(self.c_pm_stream) };
+        match pm_error {
+            ffi::PmError::PmNoError => Ok(false),
+            ffi::PmError::PmGotData => Ok(true),
+            other => from_pm_error(other).map(|_| false)
+        }
+    }
+
+    /// Closes the input, flushing any pending buffers
+    ///
+    /// PortMidi attempts to close open streams when the application exists,
+    /// but this can be difficult under Windows
+    /// (according to the PortMidi documentation).
+    pub fn close(&mut self) -> PortMidiResult<()> {
+        from_pm_error(unsafe {
+            ffi::Pm_Close(self.c_pm_stream)
+        })
+    }
+
+    /*
+    *    Test whether stream has a pending host error. Normally, the client finds
+    *    out about errors through returned error codes, but some errors can occur
+    *    asynchronously where the client does not
+    *    explicitly call a function, and therefore cannot receive an error code.
+    *    The client can test for a pending error using has_host_error(). If true,
+    *    the error can be accessed and cleared by calling get_Error_text().
+    *    Errors are also cleared by calling other functions that can return
+    *    errors, e.g. open_input(), open_output(), read(), write(). The
+    *    client does not need to call Pm_HasHostError(). Any pending error will be
+    *    reported the next time the client performs an explicit function call on
+    *    the stream, e.g. an input or output operation. Until the error is cleared,
+    *    no new error codes will be obtained, even for a different stream.
+    */
+    pub fn has_host_error(&self) -> i32  {
+        unsafe {
+            ffi::Pm_HasHostError(self.c_pm_stream)
+        }
+    }
+}
+
+
+
 // Old code
 // --------
 #[deriving(Copy, Show, PartialEq, Eq, FromPrimitive)]
@@ -265,123 +366,6 @@ pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 
 
 
-/// Representation of an input midi port.
-#[allow(missing_copy_implementations)]
-pub struct PmInputPort {
-    c_pm_stream : *const ffi::CPortMidiStream,
-    input_device : ffi::CPmDeviceID,
-    buffer_size : i32,
-}
-
-impl PmInputPort {
-    /**
-    * Constructor for PmInputPort.
-    *
-    * Return a new PmInputPort.
-    */
-    pub fn new(input_device : PortMidiDeviceId, buffer_size: i32) -> PmInputPort {
-        PmInputPort {
-            c_pm_stream : ptr::null(),
-            input_device : input_device,
-            buffer_size : buffer_size,
-        }
-    }
-
-    pub fn open(&mut self)  -> PmError {
-        unsafe {
-            PmError::unwrap(ffi::Pm_OpenInput(&self.c_pm_stream, self.input_device, ptr::null(), self.buffer_size, ptr::null(), ptr::null()))
-        }
-    }
-
-    /**
-    *    Test whether stream has a pending host error. Normally, the client finds
-    *    out about errors through returned error codes, but some errors can occur
-    *    asynchronously where the client does not
-    *    explicitly call a function, and therefore cannot receive an error code.
-    *    The client can test for a pending error using has_host_error(). If true,
-    *    the error can be accessed and cleared by calling get_Error_text().
-    *    Errors are also cleared by calling other functions that can return
-    *    errors, e.g. open_input(), open_output(), read(), write(). The
-    *    client does not need to call Pm_HasHostError(). Any pending error will be
-    *    reported the next time the client performs an explicit function call on
-    *    the stream, e.g. an input or output operation. Until the error is cleared,
-    *    no new error codes will be obtained, even for a different stream.
-    */
-    pub fn has_host_error(&self) -> i32  {
-        unsafe {
-            ffi::Pm_HasHostError(self.c_pm_stream)
-        }
-
-    }
-
-    /**
-        Read one midi note.
-        Retur the note event if available or Err(pmNoError) if no midi event is avaible or Err() if an error occurs.
-
-        Pm_Read() retrieves midi data into a buffer, and returns the number
-        of events read. Result is a non-negative number unless an error occurs,
-        in which case a PmError value will be returned.
-
-        Buffer Overflow
-
-        The problem: if an input overflow occurs, data will be lost, ultimately
-        because there is no flow control all the way back to the data source.
-        When data is lost, the receiver should be notified and some sort of
-        graceful recovery should take place, e.g. you shouldn't resume receiving
-        in the middle of a long sysex message.
-
-        With a lock-free fifo, which is pretty much what we're stuck with to
-        enable portability to the Mac, it's tricky for the producer and consumer
-        to synchronously reset the buffer and resume normal operation.
-
-        Solution: the buffer managed by PortMidi will be flushed when an overflow
-        occurs. The consumer (Pm_Read()) gets an error message (pmBufferOverflow)
-        and ordinary processing resumes as soon as a new message arrives. The
-        remainder of a partial sysex message is not considered to be a "new
-        message" and will be flushed as well.
-
-    */
-    pub fn read(&mut self) -> Result<MidiEvent, PmError> {
-
-        //get one note a the time
-         let mut pevent : ffi::CPmEvent = ffi::CPmEvent {
-            message : 0,
-            timestamp : 0,
-        };
-//        println!("portmidi::midi before read In stream:{:?}", self.c_pm_stream);
-        let nbnote : i16 = unsafe {
-            ffi::Pm_Read(self.c_pm_stream, &mut pevent, 1)
-        };
-//        println!("portmidi::midi after read");
-        match nbnote {
-            y if y == 0 => Err(PmError::PmNoError),
-            y if y > 0 => Ok(MidiEvent::wrap(pevent)),
-            _ => Err(unsafe { transmute::<i16, PmError>(nbnote) })
-        }
-    }
-
-    /**
-        Pm_Poll() tests whether input is available,
-        returning pmGotData, pmNoError, or an error value.
-    */
-    pub fn poll(&self)  -> PmError  {
-        unsafe {
-            PmError::unwrap(ffi::Pm_Poll(self.c_pm_stream))
-        }
-    }
-
-    /**
-        Pm_Close() closes a midi stream, flushing any pending buffers.
-        (PortMidi attempts to close open streams when the application
-        exits -- this is particularly difficult under Windows.)
-    */
-    pub fn close(&mut self)  -> PmError  {
-//      println!("portmidi::midi inport close");
-        unsafe {
-            PmError::unwrap(ffi::Pm_Close(self.c_pm_stream))
-        }
-    }
-}
 
 
 /// Representation of an output midi port.

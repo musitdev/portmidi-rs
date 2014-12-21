@@ -64,7 +64,7 @@ extern "C" {
     pub fn Pm_GetDeviceInfo(id:CPmDeviceID) -> *const CPmDeviceInfo;
     pub fn Pm_OpenInput(stream: *const *const CPortMidiStream, inputDevice : CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void) -> PmError;
     pub fn Pm_OpenOutput(stream : *const *const CPortMidiStream, outputDevice : CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void, latency:i32) -> PmError;
-    pub fn Pm_Read(stream : *const CPortMidiStream, buffer : *mut CPmEvent , length : i32) -> i16;
+    pub fn Pm_Read(stream : *const CPortMidiStream, buffer : *mut CPmEvent , length : i32) -> i32;
     pub fn Pm_Abort(stream : *const CPortMidiStream) -> PmError;
     pub fn Pm_Close(stream : *const CPortMidiStream) -> PmError;
     pub fn Pm_Poll(stream : *const CPortMidiStream) -> PmError;
