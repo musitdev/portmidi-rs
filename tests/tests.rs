@@ -38,8 +38,8 @@ fn test_midiin() {
     assert_eq!(innote as int, portmidi::PmError::PmNoError as int);
 
     //send note
-    let note1 = portmidi::PmEvent {
-        message : portmidi::PmMessage {
+    let note1 = portmidi::MidiEvent {
+        message : portmidi::MidiMessage {
             status : 1 | 0x90, //chanell and note on
             data1 : 36, //note number
             data2 : 90, // velocity
@@ -49,7 +49,7 @@ fn test_midiin() {
     let sendnoteerr = outport.write_event(note1);
     assert_eq!(sendnoteerr as int, portmidi::PmError::PmNoError as int);
 
-    let note2 = portmidi::PmMessage {
+    let note2 = portmidi::MidiMessage {
         status : 1 | 0x80, //chanell and note off
         data1 : 36, //note number
         data2 : 0, // velocity

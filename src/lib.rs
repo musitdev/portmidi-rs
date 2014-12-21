@@ -135,6 +135,63 @@ pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
 }
 
 
+// Midi events
+// -----------
+/// Represents a single midi message, see also `MidiEvent`
+///
+/// TODO: should we use u8?
+#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
+pub struct MidiMessage {
+    pub status : i8,
+    pub data1 : i8,
+    pub data2 : i8,
+}
+
+impl MidiMessage {
+    fn wrap(cmessage : ffi::CPmMessage) -> MidiMessage {
+        MidiMessage {
+            status:  ((cmessage) & 0xFF) as i8,
+            data1 : (((cmessage) >> 8) & 0xFF) as i8,
+            data2 : (((cmessage) >> 16) & 0xFF) as i8,
+        }
+    }
+
+    fn unwrap(&self) -> ffi::CPmMessage {
+        ((((self.data2 as i32) << 16) & 0xFF0000) |
+          (((self.data1 as i32) << 8) & 0xFF00) |
+          ((self.status as i32) & 0xFF)) as i32
+    }
+}
+
+/// Represents a time stamped midi event. See also `MidiMessage`
+///
+/// See the PortMidi documentation for how SysEx and midi realtime messages
+/// are handled
+///
+/// TODO: what to do about the timestamp?
+#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
+pub  struct MidiEvent {
+    pub message : MidiMessage,
+    pub timestamp : ffi::CPmTimestamp,
+}
+
+impl MidiEvent {
+    fn wrap(cevent : ffi::CPmEvent) -> MidiEvent {
+        MidiEvent {
+            message:  MidiMessage::wrap(cevent.message),
+            timestamp : cevent.timestamp,
+        }
+    }
+
+    fn unwrap(&self) -> ffi::CPmEvent {
+        ffi::CPmEvent {
+            message:  self.message.unwrap(),
+            timestamp : self.timestamp,
+        }
+    }
+}
+
+
 // Old code
 // --------
 #[deriving(Copy, Show, PartialEq, Eq, FromPrimitive)]
@@ -204,124 +261,8 @@ pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 
 
 
-#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
-pub struct PmMessage { /**< see PmEvent */
-    pub status : i8,
-    pub data1 : i8,
-    pub data2 : i8,
-}
-
-/**
-    Pm_Message() encodes a short Midi message into a 32-bit word. If data1
-    and/or data2 are not present, use zero.
-
-    Pm_MessageStatus(), Pm_MessageData1(), and
-    Pm_MessageData2() extract fields from a 32-bit midi message.
-*/
-impl PmMessage {
-    fn wrap(cmessage : ffi::CPmMessage) -> PmMessage {
-        PmMessage {
-            status:  ((cmessage) & 0xFF) as i8,
-            data1 : (((cmessage) >> 8) & 0xFF) as i8,
-            data2 : (((cmessage) >> 16) & 0xFF) as i8,
-        }
-    }
-
-    fn unwrap(&self) -> ffi::CPmMessage {
-        ((((self.data2 as i32) << 16) & 0xFF0000) |
-          (((self.data1 as i32) << 8) & 0xFF00) |
-          ((self.status as i32) & 0xFF)) as i32
-    }
-}
 
 
-/**
-   All midi data comes in the form of PmEvent structures. A sysex
-   message is encoded as a sequence of PmEvent structures, with each
-   structure carrying 4 bytes of the message, i.e. only the first
-   PmEvent carries the status byte.
-
-   Note that MIDI allows nested messages: the so-called "real-time" MIDI
-   messages can be inserted into the MIDI byte stream at any location,
-   including within a sysex message. MIDI real-time messages are one-byte
-   messages used mainly for timing (see the MIDI spec). PortMidi retains
-   the order of non-real-time MIDI messages on both input and output, but
-   it does not specify exactly how real-time messages are processed. This
-   is particulary problematic for MIDI input, because the input parser
-   must either prepare to buffer an unlimited number of sysex message
-   bytes or to buffer an unlimited number of real-time messages that
-   arrive embedded in a long sysex message. To simplify things, the input
-   parser is allowed to pass real-time MIDI messages embedded within a
-   sysex message, and it is up to the client to detect, process, and
-   remove these messages as they arrive.
-
-   When receiving sysex messages, the sysex message is terminated
-   by either an EOX status byte (anywhere in the 4 byte messages) or
-   by a non-real-time status byte in the low order byte of the message.
-   If you get a non-real-time status byte but there was no EOX byte, it
-   means the sysex message was somehow truncated. This is not
-   considered an error; e.g., a missing EOX can result from the user
-   disconnecting a MIDI cable during sysex transmission.
-
-   A real-time message can occur within a sysex message. A real-time
-   message will always occupy a full PmEvent with the status byte in
-   the low-order byte of the PmEvent message field. (This implies that
-   the byte-order of sysex bytes and real-time message bytes may not
-   be preserved -- for example, if a real-time message arrives after
-   3 bytes of a sysex message, the real-time message will be delivered
-   first. The first word of the sysex message will be delivered only
-   after the 4th byte arrives, filling the 4-byte PmEvent message field.
-
-   The timestamp field is observed when the output port is opened with
-   a non-zero latency. A timestamp of zero means "use the current time",
-   which in turn means to deliver the message with a delay of
-   latency (the latency parameter used when opening the output port.)
-   Do not expect PortMidi to sort data according to timestamps --
-   messages should be sent in the correct order, and timestamps MUST
-   be non-decreasing. See also "Example" for Pm_OpenOutput() above.
-
-   A sysex message will generally fill many PmEvent structures. On
-   output to a PortMidiStream with non-zero latency, the first timestamp
-   on sysex message data will determine the time to begin sending the
-   message. PortMidi implementations may ignore timestamps for the
-   remainder of the sysex message.
-
-   On input, the timestamp ideally denotes the arrival time of the
-   status byte of the message. The first timestamp on sysex message
-   data will be valid. Subsequent timestamps may denote
-   when message bytes were actually received, or they may be simply
-   copies of the first timestamp.
-
-   Timestamps for nested messages: If a real-time message arrives in
-   the middle of some other message, it is enqueued immediately with
-   the timestamp corresponding to its arrival time. The interrupted
-   non-real-time message or 4-byte packet of sysex data will be enqueued
-   later. The timestamp of interrupted data will be equal to that of
-   the interrupting real-time message to insure that timestamps are
-   non-decreasing.
- */
-#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
-pub  struct PmEvent {
-    pub message : PmMessage,
-    pub timestamp : ffi::CPmTimestamp,
-}
-
-#[doc(hidden)]
-impl PmEvent {
-    fn wrap(cevent : ffi::CPmEvent) -> PmEvent {
-        PmEvent {
-            message:  PmMessage::wrap(cevent.message),
-            timestamp : cevent.timestamp,
-        }
-    }
-
-    fn unwrap(&self) -> ffi::CPmEvent {
-        ffi::CPmEvent {
-            message:  self.message.unwrap(),
-            timestamp : self.timestamp,
-        }
-    }
-}
 
 
 /// Representation of an input midi port.
@@ -400,7 +341,7 @@ impl PmInputPort {
         message" and will be flushed as well.
 
     */
-    pub fn read(&mut self) -> Result<PmEvent, PmError> {
+    pub fn read(&mut self) -> Result<MidiEvent, PmError> {
 
         //get one note a the time
          let mut pevent : ffi::CPmEvent = ffi::CPmEvent {
@@ -414,7 +355,7 @@ impl PmInputPort {
 //        println!("portmidi::midi after read");
         match nbnote {
             y if y == 0 => Err(PmError::PmNoError),
-            y if y > 0 => Ok(PmEvent::wrap(pevent)),
+            y if y > 0 => Ok(MidiEvent::wrap(pevent)),
             _ => Err(unsafe { transmute::<i16, PmError>(nbnote) })
         }
     }
@@ -531,7 +472,7 @@ impl PmOutputPort {
 
         Sysex data may contain embedded real-time messages.
     */
-    pub fn write_event(&mut self, midievent : PmEvent)  -> PmError  {
+    pub fn write_event(&mut self, midievent : MidiEvent)  -> PmError  {
         let cevent : ffi::CPmEvent = midievent.unwrap();
         unsafe {
             PmError::unwrap(ffi::Pm_Write(self.c_pm_stream, &cevent, 1))
@@ -544,7 +485,7 @@ impl PmOutputPort {
         non-decreasing. (But timestamps are ignored if the stream was opened
         with latency = 0.)
     */
-    pub fn write_message(&mut self, midimessage : PmMessage)  -> PmError  {
+    pub fn write_message(&mut self, midimessage : MidiMessage)  -> PmError  {
         let cevent : ffi::CPmMessage = midimessage.unwrap();
         unsafe {
             PmError::unwrap(ffi::Pm_WriteShort(self.c_pm_stream, 0, cevent))
