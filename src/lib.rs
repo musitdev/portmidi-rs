@@ -8,6 +8,7 @@ use libc::c_char;
 
 mod ffi;
 
+pub type PmDeviceId = i32;
 pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
 #[deriving(Copy, Show)]
@@ -123,7 +124,6 @@ pub const HDRLENGTH : i32 = 50;
 than this number of characters */
 pub const PM_HOST_ERROR_MSG_LEN : i32 = 256;
 
-pub type PmDeviceID = int;
 pub const PM_NO_DEVICE : i32 = -1;
 
 #[deriving(Clone, Show)]
@@ -188,15 +188,15 @@ impl PmDeviceInfo {
     On Linux,
 
 */
-pub fn get_default_input_device_id() -> PmDeviceID {
+pub fn get_default_input_device_id() -> PmDeviceId {
     unsafe {
-        ffi::Pm_GetDefaultInputDeviceID() as int
+        ffi::Pm_GetDefaultInputDeviceID()
     }
 }
 
-pub fn get_default_output_device_id() -> PmDeviceID {
+pub fn get_default_output_device_id() -> PmDeviceId {
     unsafe {
-        ffi::Pm_GetDefaultOutputDeviceID() as int
+        ffi::Pm_GetDefaultOutputDeviceID()
     }
 }
 
@@ -210,7 +210,7 @@ pub fn get_default_output_device_id() -> PmDeviceID {
     not be manipulated or freed. The pointer is guaranteed to be valid
     between calls to Pm_Initialize() and Pm_Terminate().
 */
-pub fn get_device_info(device : PmDeviceID) -> Option<PmDeviceInfo> {
+pub fn get_device_info(device : PmDeviceId) -> Option<PmDeviceInfo> {
     let c_info = unsafe { ffi::Pm_GetDeviceInfo(device as i32) };
     if c_info.is_null() {
         None
@@ -354,7 +354,7 @@ impl PmInputPort {
     *
     * Return a new PmInputPort.
     */
-    pub fn new(input_device : PmDeviceID, buffer_size: int) -> PmInputPort {
+    pub fn new(input_device : PmDeviceId, buffer_size: int) -> PmInputPort {
         PmInputPort {
             c_pm_stream : ptr::null(),
             input_device : input_device as i32,
@@ -473,7 +473,7 @@ impl PmOutputPort {
     *
     * Return a new PmOutputPort.
     */
-    pub fn new(output_device : PmDeviceID, buffer_size: int) -> PmOutputPort {
+    pub fn new(output_device : PmDeviceId, buffer_size: int) -> PmOutputPort {
         PmOutputPort {
             c_pm_stream : ptr::null(),
             output_device : output_device as i32,
