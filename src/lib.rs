@@ -8,7 +8,7 @@ use libc::c_char;
 
 mod ffi;
 
-pub type PmDeviceId = i32;
+pub type PortMidiDeviceId = i32;
 pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
 #[deriving(Copy, Show)]
@@ -85,7 +85,7 @@ impl DeviceInfo {
 
 /// Returns a `DeviceInfo` with information about a device, or `None` if
 /// it does not exist
-pub fn get_device_info(device : PmDeviceId) -> Option<DeviceInfo> {
+pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
     let c_info = unsafe { ffi::Pm_GetDeviceInfo(device) };
     if c_info.is_null() {
         None
@@ -204,13 +204,13 @@ pub const PM_NO_DEVICE : i32 = -1;
     On Linux,
 
 */
-pub fn get_default_input_device_id() -> PmDeviceId {
+pub fn get_default_input_device_id() -> PortMidiDeviceId {
     unsafe {
         ffi::Pm_GetDefaultInputDeviceID()
     }
 }
 
-pub fn get_default_output_device_id() -> PmDeviceId {
+pub fn get_default_output_device_id() -> PortMidiDeviceId {
     unsafe {
         ffi::Pm_GetDefaultOutputDeviceID()
     }
@@ -352,7 +352,7 @@ impl PmInputPort {
     *
     * Return a new PmInputPort.
     */
-    pub fn new(input_device : PmDeviceId, buffer_size: i32) -> PmInputPort {
+    pub fn new(input_device : PortMidiDeviceId, buffer_size: i32) -> PmInputPort {
         PmInputPort {
             c_pm_stream : ptr::null(),
             input_device : input_device,
@@ -471,7 +471,7 @@ impl PmOutputPort {
     *
     * Return a new PmOutputPort.
     */
-    pub fn new(output_device : PmDeviceId, buffer_size: i32) -> PmOutputPort {
+    pub fn new(output_device : PortMidiDeviceId, buffer_size: i32) -> PmOutputPort {
         PmOutputPort {
             c_pm_stream : ptr::null(),
             output_device : output_device,
