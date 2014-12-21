@@ -284,9 +284,9 @@ impl InputPort {
     *    the stream, e.g. an input or output operation. Until the error is cleared,
     *    no new error codes will be obtained, even for a different stream.
     */
-    pub fn has_host_error(&self) -> i32  {
+    pub fn has_host_error(&self) -> bool {
         unsafe {
-            ffi::Pm_HasHostError(self.pm_stream)
+            ffi::Pm_HasHostError(self.pm_stream) > 0
         }
     }
 }
@@ -371,9 +371,9 @@ impl OutputPort {
     *    the stream, e.g. an input or output operation. Until the error is cleared,
     *    no new error codes will be obtained, even for a different stream.
     */
-    pub fn has_host_error(&self) -> i32  {
+    pub fn has_host_error(&self) -> bool  {
         unsafe {
-            ffi::Pm_HasHostError(self.pm_stream)
+            ffi::Pm_HasHostError(self.pm_stream) > 0
         }
     }
 }
