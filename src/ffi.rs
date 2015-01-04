@@ -1,20 +1,34 @@
 use libc::{c_char, c_void};
 
-pub type CPortMidiStream = c_void;
+pub type PmDeviceId = i32;
+
+pub type PortMidiStream = c_void;
 
 #[doc(hidden)]
-pub type CPmMessage = i32;
+pub type PmMessage = i32;
 
-pub type CPmTimestamp = u32;
+pub type PmTimestamp = u32;
+
+pub const PM_NO_DEVICE : PmDeviceId = -1;
 
 #[doc(hidden)]
 #[repr(C)]
-pub struct CPmEvent {
-    pub message : CPmMessage,
-    pub timestamp : CPmTimestamp,
+pub struct PmEvent {
+    pub message : PmMessage,
+    pub timestamp : PmTimestamp,
 }
 
-#[deriving(Show, FromPrimitive)]
+#[repr(C)]
+pub struct PmDeviceInfo {
+    pub struct_version: i32, /* < this internal structure version */
+    pub interf : *const c_char, /* < underlying MIDI API, e.g. MMSystem or DirectX */
+    pub name : *const c_char,    /* < device name, e.g. USB MidiSport 1x1 */
+    pub input : i32, /* < true iff input is available */
+    pub output : i32, /* < true iff output is available */
+    pub opened : i32, /* < used by generic PortMidi code to do error checking on arguments */
+}
+
+#[derive(Show, FromPrimitive)]
 #[repr(C)]
 pub enum PmError {
     PmNoError = 0,
@@ -41,20 +55,26 @@ pub enum PmError {
 extern "C" {
     pub fn Pm_Initialize() -> PmError;
     pub fn Pm_Terminate()-> PmError;
-    pub fn Pm_HasHostError(stream : *const CPortMidiStream ) -> i32;
-    pub fn Pm_GetErrorText(errorCode : PmError) -> *const c_char;
-    pub fn Pm_GetHostErrorText(msg : *const c_char , len : i32 );
-    pub fn Pm_CountDevices() -> u32;
-    pub fn Pm_GetDefaultInputDeviceID() -> super::CPmDeviceID;
-    pub fn Pm_GetDefaultOutputDeviceID() -> super::CPmDeviceID;
-    pub fn Pm_GetDeviceInfo(id:super::CPmDeviceID) -> *const super::CPmDeviceInfo;
-    pub fn Pm_OpenInput(stream: *const *const CPortMidiStream, inputDevice : super::CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void) -> PmError;
-    pub fn Pm_OpenOutput(stream : *const *const CPortMidiStream, outputDevice : super::CPmDeviceID, inputDriverInfo: *const c_void, bufferSize : i32, time_proc: *const c_void, time_info: *const c_void, latency:i32) -> PmError;
-    pub fn Pm_Read(stream : *const CPortMidiStream, buffer : *mut CPmEvent , length : i32) -> i16;
-    pub fn Pm_Abort(stream : *const CPortMidiStream) -> PmError;
-    pub fn Pm_Close(stream : *const CPortMidiStream) -> PmError;
-    pub fn Pm_Poll(stream : *const CPortMidiStream) -> PmError;
-    pub fn Pm_Write(stream : *const CPortMidiStream, buffer : *const CPmEvent , length : i32) -> PmError;
-    pub fn Pm_WriteShort(stream : *const CPortMidiStream, timestamp : CPmTimestamp , message : CPmMessage) -> PmError;
+    pub fn Pm_HasHostError(stream: *const PortMidiStream) -> i32;
+    pub fn Pm_GetErrorText(errorCode: PmError) -> *const c_char;
+    pub fn Pm_GetHostErrorText(msg: *const c_char, len: i32);
+    pub fn Pm_CountDevices() -> i32;
+    pub fn Pm_GetDefaultInputDeviceID() -> PmDeviceId;
+    pub fn Pm_GetDefaultOutputDeviceID() -> PmDeviceId;
+    pub fn Pm_GetDeviceInfo(id: PmDeviceId) -> *const PmDeviceInfo;
+    pub fn Pm_OpenInput(stream: *const *const PortMidiStream, inputDevice: PmDeviceId,
+                        inputDriverInfo: *const c_void, bufferSize: i32,
+                        time_proc: *const c_void, time_info: *const c_void) -> PmError;
+    pub fn Pm_OpenOutput(stream: *const *const PortMidiStream, outputDevice: PmDeviceId,
+                         inputDriverInfo: *const c_void, bufferSize: i32,
+                         time_proc: *const c_void, time_info: *const c_void,
+                         latency: i32) -> PmError;
+    pub fn Pm_Read(stream: *const PortMidiStream, buffer : *mut PmEvent, length: i32) -> i32;
+    pub fn Pm_Abort(stream: *const PortMidiStream) -> PmError;
+    pub fn Pm_Close(stream: *const PortMidiStream) -> PmError;
+    pub fn Pm_Poll(stream: *const PortMidiStream) -> PmError;
+    pub fn Pm_Write(stream: *const PortMidiStream, buffer: *const PmEvent, length: i32) -> PmError;
+    pub fn Pm_WriteShort(stream: *const PortMidiStream, timestamp: PmTimestamp,
+                         message: PmMessage) -> PmError;
 }
 

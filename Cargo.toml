@@ -3,8 +3,9 @@
 name = "portmidi"
 version = "0.0.1"
 authors = ["Philippe Delrieu <philippe.delrieu@free.fr>"]
+license = "MIT"
+description = "PortMidi bindings for Rust"
+homepage = "https://github.com/musitdev/rust-portmidi"
+repository = "https://github.com/musitdev/rust-portmidi"
+keywords = ["midi", "music"]
 
-[lib]
-name = "portmidi"
-crate-type = ["dylib", "rlib"]
-path = "src/lib.rs"
