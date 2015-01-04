@@ -16,7 +16,7 @@ pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
 // Errors
 // ------
-#[deriving(Copy, Show, PartialEq, Eq)]
+#[derive(Copy, Show, PartialEq, Eq)]
 pub enum PortMidiError {
     HostError,
     InvalidDeviceId,
@@ -103,7 +103,7 @@ pub fn get_default_output_device_id() -> Option<PortMidiDeviceId> {
 // DeviceInfo
 // ----------
 /// Represents what we know about a device
-#[deriving(Clone, Show)]
+#[derive(Clone, Show)]
 pub struct DeviceInfo {
     pub name: String,
     pub input: bool,
@@ -140,7 +140,7 @@ pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
 /// Represents a single midi message, see also `MidiEvent`
 ///
 /// TODO: should we use u8?
-#[deriving(Clone, Copy, PartialEq, Eq, Show)]
+#[derive(Clone, Copy, PartialEq, Eq, Show)]
 pub struct MidiMessage {
     pub status: i8,
     pub data1: i8,
@@ -169,7 +169,7 @@ impl MidiMessage {
 /// are handled
 ///
 /// TODO: what to do about the timestamp?
-#[deriving(Clone, Copy, PartialEq, Eq, Show)]
+#[derive(Clone, Copy, PartialEq, Eq, Show)]
 pub  struct MidiEvent {
     pub message : MidiMessage,
     pub timestamp : ffi::PmTimestamp,

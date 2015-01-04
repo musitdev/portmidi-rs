@@ -28,7 +28,7 @@ pub struct PmDeviceInfo {
     pub opened : i32, /* < used by generic PortMidi code to do error checking on arguments */
 }
 
-#[deriving(Show, FromPrimitive)]
+#[derive(Show, FromPrimitive)]
 #[repr(C)]
 pub enum PmError {
     PmNoError = 0,
