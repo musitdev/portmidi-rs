@@ -140,7 +140,7 @@ pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
 /// Represents a single midi message, see also `MidiEvent`
 ///
 /// TODO: should we use u8?
-#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
+#[deriving(Clone, Copy, PartialEq, Eq, Show)]
 pub struct MidiMessage {
     pub status: i8,
     pub data1: i8,
@@ -169,7 +169,7 @@ impl MidiMessage {
 /// are handled
 ///
 /// TODO: what to do about the timestamp?
-#[deriving(Clone, Copy, PartialEq, Eq, Decodable, Encodable, Show)]
+#[deriving(Clone, Copy, PartialEq, Eq, Show)]
 pub  struct MidiEvent {
     pub message : MidiMessage,
     pub timestamp : ffi::PmTimestamp,
