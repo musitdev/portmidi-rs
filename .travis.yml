@@ -1,17 +1,7 @@
 language: rust
-env:
-  global:
-    - secure: TeiN4v6xNRQYOX8ahW9XYftnxfLVUw3e3M9PmfxHk6UPLZmPXAeOYXjT9yDP86cnErwslxPbE33d/O8zzOexbfDY/kEgo5nfP979Zx58BS2GgeudPsVVpWn7X2KbnvocC2cHIkJJt4Xoe+BgMisQvN1Cgc7AblnDdA84JPAyE3M=
-notifications:
-  email:
-    - philippe.delrieu@free.fr
 install:
   - sudo apt-get install libportmidi-dev
 script:
   - cargo build --verbose
-  - cargo doc
-after_success:
-  - mv target/doc doc
-  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
 os:
   - linux
