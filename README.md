@@ -1,36 +1,24 @@
-rust-portmidi
-=============
+portmidi-rs
+===========
 
-[![Build Status](https://api.travis-ci.org/musitdev/rust-portmidi.svg?branch=master)](https://travis-ci.org/musitdev/rust-portmidi)
+[![Build Status](https://travis-ci.org/samdoshi/portmidi-rs.svg?branch=master)](https://travis-ci.org/samdoshi/portmidi-rs)
 
-PortMidi bindings for Rust
+[Documentation](http://samdoshi.github.io/portmidi-rs/portmidi/index.html)
 
-This is a Rust binding for PortMidi lib.
+High-level PortMidi bindings for Rust.
 
-PortMidi website  : http://portmedia.sourceforge.net/portmidi/
-
+PortMidi website: http://portmedia.sourceforge.net/portmidi/
 
 Installation
 ============
 
-Use `cargo build` to compile library, to compile and run tests use `cargo test`.
-
-PortMidi works on Linux, windows and OSX. The binding has been only tested on Linux
-It's reported to work on Mac.
-
-Documentation
-=============
-
-Auto generated documentation can be found at rust-ci: http://www.rust-ci.org/musitdev/rust-portmidi/doc/portmidi/
-
-Changes
-=======
-
-- December 2014: removed `time` and `util` modules, moved the `midi` module up one level.
+Add this to your `Cargo.toml`.
+```toml
+[dependencies]
+midi = "*"
+```
 
 License
 =======
-This software is a binding of the PortMidi library which is provide under  PortMidi license a MIT like license.
-
-This software is provide under the MIT license.
+This software is provide under the MIT license. PortMidi is provided under it's own MIT-like license.
 

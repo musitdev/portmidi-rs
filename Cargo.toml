@@ -2,10 +2,14 @@
 
 name = "portmidi"
 version = "0.0.1"
-authors = ["Philippe Delrieu <philippe.delrieu@free.fr>"]
+authors = [
+    "Sam Doshi <sam@metal-fish.co.ul>",
+    "Philippe Delrieu <philippe.delrieu@free.fr>"
+]
 license = "MIT"
-description = "PortMidi bindings for Rust"
-homepage = "https://github.com/musitdev/rust-portmidi"
-repository = "https://github.com/musitdev/rust-portmidi"
-keywords = ["midi", "music"]
+description = "High-level PortMidi bindings for Rust"
+homepage = "https://github.com/samdoshi/portmidi-rs"
+repository = "https://github.com/samdoshi/portmidi-rs"
+documentation = "http://samdoshi.github.io/portmidi-rs/portmidi/index.html"
+keywords = ["midi", "music", "audio"]
 
