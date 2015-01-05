@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `portmidi` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, portmidi">
+
+    <title>portmidi - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        
+        <p class='location'></p>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>portmidi</a><wbr></span><span class='out-of-band'><a href='stability.html'>[stability]</a> <span id='render-detail'>
+            <a id="collapse-all" href="#">[-]
+            </a>&nbsp;<a id="expand-all" href="#">[+]</a>
+        </span><a id='src-0' href='../src/portmidi/lib.rs.html#1-405'>[src]</a></span></h1>
+<h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.DeviceInfo.html'
+                               title='portmidi::DeviceInfo'>DeviceInfo</a></td>
+                        <td class='docblock short'><p>Represents what we know about a device</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.InputPort.html'
+                               title='portmidi::InputPort'>InputPort</a></td>
+                        <td class='docblock short'><p>Representation of an input midi port.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.MidiEvent.html'
+                               title='portmidi::MidiEvent'>MidiEvent</a></td>
+                        <td class='docblock short'><p>Represents a time stamped midi event. See also <code>MidiMessage</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.MidiMessage.html'
+                               title='portmidi::MidiMessage'>MidiMessage</a></td>
+                        <td class='docblock short'><p>Represents a single midi message, see also <code>MidiEvent</code></p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='struct' href='struct.OutputPort.html'
+                               title='portmidi::OutputPort'>OutputPort</a></td>
+                        <td class='docblock short'><p>Representation of an output midi port.</p>
+</td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='enum' href='enum.PortMidiError.html'
+                               title='portmidi::PortMidiError'>PortMidiError</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='constants' class='section-header'><a href="#constants">Constants</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='constant' href='constant.HDRLENGTH.html'
+                               title='portmidi::HDRLENGTH'>HDRLENGTH</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='constant' href='constant.PM_HOST_ERROR_MSG_LEN.html'
+                               title='portmidi::PM_HOST_ERROR_MSG_LEN'>PM_HOST_ERROR_MSG_LEN</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.count_devices.html'
+                               title='portmidi::count_devices'>count_devices</a></td>
+                        <td class='docblock short'><p>Return the number of devices</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.get_default_input_device_id.html'
+                               title='portmidi::get_default_input_device_id'>get_default_input_device_id</a></td>
+                        <td class='docblock short'><p>Gets the <code>PortMidiDeviceId</code> for the default input, or <code>None</code> if
+there isn&#39;t one</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.get_default_output_device_id.html'
+                               title='portmidi::get_default_output_device_id'>get_default_output_device_id</a></td>
+                        <td class='docblock short'><p>Gets the <code>PortMidiDeviceId</code> for the default output, or <code>None</code> if
+there isn&#39;t one</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.get_device_info.html'
+                               title='portmidi::get_device_info'>get_device_info</a></td>
+                        <td class='docblock short'><p>Returns a <code>DeviceInfo</code> with information about a device, or <code>None</code> if
+it does not exist</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.get_error_text.html'
+                               title='portmidi::get_error_text'>get_error_text</a></td>
+                        <td class='docblock short'><p>Translate portmidi error number into human readable message.
+*    These strings are constants (set at compile time) so client has
+*    no need to allocate storage</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.get_host_error_text.html'
+                               title='portmidi::get_host_error_text'>get_host_error_text</a></td>
+                        <td class='docblock short'><p>Translate portmidi host error into human readable message.
+These strings are computed at run time, so client has to allocate storage.
+After this routine executes, the host error is cleared.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.initialize.html'
+                               title='portmidi::initialize'>initialize</a></td>
+                        <td class='docblock short'><p><code>initialize</code> initalizes the underlying PortMidi C library, call this
+before using the library.</p>
+</td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='fn' href='fn.terminate.html'
+                               title='portmidi::terminate'>terminate</a></td>
+                        <td class='docblock short'><p><code>terminate</code> terminates the underlying PortMidi C library, call this
+after using the library.</p>
+</td>
+                    </tr>
+                </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='type' href='type.PortMidiDeviceId.html'
+                               title='portmidi::PortMidiDeviceId'>PortMidiDeviceId</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                
+                    <tr>
+                        <td><a class='stability Unmarked' title='No stability level'></a><a class='type' href='type.PortMidiResult.html'
+                               title='portmidi::PortMidiResult'>PortMidiResult</a></td>
+                        <td class='docblock short'></td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "portmidi";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script async src="../search-index.js"></script>
+</body>
+</html>
