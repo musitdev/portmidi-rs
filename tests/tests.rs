@@ -58,9 +58,6 @@ fn test_midiin() {
     assert_eq!(result, Ok(()));
 
     //close out port
-    let result = outport.abort();
-    assert_eq!(result, Ok(()));
-
     let result = outport.close();
     assert_eq!(result, Ok(()));
 

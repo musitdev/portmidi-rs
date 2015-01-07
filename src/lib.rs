@@ -345,7 +345,8 @@ impl OutputPort {
     /// Terminates outgoing messages immediately
     ///
     /// The caller should immediately close the output port, this may
-    /// result in transmission of a partial midi message.
+    /// result in transmission of a partial midi message. Note, not all platforms
+    /// support abort.
     pub fn abort(&mut self) -> PortMidiResult<()> {
         from_pm_error(unsafe {
             ffi::Pm_Abort(self.pm_stream)
