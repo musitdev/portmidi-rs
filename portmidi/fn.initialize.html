@@ -44,9 +44,12 @@
 <h1 class='fqn'><span class='in-band'>Function <a href='index.html'>portmidi</a>::<wbr><a class='fn' href=''>initialize</a><wbr></span><span class='out-of-band'><span id='render-detail'>
             <a id="collapse-all" href="#">[-]
             </a>&nbsp;<a id="expand-all" href="#">[+]</a>
-        </span><a id='src-1555' href='../src/portmidi/lib.rs.html#53-57'>[src]</a></span></h1>
+        </span><a id='src-1555' href='../src/portmidi/lib.rs.html#63-67'>[src]</a></span></h1>
 <pre class='rust fn'>pub fn initialize() -&gt; <a class='type' href='../portmidi/type.PortMidiResult.html' title='portmidi::PortMidiResult'>PortMidiResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</pre><div class='docblock'><p><code>initialize</code> initalizes the underlying PortMidi C library, call this
 before using the library.</p>
+
+<p>Once initialized, PortMidi will no longer pickup any new Midi devices that are
+connected, i.e. it does not support hot plugging.</p>
 </div></section>
     <section id='search' class="content hidden"></section>
 
