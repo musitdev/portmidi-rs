@@ -16,6 +16,7 @@ mod ffi;
 
 // Types
 // -----
+/// Used by PortMidi to refer to a Midi device
 pub type PortMidiDeviceId = i32;
 pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
@@ -56,6 +57,9 @@ fn from_pm_error(pm_error: ffi::PmError) -> PortMidiResult<()> {
 // ----------
 /// `initialize` initalizes the underlying PortMidi C library, call this
 /// before using the library.
+///
+/// Once initialized, PortMidi will no longer pickup any new Midi devices that are
+/// connected, i.e. it does not support hot plugging.
 pub fn initialize() -> PortMidiResult<()> {
     from_pm_error(unsafe {
         ffi::Pm_Initialize()
@@ -70,8 +74,9 @@ pub fn terminate() -> PortMidiResult<()> {
     })
 }
 
-/// Return the number of devices
-pub fn count_devices() -> i32 {
+/// Return the number of devices. This number will not change during the lifetime
+/// of the program.
+pub fn count_devices() -> PortMidiDeviceId {
     unsafe {
         ffi::Pm_CountDevices()
     }
@@ -111,15 +116,21 @@ pub fn get_default_output_device_id() -> Option<PortMidiDeviceId> {
 /// Represents what we know about a device
 #[derive(Clone, Show)]
 pub struct DeviceInfo {
+    /// The `PortMidiDeviceId` used with `OutputPort::new` and `InputPort::new`
+    pub device_id: PortMidiDeviceId,
+    /// The name of the device
     pub name: String,
+    /// Is the device an input
     pub input: bool,
+    /// Is the device an output
     pub output: bool
 }
 
 impl DeviceInfo {
-    fn wrap(device_info: *const ffi::PmDeviceInfo) -> DeviceInfo {
+    fn wrap(device_id: PortMidiDeviceId, device_info: *const ffi::PmDeviceInfo) -> DeviceInfo {
         unsafe {
             DeviceInfo {
+                device_id: device_id,
                 name: String::from_raw_buf((*device_info).name as *const u8),
                 input: (*device_info).input > 0,
                 output: (*device_info).output > 0
@@ -130,13 +141,13 @@ impl DeviceInfo {
 
 /// Returns a `DeviceInfo` with information about a device, or `None` if
 /// it does not exist
-pub fn get_device_info(device : PortMidiDeviceId) -> Option<DeviceInfo> {
-    let info = unsafe { ffi::Pm_GetDeviceInfo(device) };
+pub fn get_device_info(device_id: PortMidiDeviceId) -> Option<DeviceInfo> {
+    let info = unsafe { ffi::Pm_GetDeviceInfo(device_id) };
     if info.is_null() {
         None
     }
     else {
-        Some(DeviceInfo::wrap(info))
+        Some(DeviceInfo::wrap(device_id, info))
     }
 }
 
@@ -200,7 +211,7 @@ impl MidiEvent {
 
 // Input
 // -----
-/// Representation of an input midi port.
+/// Representation of an input midi port
 #[allow(missing_copy_implementations)]
 pub struct InputPort {
     pm_stream : *const ffi::PortMidiStream,
@@ -300,7 +311,7 @@ impl InputPort {
 
 // Output
 // ------
-/// Representation of an output midi port.
+/// Representation of an output midi port
 #[allow(missing_copy_implementations)]
 pub struct OutputPort {
     pm_stream: *const ffi::PortMidiStream,
