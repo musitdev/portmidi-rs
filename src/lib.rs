@@ -128,13 +128,18 @@ pub struct DeviceInfo {
 
 impl DeviceInfo {
     fn wrap(device_id: PortMidiDeviceId, device_info: *const ffi::PmDeviceInfo) -> DeviceInfo {
-        unsafe {
-            DeviceInfo {
-                device_id: device_id,
-                name: String::from_raw_buf((*device_info).name as *const u8),
-                input: (*device_info).input > 0,
-                output: (*device_info).output > 0
-            }
+        let name = unsafe {
+            let bytes = std::ffi::c_str_to_bytes(&(*device_info).name);
+            std::str::from_utf8_unchecked(bytes).to_string()
+        };
+        let input = unsafe { (*device_info).input };
+        let output = unsafe { (*device_info).output };
+
+        DeviceInfo {
+            device_id: device_id,
+            name: name,
+            input: input > 0,
+            output: output > 0
         }
     }
 }
@@ -404,7 +409,9 @@ impl OutputPort {
 */
 pub fn get_error_text(error_code: ffi::PmError) -> String {
     unsafe {
-        String::from_raw_buf((ffi::Pm_GetErrorText(error_code) as *const u8))
+        let error_text = ffi::Pm_GetErrorText(error_code);
+        let bytes = std::ffi::c_str_to_bytes(&error_text);
+        std::str::from_utf8_unchecked(bytes).to_string()
     }
 }
 
