@@ -470,6 +470,7 @@
 <span id="428">428</span>
 <span id="429">429</span>
 <span id="430">430</span>
+<span id="431">431</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 Sam Doshi (sam@metal-fish.co.uk)</span>
 <span class='comment'>// Copyright 2013-2014 Philippe Delrieu (philippe.delrieu@free.fr)</span>
@@ -818,7 +819,8 @@
     <span class='doccomment'>/// Terminates outgoing messages immediately</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// The caller should immediately close the output port, this may</span>
-    <span class='doccomment'>/// result in transmission of a partial midi message.</span>
+    <span class='doccomment'>/// result in transmission of a partial midi message. Note, not all platforms</span>
+    <span class='doccomment'>/// support abort.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>abort</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>PortMidiResult</span><span class='op'>&lt;</span>()<span class='op'>&gt;</span> {
         <span class='ident'>from_pm_error</span>(<span class='kw'>unsafe</span> {
             <span class='ident'>ffi</span>::<span class='ident'>Pm_Abort</span>(<span class='self'>self</span>.<span class='ident'>pm_stream</span>)

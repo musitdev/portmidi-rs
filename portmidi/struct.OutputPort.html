@@ -56,7 +56,8 @@
 <div class='docblock'><p>Terminates outgoing messages immediately</p>
 
 <p>The caller should immediately close the output port, this may
-result in transmission of a partial midi message.</p>
+result in transmission of a partial midi message. Note, not all platforms
+support abort.</p>
 </div><h4 id='method.close' class='method'><a class='stability Unmarked' title='No stability level'></a><code>fn <a href='#method.close' class='fnname'>close</a>(&amp;mut self) -&gt; <a class='type' href='../portmidi/type.PortMidiResult.html' title='portmidi::PortMidiResult'>PortMidiResult</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></h4>
 <div class='docblock'><p>Closes the midi stream, flushing any pending buffers</p>
 
