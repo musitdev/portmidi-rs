@@ -6,17 +6,17 @@ fn test_midiin() {
     assert_eq!(result, Ok(()));
 
     let nbdevice = portmidi::count_devices();
-    println!("portmidi nb device {}", nbdevice);
+    println!("portmidi nb device {:?}", nbdevice);
     let defdevin = portmidi::get_default_input_device_id().unwrap();
-    println!("portmidi default input device {}", defdevin);
+    println!("portmidi default input device {:?}", defdevin);
     let defdevout = portmidi::get_default_output_device_id().unwrap();
-    println!("portmidi default output device {}", defdevout);
+    println!("portmidi default output device {:?}", defdevout);
 
     let ininfo = portmidi::get_device_info(defdevin);
-    println!("portmidi default input device info {}", ininfo);
+    println!("portmidi default input device info {:?}", ininfo);
 
     let outinfo = portmidi::get_device_info(defdevout);
-    println!("portmidi default output device info {}", outinfo);
+    println!("portmidi default output device info {:?}", outinfo);
 
     let mut inport = portmidi::InputPort::new(defdevin, 0);
     let result = inport.open();
@@ -27,11 +27,11 @@ fn test_midiin() {
     assert_eq!(result, Ok(()));
 
     let read_midi = inport.read();
-    println!("portmidi input note {}", read_midi);
+    println!("portmidi input note {:?}", read_midi);
     match read_midi    {
-        Ok(Some(notes)) => println!("portmidi read midi note {}", notes),
+        Ok(Some(notes)) => println!("portmidi read midi note {:?}", notes),
         Ok(None) => println!("portmidi read midi no note"),
-        Err(err) => println!("portmidi read midi error {}", err)
+        Err(err) => println!("portmidi read midi error {:?}", err)
     }
 
     let result = inport.poll();
