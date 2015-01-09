@@ -5,8 +5,6 @@
 // This file may not be copied, modified, or distributed except according to those terms.
 
 extern crate libc;
-extern crate core;
-extern crate serialize;
 
 use std::ptr;
 use libc::c_char;
