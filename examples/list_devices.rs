@@ -12,8 +12,8 @@ fn get_devices() -> pm::PortMidiResult<Vec<pm::DeviceInfo>> {
     try!(pm::initialize());
     let no = pm::count_devices();
     // use filter_map to discard None, and unwrap the Some(_)
-    let devices = range(0, no).filter_map(|i| pm::get_device_info(i))
-                              .collect::<Vec<_>>();
+    let devices = (0..no).filter_map(|i| pm::get_device_info(i))
+                         .collect::<Vec<_>>();
     try!(pm::terminate());
     Ok(devices)
 }
