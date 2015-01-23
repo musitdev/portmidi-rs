@@ -1,6 +1,5 @@
 extern crate "portmidi" as pm;
 
-#[main]
 fn main() {
     match get_devices() {
         Err(e) => println!("{:?}", e),
