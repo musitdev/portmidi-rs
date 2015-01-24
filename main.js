@@ -555,6 +555,8 @@
         // This mapping table should match the discriminants of
         // `rustdoc::html::item_type::ItemType` type in Rust.
         var itemTypes = ["mod",
+                         "externcrate",
+                         "import",
                          "struct",
                          "enum",
                          "fn",
@@ -562,13 +564,10 @@
                          "static",
                          "trait",
                          "impl",
-                         "viewitem",
                          "tymethod",
                          "method",
                          "structfield",
                          "variant",
-                         "ffi", // retained for backward compatibility
-                         "ffs", // retained for backward compatibility
                          "macro",
                          "primitive",
                          "associatedtype",
@@ -635,7 +634,7 @@
             $('.do-search').on('click', search);
             $('.search-input').on('keyup', function() {
                 clearTimeout(keyUpTimeout);
-                keyUpTimeout = setTimeout(search, 100);
+                keyUpTimeout = setTimeout(search, 500);
             });
 
             // Push and pop states are used to add search results to the browser
@@ -708,7 +707,7 @@
                 var code = $('<code>').append(structs[j]);
                 $.each(code.find('a'), function(idx, a) {
                     var href = $(a).attr('href');
-                    if (href && !href.startsWith('http')) {
+                    if (href && href.indexOf('http') !== 0) {
                         $(a).attr('href', rootPath + href);
                     }
                 });

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="Source to the Rust file `/Users/sam/Dropbox/Projects/portmidi-rs/src/lib.rs`.">
+    <meta name="description" content="Source to the Rust file `src/lib.rs`.">
     <meta name="keywords" content="rust, rustlang, rust-lang">
 
     <title>lib.rs.html -- source</title>
@@ -471,6 +471,11 @@
 <span id="429">429</span>
 <span id="430">430</span>
 <span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 Sam Doshi (sam@metal-fish.co.uk)</span>
 <span class='comment'>// Copyright 2013-2014 Philippe Delrieu (philippe.delrieu@free.fr)</span>
@@ -479,9 +484,8 @@
 <span class='comment'>// This file may not be copied, modified, or distributed except according to those terms.</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>core</span>;
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serialize</span>;
 
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
 <span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>;
 
@@ -523,6 +527,12 @@
         <span class='ident'>ffi</span>::<span class='ident'>PmError</span>::<span class='ident'>PmBadData</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>PortMidiError</span>::<span class='ident'>BadData</span>),
         <span class='ident'>ffi</span>::<span class='ident'>PmError</span>::<span class='ident'>PmInternalError</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>PortMidiError</span>::<span class='ident'>InternalError</span>),
         <span class='ident'>ffi</span>::<span class='ident'>PmError</span>::<span class='ident'>PmBufferMaxSize</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>PortMidiError</span>::<span class='ident'>BufferMaxSize</span>),
+    }
+}
+
+<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>PortMidiError</span> {
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:?}&quot;</span>, <span class='self'>self</span>)
     }
 }
 
