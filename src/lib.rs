@@ -7,7 +7,6 @@
 
 extern crate libc;
 
-use std::fmt;
 use std::ptr;
 use libc::c_char;
 
@@ -51,13 +50,6 @@ fn from_pm_error(pm_error: ffi::PmError) -> PortMidiResult<()> {
         ffi::PmError::PmBufferMaxSize => Err(PortMidiError::BufferMaxSize),
     }
 }
-
-impl fmt::Display for PortMidiError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 
 // Global fns
 // ----------
