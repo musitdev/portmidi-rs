@@ -158,21 +158,19 @@ pub fn get_device_info(device_id: PortMidiDeviceId) -> Option<DeviceInfo> {
 // Midi events
 // -----------
 /// Represents a single midi message, see also `MidiEvent`
-///
-/// TODO: should we use u8?
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiMessage {
-    pub status: i8,
-    pub data1: i8,
-    pub data2: i8,
+    pub status: u8,
+    pub data1: u8,
+    pub data2: u8,
 }
 
 impl MidiMessage {
     fn wrap(cmessage : ffi::PmMessage) -> MidiMessage {
         MidiMessage {
-            status:  ((cmessage) & 0xFF) as i8,
-            data1 : (((cmessage) >> 8) & 0xFF) as i8,
-            data2 : (((cmessage) >> 16) & 0xFF) as i8,
+            status:  ((cmessage) & 0xFF) as u8,
+            data1 : (((cmessage) >> 8) & 0xFF) as u8,
+            data2 : (((cmessage) >> 16) & 0xFF) as u8,
         }
     }
 
@@ -190,7 +188,7 @@ impl MidiMessage {
 ///
 /// TODO: what to do about the timestamp?
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub  struct MidiEvent {
+pub struct MidiEvent {
     pub message : MidiMessage,
     pub timestamp : ffi::PmTimestamp,
 }
