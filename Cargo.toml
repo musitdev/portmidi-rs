@@ -1,7 +1,7 @@
 [package]
 
 name = "portmidi"
-version = "0.0.4"
+version = "0.1.0"
 authors = [
     "Sam Doshi <sam@metal-fish.co.ul>",
     "Philippe Delrieu <philippe.delrieu@free.fr>"
