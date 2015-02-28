@@ -467,25 +467,16 @@
 <span id="425">425</span>
 <span id="426">426</span>
 <span id="427">427</span>
-<span id="428">428</span>
-<span id="429">429</span>
-<span id="430">430</span>
-<span id="431">431</span>
-<span id="432">432</span>
-<span id="433">433</span>
-<span id="434">434</span>
-<span id="435">435</span>
-<span id="436">436</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2015 Sam Doshi (sam@metal-fish.co.uk)</span>
 <span class='comment'>// Copyright 2013-2014 Philippe Delrieu (philippe.delrieu@free.fr)</span>
 <span class='comment'>//</span>
 <span class='comment'>// Licensed under the MIT License &lt;LICENSE or http://opensource.org/licenses/MIT&gt;.</span>
 <span class='comment'>// This file may not be copied, modified, or distributed except according to those terms.</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>feature</span>(<span class='ident'>core</span>, <span class='ident'>std_misc</span>)]</span>
 
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>libc</span>;
 
-<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
 <span class='kw'>use</span> <span class='ident'>libc</span>::<span class='ident'>c_char</span>;
 
@@ -501,7 +492,7 @@
 
 <span class='comment'>// Errors</span>
 <span class='comment'>// ------</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>, <span class='ident'>Show</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>, <span class='ident'>Debug</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>enum</span> <span class='ident'>PortMidiError</span> {
     <span class='ident'>HostError</span>,
     <span class='ident'>InvalidDeviceId</span>,
@@ -529,13 +520,6 @@
         <span class='ident'>ffi</span>::<span class='ident'>PmError</span>::<span class='ident'>PmBufferMaxSize</span> <span class='op'>=&gt;</span> <span class='prelude-val'>Err</span>(<span class='ident'>PortMidiError</span>::<span class='ident'>BufferMaxSize</span>),
     }
 }
-
-<span class='kw'>impl</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>PortMidiError</span> {
-    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;{:?}&quot;</span>, <span class='self'>self</span>)
-    }
-}
-
 
 <span class='comment'>// Global fns</span>
 <span class='comment'>// ----------</span>
@@ -598,7 +582,7 @@
 <span class='comment'>// DeviceInfo</span>
 <span class='comment'>// ----------</span>
 <span class='doccomment'>/// Represents what we know about a device</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Show</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>DeviceInfo</span> {
     <span class='doccomment'>/// The `PortMidiDeviceId` used with `OutputPort::new` and `InputPort::new`</span>
     <span class='kw'>pub</span> <span class='ident'>device_id</span>: <span class='ident'>PortMidiDeviceId</span>,
@@ -613,7 +597,7 @@
 <span class='kw'>impl</span> <span class='ident'>DeviceInfo</span> {
     <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='ident'>device_id</span>: <span class='ident'>PortMidiDeviceId</span>, <span class='ident'>device_info</span>: <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>ffi</span>::<span class='ident'>PmDeviceInfo</span>) <span class='op'>-&gt;</span> <span class='ident'>DeviceInfo</span> {
         <span class='kw'>let</span> <span class='ident'>name</span> <span class='op'>=</span> <span class='kw'>unsafe</span> {
-            <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>c_str_to_bytes</span>(<span class='kw-2'>&amp;</span>(<span class='op'>*</span><span class='ident'>device_info</span>).<span class='ident'>name</span>);
+            <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>CStr</span>::<span class='ident'>from_ptr</span>((<span class='op'>*</span><span class='ident'>device_info</span>).<span class='ident'>name</span>).<span class='ident'>to_bytes</span>();
             <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>from_utf8_unchecked</span>(<span class='ident'>bytes</span>).<span class='ident'>to_string</span>()
         };
         <span class='kw'>let</span> <span class='ident'>input</span> <span class='op'>=</span> <span class='kw'>unsafe</span> { (<span class='op'>*</span><span class='ident'>device_info</span>).<span class='ident'>input</span> };
@@ -644,21 +628,19 @@
 <span class='comment'>// Midi events</span>
 <span class='comment'>// -----------</span>
 <span class='doccomment'>/// Represents a single midi message, see also `MidiEvent`</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// TODO: should we use u8?</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Show</span>)]</span>
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Debug</span>)]</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MidiMessage</span> {
-    <span class='kw'>pub</span> <span class='ident'>status</span>: <span class='ident'>i8</span>,
-    <span class='kw'>pub</span> <span class='ident'>data1</span>: <span class='ident'>i8</span>,
-    <span class='kw'>pub</span> <span class='ident'>data2</span>: <span class='ident'>i8</span>,
+    <span class='kw'>pub</span> <span class='ident'>status</span>: <span class='ident'>u8</span>,
+    <span class='kw'>pub</span> <span class='ident'>data1</span>: <span class='ident'>u8</span>,
+    <span class='kw'>pub</span> <span class='ident'>data2</span>: <span class='ident'>u8</span>,
 }
 
 <span class='kw'>impl</span> <span class='ident'>MidiMessage</span> {
     <span class='kw'>fn</span> <span class='ident'>wrap</span>(<span class='ident'>cmessage</span> : <span class='ident'>ffi</span>::<span class='ident'>PmMessage</span>) <span class='op'>-&gt;</span> <span class='ident'>MidiMessage</span> {
         <span class='ident'>MidiMessage</span> {
-            <span class='ident'>status</span>:  ((<span class='ident'>cmessage</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xFF</span>) <span class='kw'>as</span> <span class='ident'>i8</span>,
-            <span class='ident'>data1</span> : (((<span class='ident'>cmessage</span>) <span class='op'>&gt;&gt;</span> <span class='number'>8</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xFF</span>) <span class='kw'>as</span> <span class='ident'>i8</span>,
-            <span class='ident'>data2</span> : (((<span class='ident'>cmessage</span>) <span class='op'>&gt;&gt;</span> <span class='number'>16</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xFF</span>) <span class='kw'>as</span> <span class='ident'>i8</span>,
+            <span class='ident'>status</span>:  ((<span class='ident'>cmessage</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xFF</span>) <span class='kw'>as</span> <span class='ident'>u8</span>,
+            <span class='ident'>data1</span> : (((<span class='ident'>cmessage</span>) <span class='op'>&gt;&gt;</span> <span class='number'>8</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xFF</span>) <span class='kw'>as</span> <span class='ident'>u8</span>,
+            <span class='ident'>data2</span> : (((<span class='ident'>cmessage</span>) <span class='op'>&gt;&gt;</span> <span class='number'>16</span>) <span class='kw-2'>&amp;</span> <span class='number'>0xFF</span>) <span class='kw'>as</span> <span class='ident'>u8</span>,
         }
     }
 
@@ -675,8 +657,8 @@
 <span class='doccomment'>/// are handled</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// TODO: what to do about the timestamp?</span>
-<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Show</span>)]</span>
-<span class='kw'>pub</span>  <span class='kw'>struct</span> <span class='ident'>MidiEvent</span> {
+<span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Clone</span>, <span class='ident'>Copy</span>, <span class='ident'>PartialEq</span>, <span class='ident'>Eq</span>, <span class='ident'>Debug</span>)]</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>MidiEvent</span> {
     <span class='kw'>pub</span> <span class='ident'>message</span> : <span class='ident'>MidiMessage</span>,
     <span class='kw'>pub</span> <span class='ident'>timestamp</span> : <span class='ident'>ffi</span>::<span class='ident'>PmTimestamp</span>,
 }
@@ -895,7 +877,7 @@
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>get_error_text</span>(<span class='ident'>error_code</span>: <span class='ident'>ffi</span>::<span class='ident'>PmError</span>) <span class='op'>-&gt;</span> <span class='ident'>String</span> {
     <span class='kw'>unsafe</span> {
         <span class='kw'>let</span> <span class='ident'>error_text</span> <span class='op'>=</span> <span class='ident'>ffi</span>::<span class='ident'>Pm_GetErrorText</span>(<span class='ident'>error_code</span>);
-        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>c_str_to_bytes</span>(<span class='kw-2'>&amp;</span><span class='ident'>error_text</span>);
+        <span class='kw'>let</span> <span class='ident'>bytes</span> <span class='op'>=</span> <span class='ident'>std</span>::<span class='ident'>ffi</span>::<span class='ident'>CStr</span>::<span class='ident'>from_ptr</span>(<span class='ident'>error_text</span>).<span class='ident'>to_bytes</span>();
         <span class='ident'>std</span>::<span class='ident'>str</span>::<span class='ident'>from_utf8_unchecked</span>(<span class='ident'>bytes</span>).<span class='ident'>to_string</span>()
     }
 }
