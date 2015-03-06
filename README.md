@@ -32,10 +32,13 @@ On OSX (Homebrew):
 ```sh
 brew install portmidi
 ```
-On OSX, if you get a linker error `ld: library not found for -lportmidi`, make sure you have the PortMidi library in your `$LIBRARY_PATH`, e.g. for Homebrew:
-```sh
-export LIBRARY_PATH="$LIBRARY_PATH:/usr/local/lib"
-```
+On OSX, if you get a linker error `ld: library not found for -lportmidi`, either,
+ - make sure you have the Xcode Command Line Tools installed, not just Xcode, or
+ - make sure you have the PortMidi library in your `$LIBRARY_PATH`, e.g. for Homebrew:
+
+   ```sh
+   export LIBRARY_PATH="$LIBRARY_PATH:/usr/local/lib"
+   ```
 
 Examples
 ========
