@@ -3,7 +3,7 @@
 //
 // Licensed under the MIT License <LICENSE or http://opensource.org/licenses/MIT>.
 // This file may not be copied, modified, or distributed except according to those terms.
-#![feature(core, std_misc)]
+#![feature(core)]
 
 extern crate libc;
 
@@ -22,7 +22,7 @@ pub type PortMidiResult<T> = Result<T, PortMidiError>;
 
 // Errors
 // ------
-#[derive(Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PortMidiError {
     HostError,
     InvalidDeviceId,
