@@ -1,5 +1,3 @@
-#![feature(exit_status)]
-
 extern crate portmidi as pm;
 
 pub mod common;

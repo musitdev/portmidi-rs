@@ -3,8 +3,6 @@
 //
 // Licensed under the MIT License <LICENSE or http://opensource.org/licenses/MIT>.
 // This file may not be copied, modified, or distributed except according to those terms.
-#![feature(core)]
-
 extern crate libc;
 
 use std::ptr;
@@ -245,7 +243,6 @@ impl InputPort {
     /// See the PortMidi documentation for information on how it deals with input
     /// overflows
     pub fn read(&mut self) -> PortMidiResult<Option<MidiEvent>> {
-        use std::num::FromPrimitive;
         //get one note a the time
         let mut event = ffi::PmEvent { message : 0, timestamp : 0 };
         let no_of_notes = unsafe { ffi::Pm_Read(self.pm_stream, &mut event, 1) };
@@ -254,7 +251,8 @@ impl InputPort {
             y if y > 0 => Ok(Some(MidiEvent::wrap(event))),
             _ => {
                 // if it's negative it's an error, convert it
-                let maybe_pm_error: Option<ffi::PmError> = FromPrimitive::from_i32(no_of_notes);
+                //let maybe_pm_error: Option<ffi::PmError> = FromPrimitive::from_i32(no_of_notes);
+                let maybe_pm_error = ffi::tmp_from_primitive(no_of_notes);
                 if let Some(pm_error) = maybe_pm_error {
                     from_pm_error(pm_error).map(|_| None)
                 }

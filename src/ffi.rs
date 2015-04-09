@@ -57,6 +57,24 @@ pub enum PmError {
     PmBufferMaxSize = -9992, /* buffer is already as large as it can be */
 }
 
+// while we wait for FromPrimitive to stabilise
+pub fn tmp_from_primitive(i: i32) -> Option<PmError> {
+    match i {
+        0 => Some(PmError::PmNoError),
+        1 => Some(PmError::PmGotData),
+        -10000 => Some(PmError::PmHostError),
+        -9999 => Some(PmError::PmInvalidDeviceId),
+        -9998 => Some(PmError::PmInsufficientMemory),
+        -9997 => Some(PmError::PmBufferTooSmall),
+        -9996 => Some(PmError::PmBufferOverflow),
+        -9995 => Some(PmError::PmBadPtr),
+        -9994 => Some(PmError::PmBadData),
+        -9993 => Some(PmError::PmInternalError),
+        -9992 => Some(PmError::PmBufferMaxSize),
+        _ => None
+    }
+}
+
 #[link(name = "portmidi")]
 extern "C" {
     pub fn Pm_Initialize() -> PmError;

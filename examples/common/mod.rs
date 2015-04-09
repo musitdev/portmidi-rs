@@ -31,7 +31,8 @@ pub fn die() {
         Err(e) => println!("Error: {:?}", e),
         Ok(d) => print_devices(d)
     }
-    env::set_exit_status(1);
+    // disable until set_exit_status is stable
+    //env::set_exit_status(1);
 }
 
 pub fn get_arg<T:str::FromStr>(index: usize) -> Option<T> {
