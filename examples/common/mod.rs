@@ -1,5 +1,5 @@
 use std::env;
-use std::old_io;
+use std::io::stdin;
 use std::str;
 use std::sync::{Arc, RwLock};
 use std::thread;
@@ -51,7 +51,7 @@ impl QuitWatcher {
         thread::spawn(move || {
             println!("Press enter to quit");
             // read_line will block until enter is pressed
-            old_io::stdin().read_line().ok().expect("Failed to read line");
+            stdin().read_line(&mut String::new()).ok().expect("Failed to read line");
             let mut quit = quit_lock.write().unwrap();
             *quit = true;
         });

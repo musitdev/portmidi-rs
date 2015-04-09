@@ -1,6 +1,6 @@
-#![feature(env, old_io)]
+#![feature(exit_status)]
 
-extern crate "portmidi" as pm;
+extern crate portmidi as pm;
 
 pub mod common;
 use common::{get_devices, print_devices};

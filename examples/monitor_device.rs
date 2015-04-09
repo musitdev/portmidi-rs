@@ -1,9 +1,8 @@
-#![feature(core, env, old_io, std_misc)]
+#![feature(exit_status)]
 
-extern crate "portmidi" as pm;
+extern crate portmidi as pm;
 
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
+use std::thread::sleep_ms;
 
 use pm::{PortMidiDeviceId, PortMidiResult};
 use pm::PortMidiError::InvalidDeviceId;
@@ -48,7 +47,7 @@ fn monitor(device_id: PortMidiDeviceId) -> PortMidiResult<()> {
         }
 
         // no more data? wait a little before trying again
-        sleep(Duration::milliseconds(50));
+        sleep_ms(50);
     }
 
     // close the input and terminate portmidi

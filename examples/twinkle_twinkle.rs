@@ -1,9 +1,8 @@
-#![feature(core, env, old_io, std_misc)]
+#![feature(exit_status)]
 
-extern crate "portmidi" as pm;
+extern crate portmidi as pm;
 
-use std::old_io::timer::sleep;
-use std::time::duration::Duration;
+use std::thread::sleep_ms;
 
 use pm::{MidiMessage, PortMidiDeviceId, PortMidiResult};
 use pm::PortMidiError::InvalidDeviceId;
@@ -12,7 +11,7 @@ pub mod common;
 
 static MIDI_CH: u8 = 0; // == midi channel 1
 
-static MELODY: &'static [(u8, i64)] = &[
+static MELODY: &'static [(u8, u32)] = &[
     (60, 1), (60, 1), (67, 1), (67, 1),
     (69, 1), (69, 1), (67, 2),
     (65, 1), (65, 1), (64, 1), (64, 1),
@@ -61,15 +60,15 @@ fn twinkle_twinkle(device_id: PortMidiDeviceId) -> PortMidiResult<()> {
 
     while qw.is_running() {
         if let Some(&(n, d)) = iter.next() {
-            let dur: i64 = 400 * d;
+            let dur: u32 = 400 * d;
 
             // send the note on
             try!(output.write_message(note_on(MIDI_CH, n)));
-            sleep(Duration::milliseconds(dur - 100));
+            sleep_ms(dur - 100);
 
             // send the note off
             try!(output.write_message(note_off(MIDI_CH, n)));
-            sleep(Duration::milliseconds(100));
+            sleep_ms(100);
         }
     }
 
