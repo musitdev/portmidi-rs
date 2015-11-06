@@ -33,6 +33,28 @@ pub enum PortMidiError {
     BufferMaxSize
 }
 
+impl ::std::fmt::Display for PortMidiError {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl ::std::error::Error for PortMidiError {
+    fn description(&self) -> &str {
+        match *self {
+            PortMidiError::HostError => "Host error",
+            PortMidiError::InvalidDeviceId => "Invalid device ID",
+            PortMidiError::InsufficientMemory => "Insufficent memory",
+            PortMidiError::BufferTooSmall => "Buffer is too small",
+            PortMidiError::BufferOverflow => "Buffer has overflow",
+            PortMidiError::BadPtr => "Bad pointer was supplied",
+            PortMidiError::BadData => "Invalid MIDI message data",
+            PortMidiError::InternalError => "Portmidi internal error",
+            PortMidiError::BufferMaxSize => "Buffer cannot be made larger"
+        }
+    }
+}
+
 fn from_pm_error(pm_error: ffi::PmError) -> PortMidiResult<()> {
     match pm_error {
         ffi::PmError::PmNoError => Ok(()),
