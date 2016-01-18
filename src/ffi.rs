@@ -1,7 +1,9 @@
 // Copyright 2014-2015 Sam Doshi (sam@metal-fish.co.uk)
 // Copyright 2013-2014 Philippe Delrieu (philippe.delrieu@free.fr)
 //
-// Licensed under the MIT License <LICENSE or http://opensource.org/licenses/MIT>.
+// Licensed under either of
+//          Apache License, Version 2.0, (LICENSE-APACHE or http://www.apache.org/licenses/LICENSE-2.0)
+//          MIT license (LICENSE-MIT or http://opensource.org/licenses/MIT).
 // This file may not be copied, modified, or distributed except according to those terms.
 
 use libc::{c_char, c_void};

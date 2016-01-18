@@ -6,7 +6,7 @@ authors = [
     "Sam Doshi <sam@metal-fish.co.ul>",
     "Philippe Delrieu <philippe.delrieu@free.fr>"
 ]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 description = "High-level PortMidi bindings for Rust"
 homepage = "https://github.com/samdoshi/portmidi-rs"
 repository = "https://github.com/samdoshi/portmidi-rs"
