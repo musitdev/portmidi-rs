@@ -14,4 +14,4 @@ documentation = "http://samdoshi.github.io/portmidi-rs/portmidi/index.html"
 keywords = ["midi", "music", "audio"]
 
 [dependencies]
-libc = "*"
+libc = "0.2.5"
