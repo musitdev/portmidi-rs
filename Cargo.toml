@@ -8,9 +8,9 @@ authors = [
 ]
 license = "MIT OR Apache-2.0"
 description = "High-level PortMidi bindings for Rust"
-homepage = "https://github.com/samdoshi/portmidi-rs"
-repository = "https://github.com/samdoshi/portmidi-rs"
-documentation = "http://samdoshi.github.io/portmidi-rs/portmidi/index.html"
+homepage = "https://github.com/musitdev/portmidi-rs"
+repository = "https://github.com/musitdev/portmidi-rs"
+documentation = "http://musitdev.github.io/portmidi-rs/portmidi/index.html"
 keywords = ["midi", "music", "audio"]
 
 [dependencies]

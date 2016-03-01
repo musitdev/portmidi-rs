@@ -1,9 +1,8 @@
 portmidi-rs
 ===========
 
-[![Build Status](https://travis-ci.org/samdoshi/portmidi-rs.svg?branch=master)](https://travis-ci.org/samdoshi/portmidi-rs)
-
-[Documentation](http://samdoshi.github.io/portmidi-rs/portmidi/index.html)
+[![Build Status](https://travis-ci.org/musitdev/portmidi-rs.svg?branch=master)](https://travis-ci.org/musitdev/portmidi-rs)
+[![Documentation](https://img.shields.io/badge/rustdoc-hosted-blue.svg)](http://musitdev.github.io/portmidi-rs/portmidi/index.html)
 
 High-level PortMidi bindings for Rust.
 
@@ -15,7 +14,7 @@ Installation
 Add this to your `Cargo.toml`.
 ```toml
 [dependencies]
-portmidi = "*"
+portmidi = "^0.1"
 ```
 
 Prerequisites
