@@ -15,7 +15,7 @@ Installation
 Add this to your `Cargo.toml`.
 ```toml
 [dependencies]
-portmidi = "*"
+portmidi = "^0.1"
 ```
 
 Prerequisites
