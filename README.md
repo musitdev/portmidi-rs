@@ -1,9 +1,9 @@
 portmidi-rs
 ===========
 
-[![Build Status](https://travis-ci.org/samdoshi/portmidi-rs.svg?branch=master)](https://travis-ci.org/samdoshi/portmidi-rs)
+[![Build Status](https://travis-ci.org/musitdev/portmidi-rs.svg?branch=master)](https://travis-ci.org/musitdev/portmidi-rs)
 
-[Documentation](http://samdoshi.github.io/portmidi-rs/portmidi/index.html)
+[Documentation](http://musitdev.github.io/portmidi-rs/portmidi/index.html)
 
 High-level PortMidi bindings for Rust.
 
