@@ -9,28 +9,22 @@ pub mod common;
 
 static MIDI_CH: u8 = 0; // == midi channel 1
 
-static MELODY: &'static [(u8, u32)] = &[
-    (60, 1), (60, 1), (67, 1), (67, 1),
-    (69, 1), (69, 1), (67, 2),
-    (65, 1), (65, 1), (64, 1), (64, 1),
-    (62, 1), (62, 1), (60, 2),
-
-    (67, 1), (67, 1), (65, 1), (65, 1),
-    (64, 1), (64, 1), (62, 2),
-    (67, 1), (67, 1), (65, 1), (65, 1),
-    (64, 1), (64, 1), (62, 2),
-
-    (60, 1), (60, 1), (67, 1), (67, 1),
-    (69, 1), (69, 1), (67, 2),
-    (65, 1), (65, 1), (64, 1), (64, 1),
-    (62, 1), (62, 1), (60, 2)
-    ];
+static MELODY: &'static [(u8, u32)] = &[(60, 1), (60, 1), (67, 1), (67, 1), (69, 1), (69, 1),
+                                        (67, 2), (65, 1), (65, 1), (64, 1), (64, 1), (62, 1),
+                                        (62, 1), (60, 2), (67, 1), (67, 1), (65, 1), (65, 1),
+                                        (64, 1), (64, 1), (62, 2), (67, 1), (67, 1), (65, 1),
+                                        (65, 1), (64, 1), (64, 1), (62, 2), (60, 1), (60, 1),
+                                        (67, 1), (67, 1), (69, 1), (69, 1), (67, 2), (65, 1),
+                                        (65, 1), (64, 1), (64, 1), (62, 1), (62, 1), (60, 2)];
 
 fn main() {
     // get the device number from the command line, or die()
     let device_id = match common::get_arg(1) {
         Some(id) => id,
-        None => { common::die(); return; }
+        None => {
+            common::die();
+            return;
+        }
     };
 
     // run twinkle_twinkle, print an error if it returns one
@@ -80,7 +74,7 @@ fn note_on(channel: u8, note: u8) -> MidiMessage {
     MidiMessage {
         status: status,
         data1: note,
-        data2: 100
+        data2: 100,
     }
 }
 
@@ -89,7 +83,6 @@ fn note_off(channel: u8, note: u8) -> MidiMessage {
     MidiMessage {
         status: status,
         data1: note,
-        data2: 0
+        data2: 0,
     }
 }
-

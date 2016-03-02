@@ -30,7 +30,7 @@ pub enum PortMidiError {
     BadPtr,
     BadData,
     InternalError,
-    BufferMaxSize
+    BufferMaxSize,
 }
 
 impl ::std::fmt::Display for PortMidiError {
@@ -50,7 +50,7 @@ impl ::std::error::Error for PortMidiError {
             PortMidiError::BadPtr => "Bad pointer was supplied",
             PortMidiError::BadData => "Invalid MIDI message data",
             PortMidiError::InternalError => "Portmidi internal error",
-            PortMidiError::BufferMaxSize => "Buffer cannot be made larger"
+            PortMidiError::BufferMaxSize => "Buffer cannot be made larger",
         }
     }
 }
@@ -79,25 +79,19 @@ fn from_pm_error(pm_error: ffi::PmError) -> PortMidiResult<()> {
 /// Once initialized, PortMidi will no longer pickup any new Midi devices that are
 /// connected, i.e. it does not support hot plugging.
 pub fn initialize() -> PortMidiResult<()> {
-    from_pm_error(unsafe {
-        ffi::Pm_Initialize()
-    })
+    from_pm_error(unsafe { ffi::Pm_Initialize() })
 }
 
 /// `terminate` terminates the underlying PortMidi C library, call this
 /// after using the library.
 pub fn terminate() -> PortMidiResult<()> {
-    from_pm_error(unsafe {
-        ffi::Pm_Terminate()
-    })
+    from_pm_error(unsafe { ffi::Pm_Terminate() })
 }
 
 /// Return the number of devices. This number will not change during the lifetime
 /// of the program.
 pub fn count_devices() -> PortMidiDeviceId {
-    unsafe {
-        ffi::Pm_CountDevices()
-    }
+    unsafe { ffi::Pm_CountDevices() }
 }
 
 /// Gets the `PortMidiDeviceId` for the default input, or `None` if
@@ -108,8 +102,7 @@ pub fn get_default_input_device_id() -> Option<PortMidiDeviceId> {
     let id = unsafe { ffi::Pm_GetDefaultInputDeviceID() };
     if id == ffi::PM_NO_DEVICE {
         None
-    }
-    else {
+    } else {
         Some(id)
     }
 }
@@ -122,8 +115,7 @@ pub fn get_default_output_device_id() -> Option<PortMidiDeviceId> {
     let id = unsafe { ffi::Pm_GetDefaultOutputDeviceID() };
     if id == ffi::PM_NO_DEVICE {
         None
-    }
-    else {
+    } else {
         Some(id)
     }
 }
@@ -141,7 +133,7 @@ pub struct DeviceInfo {
     /// Is the device an input
     pub input: bool,
     /// Is the device an output
-    pub output: bool
+    pub output: bool,
 }
 
 impl DeviceInfo {
@@ -157,7 +149,7 @@ impl DeviceInfo {
             device_id: device_id,
             name: name,
             input: input > 0,
-            output: output > 0
+            output: output > 0,
         }
     }
 }
@@ -168,8 +160,7 @@ pub fn get_device_info(device_id: PortMidiDeviceId) -> Option<DeviceInfo> {
     let info = unsafe { ffi::Pm_GetDeviceInfo(device_id) };
     if info.is_null() {
         None
-    }
-    else {
+    } else {
         Some(DeviceInfo::wrap(device_id, info))
     }
 }
@@ -186,18 +177,17 @@ pub struct MidiMessage {
 }
 
 impl MidiMessage {
-    fn wrap(cmessage : ffi::PmMessage) -> MidiMessage {
+    fn wrap(cmessage: ffi::PmMessage) -> MidiMessage {
         MidiMessage {
-            status:  ((cmessage) & 0xFF) as u8,
-            data1 : (((cmessage) >> 8) & 0xFF) as u8,
-            data2 : (((cmessage) >> 16) & 0xFF) as u8,
+            status: ((cmessage) & 0xFF) as u8,
+            data1: (((cmessage) >> 8) & 0xFF) as u8,
+            data2: (((cmessage) >> 16) & 0xFF) as u8,
         }
     }
 
     fn unwrap(&self) -> ffi::PmMessage {
-        ((((self.data2 as i32) << 16) & 0xFF0000) |
-          (((self.data1 as i32) << 8) & 0xFF00) |
-          ((self.status as i32) & 0xFF)) as i32
+        ((((self.data2 as i32) << 16) & 0xFF0000) | (((self.data1 as i32) << 8) & 0xFF00) |
+         ((self.status as i32) & 0xFF)) as i32
     }
 }
 
@@ -209,15 +199,15 @@ impl MidiMessage {
 /// TODO: what to do about the timestamp?
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiEvent {
-    pub message : MidiMessage,
-    pub timestamp : ffi::PmTimestamp,
+    pub message: MidiMessage,
+    pub timestamp: ffi::PmTimestamp,
 }
 
 impl MidiEvent {
     fn wrap(event: ffi::PmEvent) -> MidiEvent {
         MidiEvent {
-            message:  MidiMessage::wrap(event.message),
-            timestamp : event.timestamp,
+            message: MidiMessage::wrap(event.message),
+            timestamp: event.timestamp,
         }
     }
 
@@ -235,26 +225,30 @@ impl MidiEvent {
 /// Representation of an input midi port
 #[allow(missing_copy_implementations)]
 pub struct InputPort {
-    pm_stream : *const ffi::PortMidiStream,
-    input_device : ffi::PmDeviceId,
-    buffer_size : i32,
+    pm_stream: *const ffi::PortMidiStream,
+    input_device: ffi::PmDeviceId,
+    buffer_size: i32,
 }
 
 impl InputPort {
     /// Construct a new `InputPort` for `input_device`
-    pub fn new(input_device : PortMidiDeviceId, buffer_size: i32) -> InputPort {
+    pub fn new(input_device: PortMidiDeviceId, buffer_size: i32) -> InputPort {
         InputPort {
-            pm_stream : ptr::null(),
-            input_device : input_device,
-            buffer_size : buffer_size,
+            pm_stream: ptr::null(),
+            input_device: input_device,
+            buffer_size: buffer_size,
         }
     }
 
     /// Open the port returning an error if there is a problem
-    pub fn open(&mut self)  -> PortMidiResult<()> {
+    pub fn open(&mut self) -> PortMidiResult<()> {
         from_pm_error(unsafe {
-            ffi::Pm_OpenInput(&self.pm_stream, self.input_device, ptr::null(),
-                              self.buffer_size, ptr::null(), ptr::null())
+            ffi::Pm_OpenInput(&self.pm_stream,
+                              self.input_device,
+                              ptr::null(),
+                              self.buffer_size,
+                              ptr::null(),
+                              ptr::null())
         })
     }
 
@@ -265,20 +259,22 @@ impl InputPort {
     /// See the PortMidi documentation for information on how it deals with input
     /// overflows
     pub fn read(&mut self) -> PortMidiResult<Option<MidiEvent>> {
-        //get one note a the time
-        let mut event = ffi::PmEvent { message : 0, timestamp : 0 };
+        // get one note a the time
+        let mut event = ffi::PmEvent {
+            message: 0,
+            timestamp: 0,
+        };
         let no_of_notes = unsafe { ffi::Pm_Read(self.pm_stream, &mut event, 1) };
         match no_of_notes {
             y if y == 0 => Ok(None),
             y if y > 0 => Ok(Some(MidiEvent::wrap(event))),
             _ => {
                 // if it's negative it's an error, convert it
-                //let maybe_pm_error: Option<ffi::PmError> = FromPrimitive::from_i32(no_of_notes);
+                // let maybe_pm_error: Option<ffi::PmError> = FromPrimitive::from_i32(no_of_notes);
                 let maybe_pm_error = ffi::tmp_from_primitive(no_of_notes);
                 if let Some(pm_error) = maybe_pm_error {
                     from_pm_error(pm_error).map(|_| None)
-                }
-                else {
+                } else {
                     // what should we do, if we can't convert the error no?
                     // should we panic?
                     Ok(None)
@@ -293,7 +289,7 @@ impl InputPort {
         match pm_error {
             ffi::PmError::PmNoError => Ok(false),
             ffi::PmError::PmGotData => Ok(true),
-            other => from_pm_error(other).map(|_| false)
+            other => from_pm_error(other).map(|_| false),
         }
     }
 
@@ -303,29 +299,24 @@ impl InputPort {
     /// exits, but this can be difficult under Windows
     /// (according to the PortMidi documentation).
     pub fn close(&mut self) -> PortMidiResult<()> {
-        from_pm_error(unsafe {
-            ffi::Pm_Close(self.pm_stream)
-        })
+        from_pm_error(unsafe { ffi::Pm_Close(self.pm_stream) })
     }
 
-    /*
-    *    Test whether stream has a pending host error. Normally, the client finds
-    *    out about errors through returned error codes, but some errors can occur
-    *    asynchronously where the client does not
-    *    explicitly call a function, and therefore cannot receive an error code.
-    *    The client can test for a pending error using has_host_error(). If true,
-    *    the error can be accessed and cleared by calling get_Error_text().
-    *    Errors are also cleared by calling other functions that can return
-    *    errors, e.g. open_input(), open_output(), read(), write(). The
-    *    client does not need to call Pm_HasHostError(). Any pending error will be
-    *    reported the next time the client performs an explicit function call on
-    *    the stream, e.g. an input or output operation. Until the error is cleared,
-    *    no new error codes will be obtained, even for a different stream.
-    */
+    //    Test whether stream has a pending host error. Normally, the client finds
+    //    out about errors through returned error codes, but some errors can occur
+    //    asynchronously where the client does not
+    //    explicitly call a function, and therefore cannot receive an error code.
+    //    The client can test for a pending error using has_host_error(). If true,
+    //    the error can be accessed and cleared by calling get_Error_text().
+    //    Errors are also cleared by calling other functions that can return
+    //    errors, e.g. open_input(), open_output(), read(), write(). The
+    //    client does not need to call Pm_HasHostError(). Any pending error will be
+    //    reported the next time the client performs an explicit function call on
+    //    the stream, e.g. an input or output operation. Until the error is cleared,
+    //    no new error codes will be obtained, even for a different stream.
+    //
     pub fn has_host_error(&self) -> bool {
-        unsafe {
-            ffi::Pm_HasHostError(self.pm_stream) > 0
-        }
+        unsafe { ffi::Pm_HasHostError(self.pm_stream) > 0 }
     }
 }
 
@@ -351,10 +342,15 @@ impl OutputPort {
     }
 
     /// Open the port returning an error if there is a problem
-    pub fn open(&mut self)  -> PortMidiResult<()> {
+    pub fn open(&mut self) -> PortMidiResult<()> {
         from_pm_error(unsafe {
-            ffi::Pm_OpenOutput(&self.pm_stream, self.output_device, ptr::null(),
-                               self.buffer_size, ptr::null(), ptr::null(), 0)
+            ffi::Pm_OpenOutput(&self.pm_stream,
+                               self.output_device,
+                               ptr::null(),
+                               self.buffer_size,
+                               ptr::null(),
+                               ptr::null(),
+                               0)
         })
     }
 
@@ -364,9 +360,7 @@ impl OutputPort {
     /// result in transmission of a partial midi message. Note, not all platforms
     /// support abort.
     pub fn abort(&mut self) -> PortMidiResult<()> {
-        from_pm_error(unsafe {
-            ffi::Pm_Abort(self.pm_stream)
-        })
+        from_pm_error(unsafe { ffi::Pm_Abort(self.pm_stream) })
     }
 
     /// Closes the midi stream, flushing any pending buffers
@@ -375,45 +369,36 @@ impl OutputPort {
     /// exits, but this can be difficult under Windows
     /// (according to the PortMidi documentation).
     pub fn close(&mut self) -> PortMidiResult<()> {
-        from_pm_error(unsafe {
-            ffi::Pm_Close(self.pm_stream)
-        })
+        from_pm_error(unsafe { ffi::Pm_Close(self.pm_stream) })
     }
 
     /// Write a single `MidiEvent`
     pub fn write_event(&mut self, midi_event: MidiEvent) -> PortMidiResult<()> {
         let event = midi_event.unwrap();
-        from_pm_error(unsafe {
-            ffi::Pm_Write(self.pm_stream, &event, 1)
-        })
+        from_pm_error(unsafe { ffi::Pm_Write(self.pm_stream, &event, 1) })
     }
 
     /// Write a single `MidiMessage` immediately
     pub fn write_message(&mut self, midi_message: MidiMessage) -> PortMidiResult<()> {
         let message = midi_message.unwrap();
-        from_pm_error(unsafe {
-            ffi::Pm_WriteShort(self.pm_stream, 0, message)
-        })
+        from_pm_error(unsafe { ffi::Pm_WriteShort(self.pm_stream, 0, message) })
     }
 
-    /*
-    *    Test whether stream has a pending host error. Normally, the client finds
-    *    out about errors through returned error codes, but some errors can occur
-    *    asynchronously where the client does not
-    *    explicitly call a function, and therefore cannot receive an error code.
-    *    The client can test for a pending error using has_host_error(). If true,
-    *    the error can be accessed and cleared by calling get_Error_text().
-    *    Errors are also cleared by calling other functions that can return
-    *    errors, e.g. open_input(), open_output(), read(), write(). The
-    *    client does not need to call Pm_HasHostError(). Any pending error will be
-    *    reported the next time the client performs an explicit function call on
-    *    the stream, e.g. an input or output operation. Until the error is cleared,
-    *    no new error codes will be obtained, even for a different stream.
-    */
-    pub fn has_host_error(&self) -> bool  {
-        unsafe {
-            ffi::Pm_HasHostError(self.pm_stream) > 0
-        }
+    //    Test whether stream has a pending host error. Normally, the client finds
+    //    out about errors through returned error codes, but some errors can occur
+    //    asynchronously where the client does not
+    //    explicitly call a function, and therefore cannot receive an error code.
+    //    The client can test for a pending error using has_host_error(). If true,
+    //    the error can be accessed and cleared by calling get_Error_text().
+    //    Errors are also cleared by calling other functions that can return
+    //    errors, e.g. open_input(), open_output(), read(), write(). The
+    //    client does not need to call Pm_HasHostError(). Any pending error will be
+    //    reported the next time the client performs an explicit function call on
+    //    the stream, e.g. an input or output operation. Until the error is cleared,
+    //    no new error codes will be obtained, even for a different stream.
+    //
+    pub fn has_host_error(&self) -> bool {
+        unsafe { ffi::Pm_HasHostError(self.pm_stream) > 0 }
     }
 }
 
@@ -444,4 +429,3 @@ pub fn get_host_error_text(msg: *const c_char, len: i32) {
 
 pub const HDRLENGTH: i32 = 50;
 pub const PM_HOST_ERROR_MSG_LEN: i32 = 256;
-

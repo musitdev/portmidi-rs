@@ -10,8 +10,9 @@ pub fn get_devices() -> pm::PortMidiResult<Vec<pm::DeviceInfo>> {
     try!(pm::initialize());
     let no = pm::count_devices();
     // use filter_map to discard None, and unwrap the Some(_)
-    let devices = (0..no).filter_map(|i| pm::get_device_info(i))
-                         .collect::<Vec<_>>();
+    let devices = (0..no)
+                      .filter_map(|i| pm::get_device_info(i))
+                      .collect::<Vec<_>>();
     try!(pm::terminate());
     Ok(devices)
 }
@@ -20,7 +21,11 @@ pub fn print_devices(devices: Vec<pm::DeviceInfo>) {
     println!("Id  Name                 Input? Output?");
     println!("=======================================");
     for d in devices.into_iter() {
-        println!("{:<3} {:<20} {:<6} {:<6}", d.device_id, d.name, d.input, d.output);
+        println!("{:<3} {:<20} {:<6} {:<6}",
+                 d.device_id,
+                 d.name,
+                 d.input,
+                 d.output);
     }
 }
 
@@ -29,13 +34,13 @@ pub fn die() {
     println!("");
     match get_devices() {
         Err(e) => println!("Error: {:?}", e),
-        Ok(d) => print_devices(d)
+        Ok(d) => print_devices(d),
     }
     // disable until set_exit_status is stable
-    //env::set_exit_status(1);
+    // env::set_exit_status(1);
 }
 
-pub fn get_arg<T:str::FromStr>(index: usize) -> Option<T> {
+pub fn get_arg<T: str::FromStr>(index: usize) -> Option<T> {
     let mut args = env::args();
     args.nth(index).and_then(|s| s.parse().ok())
 }
@@ -47,7 +52,7 @@ impl QuitWatcher {
         QuitWatcher(Arc::new(RwLock::new(false)))
     }
 
-    pub fn start(&self)  {
+    pub fn start(&self) {
         let quit_lock = self.0.clone();
         thread::spawn(move || {
             println!("Press enter to quit");
@@ -63,4 +68,3 @@ impl QuitWatcher {
         !*quit
     }
 }
-

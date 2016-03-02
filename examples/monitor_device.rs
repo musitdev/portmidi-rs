@@ -11,7 +11,10 @@ fn main() {
     // get the device number from the command line, or die()
     let device_id = match common::get_arg(1) {
         Some(id) => id,
-        None => { common::die(); return; }
+        None => {
+            common::die();
+            return;
+        }
     };
 
     // run the monitor, print an error if it returns one
@@ -52,4 +55,3 @@ fn monitor(device_id: PortMidiDeviceId) -> PortMidiResult<()> {
     try!(input.close());
     pm::terminate()
 }
-

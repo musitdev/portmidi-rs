@@ -28,44 +28,44 @@ fn test_midiin() {
 
     let read_midi = inport.read();
     println!("portmidi input note {:?}", read_midi);
-    match read_midi    {
+    match read_midi {
         Ok(Some(notes)) => println!("portmidi read midi note {:?}", notes),
         Ok(None) => println!("portmidi read midi no note"),
-        Err(err) => println!("portmidi read midi error {:?}", err)
+        Err(err) => println!("portmidi read midi error {:?}", err),
     }
 
     let result = inport.poll();
     assert_eq!(result, Ok(false));
 
-    //send note
+    // send note
     let note1 = portmidi::MidiEvent {
-        message : portmidi::MidiMessage {
-            status : 1 | 0x90, //chanell and note on
-            data1 : 36, //note number
-            data2 : 90, // velocity
+        message: portmidi::MidiMessage {
+            status: 1 | 0x90, // chanell and note on
+            data1: 36, // note number
+            data2: 90, // velocity
         },
-        timestamp : 0
+        timestamp: 0,
     };
     let result = outport.write_event(note1);
     assert_eq!(result, Ok(()));
 
     let note2 = portmidi::MidiMessage {
-        status : 1 | 0x80, //chanell and note off
-        data1 : 36, //note number
-        data2 : 0, // velocity
+        status: 1 | 0x80, // chanell and note off
+        data1: 36, // note number
+        data2: 0, // velocity
     };
     let result = outport.write_message(note2);
     assert_eq!(result, Ok(()));
 
-    //close out port
+    // close out port
     let result = outport.close();
     assert_eq!(result, Ok(()));
 
-    //close in port
+    // close in port
     let result = inport.close();
     assert_eq!(result, Ok(()));
 
-    //terminate midi
+    // terminate midi
     let result = portmidi::terminate();
     assert_eq!(result, Ok(()));
 }
