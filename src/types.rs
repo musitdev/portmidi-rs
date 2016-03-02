@@ -1,12 +1,14 @@
 use std::fmt::{Display, Formatter, Error as FormatError};
 use std::error::Error as StdError;
 use std::convert::From;
+use std::result;
 
 use ffi;
 
 pub type PortMidiDeviceId = i32;
-pub type PortMidiResult<T> = Result<T, Error>;
-impl From<ffi::PmError> for PortMidiResult<()> {
+
+pub type Result<T> = result::Result<T, Error>;
+impl From<ffi::PmError> for Result<()> {
     fn from(err: ffi::PmError) -> Self {
         match err {
             ffi::PmError::PmNoError | ffi::PmError::PmGotData => Ok(()),

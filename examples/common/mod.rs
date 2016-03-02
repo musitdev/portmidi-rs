@@ -6,7 +6,7 @@ use std::thread;
 
 use pm;
 
-pub fn get_devices() -> pm::PortMidiResult<Vec<pm::DeviceInfo>> {
+pub fn get_devices() -> pm::Result<Vec<pm::DeviceInfo>> {
     try!(pm::initialize());
     let no = pm::count_devices();
     // use filter_map to discard None, and unwrap the Some(_)

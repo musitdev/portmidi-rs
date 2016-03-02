@@ -2,7 +2,7 @@ extern crate portmidi as pm;
 
 use std::thread::sleep_ms;
 
-use pm::{MidiMessage, PortMidiDeviceId, PortMidiResult};
+use pm::{MidiMessage, PortMidiDeviceId, Result};
 use pm::PmError::PmInvalidDeviceId;
 
 pub mod common;
@@ -33,7 +33,7 @@ fn main() {
     }
 }
 
-fn twinkle_twinkle(device_id: PortMidiDeviceId) -> PortMidiResult<()> {
+fn twinkle_twinkle(device_id: PortMidiDeviceId) -> Result<()> {
     // initialize portmidi
     try!(pm::initialize());
 

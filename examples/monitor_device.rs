@@ -2,7 +2,7 @@ extern crate portmidi as pm;
 
 use std::thread::sleep_ms;
 
-use pm::{PortMidiDeviceId, PortMidiResult};
+use pm::{PortMidiDeviceId, Result};
 use pm::PmError::PmInvalidDeviceId;
 
 pub mod common;
@@ -23,7 +23,7 @@ fn main() {
     }
 }
 
-fn monitor(device_id: PortMidiDeviceId) -> PortMidiResult<()> {
+fn monitor(device_id: PortMidiDeviceId) -> Result<()> {
     // initialize portmidi
     try!(pm::initialize());
 

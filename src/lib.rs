@@ -21,14 +21,14 @@ pub use types::*;
 ///
 /// Once initialized, PortMidi will no longer pickup any new Midi devices that are
 /// connected, i.e. it does not support hot plugging.
-pub fn initialize() -> PortMidiResult<()> {
-    PortMidiResult::from(unsafe { ffi::Pm_Initialize() })
+pub fn initialize() -> Result<()> {
+    Result::from(unsafe { ffi::Pm_Initialize() })
 }
 
 /// `terminate` terminates the underlying PortMidi C library, call this
 /// after using the library.
-pub fn terminate() -> PortMidiResult<()> {
-    PortMidiResult::from(unsafe { ffi::Pm_Terminate() })
+pub fn terminate() -> Result<()> {
+    Result::from(unsafe { ffi::Pm_Terminate() })
 }
 
 /// Return the number of devices. This number will not change during the lifetime
@@ -185,8 +185,8 @@ impl InputPort {
     }
 
     /// Open the port returning an error if there is a problem
-    pub fn open(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe {
+    pub fn open(&mut self) -> Result<()> {
+        Result::from(unsafe {
             ffi::Pm_OpenInput(&self.stream,
                               self.input_device,
                               ptr::null(),
@@ -196,7 +196,7 @@ impl InputPort {
         })
     }
 
-    pub fn read_n(&mut self, cnt: usize) -> PortMidiResult<Option<Vec<MidiEvent>>> {
+    pub fn read_n(&mut self, cnt: usize) -> Result<Option<Vec<MidiEvent>>> {
         let read_cnt = if cnt > EVENT_BUFFER_SIZE {
             EVENT_BUFFER_SIZE as i32
         } else {
@@ -227,7 +227,7 @@ impl InputPort {
     /// See the PortMidi documentation for information on how it deals with input
     /// overflows
     /// TODO: call `read_n`
-    pub fn read(&mut self) -> PortMidiResult<Option<MidiEvent>> {
+    pub fn read(&mut self) -> Result<Option<MidiEvent>> {
         match self.read_n(1) {
             Ok(Some(mut vec)) => Ok(vec.pop()),
             Ok(_) => Ok(None),
@@ -236,7 +236,7 @@ impl InputPort {
     }
 
     /// `poll` tests if there is input available, either returing a bool or an error
-    pub fn poll(&self) -> PortMidiResult<bool> {
+    pub fn poll(&self) -> Result<bool> {
         let pm_error = unsafe { ffi::Pm_Poll(self.stream) };
         match pm_error {
             ffi::PmError::PmNoError => Ok(false),
@@ -250,8 +250,8 @@ impl InputPort {
     /// PortMidi attempts to close open streams when the application
     /// exits, but this can be difficult under Windows
     /// (according to the PortMidi documentation).
-    pub fn close(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe { ffi::Pm_Close(self.stream) })
+    pub fn close(&mut self) -> Result<()> {
+        Result::from(unsafe { ffi::Pm_Close(self.stream) })
     }
 }
 
@@ -276,8 +276,8 @@ impl OutputPort {
     }
 
     /// Open the port returning an error if there is a problem
-    pub fn open(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe {
+    pub fn open(&mut self) -> Result<()> {
+        Result::from(unsafe {
             ffi::Pm_OpenOutput(&self.stream,
                                self.output_device,
                                ptr::null(),
@@ -293,8 +293,8 @@ impl OutputPort {
     /// The caller should immediately close the output port, this may
     /// result in transmission of a partial midi message. Note, not all platforms
     /// support abort.
-    pub fn abort(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe { ffi::Pm_Abort(self.stream) })
+    pub fn abort(&mut self) -> Result<()> {
+        Result::from(unsafe { ffi::Pm_Abort(self.stream) })
     }
 
     /// Closes the midi stream, flushing any pending buffers
@@ -302,20 +302,20 @@ impl OutputPort {
     /// PortMidi attempts to close open streams when the application
     /// exits, but this can be difficult under Windows
     /// (according to the PortMidi documentation).
-    pub fn close(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe { ffi::Pm_Close(self.stream) })
+    pub fn close(&mut self) -> Result<()> {
+        Result::from(unsafe { ffi::Pm_Close(self.stream) })
     }
 
     /// Write a single `MidiEvent`
-    pub fn write_event(&mut self, midi_event: MidiEvent) -> PortMidiResult<()> {
+    pub fn write_event(&mut self, midi_event: MidiEvent) -> Result<()> {
         let event = midi_event.unwrap();
-        PortMidiResult::from(unsafe { ffi::Pm_Write(self.stream, &event, 1) })
+        Result::from(unsafe { ffi::Pm_Write(self.stream, &event, 1) })
     }
 
     /// Write a single `MidiMessage` immediately
-    pub fn write_message(&mut self, midi_message: MidiMessage) -> PortMidiResult<()> {
+    pub fn write_message(&mut self, midi_message: MidiMessage) -> Result<()> {
         let message = midi_message.unwrap();
-        PortMidiResult::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })
+        Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })
     }
 }
 
