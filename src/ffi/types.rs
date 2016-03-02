@@ -1,4 +1,5 @@
 use std::os::raw::{c_char, c_void};
+use std::default::Default;
 
 pub type PmDeviceId = i32;
 pub type PortMidiStream = c_void;
@@ -6,10 +7,19 @@ pub type PmMessage = i32;
 pub type PmTimestamp = u32;
 pub const PM_NO_DEVICE: PmDeviceId = -1;
 
+#[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PmEvent {
     pub message: PmMessage,
     pub timestamp: PmTimestamp,
+}
+impl Default for PmEvent {
+    fn default() -> Self {
+        PmEvent {
+            message: 0,
+            timestamp: 0,
+        }
+    }
 }
 
 #[repr(C)]
