@@ -68,60 +68,6 @@ pub fn get_default_output_device_id() -> Option<PortMidiDeviceId> {
 
 
 
-// Midi events
-// -----------
-/// Represents a single midi message, see also `MidiEvent`
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct MidiMessage {
-    pub status: u8,
-    pub data1: u8,
-    pub data2: u8,
-}
-
-impl MidiMessage {
-    fn wrap(cmessage: ffi::PmMessage) -> MidiMessage {
-        MidiMessage {
-            status: ((cmessage) & 0xFF) as u8,
-            data1: (((cmessage) >> 8) & 0xFF) as u8,
-            data2: (((cmessage) >> 16) & 0xFF) as u8,
-        }
-    }
-
-    fn unwrap(&self) -> ffi::PmMessage {
-        ((((self.data2 as i32) << 16) & 0xFF0000) | (((self.data1 as i32) << 8) & 0xFF00) |
-         ((self.status as i32) & 0xFF)) as i32
-    }
-}
-
-/// Represents a time stamped midi event. See also `MidiMessage`
-///
-/// See the PortMidi documentation for how SysEx and midi realtime messages
-/// are handled
-///
-/// TODO: what to do about the timestamp?
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub struct MidiEvent {
-    pub message: MidiMessage,
-    pub timestamp: ffi::PmTimestamp,
-}
-
-impl MidiEvent {
-    fn wrap(event: ffi::PmEvent) -> MidiEvent {
-        MidiEvent {
-            message: MidiMessage::wrap(event.message),
-            timestamp: event.timestamp,
-        }
-    }
-
-    fn unwrap(&self) -> ffi::PmEvent {
-        ffi::PmEvent {
-            message: self.message.unwrap(),
-            timestamp: self.timestamp,
-        }
-    }
-}
-
-
 // Input
 // -----
 /// Representation of an input midi port
