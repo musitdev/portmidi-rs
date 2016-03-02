@@ -158,4 +158,3 @@ impl OutputPort {
         Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })
     }
 }
-

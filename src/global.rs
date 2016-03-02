@@ -49,9 +49,3 @@ pub fn get_default_output_device_id() -> Option<PortMidiDeviceId> {
         Some(id)
     }
 }
-
-
-
-
-
-
