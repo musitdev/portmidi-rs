@@ -1,4 +1,5 @@
 use std::os::raw::{c_char, c_void};
+use std::mem;
 use std::default::Default;
 
 pub type PmDeviceId = i32;
@@ -59,21 +60,14 @@ pub enum PmError {
     /// buffer is already as large as it can be
     PmBufferMaxSize = -9992,
 }
-
-// while we wait for FromPrimitive to stabilise
-pub fn tmp_from_primitive(i: i32) -> Option<PmError> {
-    match i {
-        0 => Some(PmError::PmNoError),
-        1 => Some(PmError::PmGotData),
-        -10000 => Some(PmError::PmHostError),
-        -9999 => Some(PmError::PmInvalidDeviceId),
-        -9998 => Some(PmError::PmInsufficientMemory),
-        -9997 => Some(PmError::PmBufferTooSmall),
-        -9996 => Some(PmError::PmBufferOverflow),
-        -9995 => Some(PmError::PmBadPtr),
-        -9994 => Some(PmError::PmBadData),
-        -9993 => Some(PmError::PmInternalError),
-        -9992 => Some(PmError::PmBufferMaxSize),
-        _ => None,
+pub trait MaybeError<T> {
+    fn try_from(err_code: T) -> Result<T, PmError>;
+}
+impl MaybeError<i32> for PmError {
+    fn try_from(err_code: i32) -> Result<i32, PmError> {
+        match err_code {
+            -10_000...-9992 | 0 | 1 => unsafe { Err(mem::transmute(err_code)) },
+            _ => Ok(err_code),
+        }
     }
 }
