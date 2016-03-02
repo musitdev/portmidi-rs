@@ -203,11 +203,7 @@ impl InputPort {
             cnt as i32
         };
         let mut event_buffer = [ffi::PmEvent::default(); EVENT_BUFFER_SIZE];
-        let res = unsafe {
-            ffi::Pm_Read(self.stream,
-                         event_buffer.as_mut_ptr(),
-                         read_cnt)
-        };
+        let res = unsafe { ffi::Pm_Read(self.stream, event_buffer.as_mut_ptr(), read_cnt) };
         if res < 0 {
             let err = ffi::PmError::try_from(res).unwrap();
             // TODO: Return the error
@@ -218,8 +214,8 @@ impl InputPort {
         } else {
             // remove mutability and replace return value
             let mut events = (0..res as usize)
-                             .map(|i| MidiEvent::wrap(event_buffer[i].clone()))
-                             .collect::<Vec<MidiEvent>>();
+                                 .map(|i| MidiEvent::wrap(event_buffer[i].clone()))
+                                 .collect::<Vec<MidiEvent>>();
             Ok(Some(events))
         }
     }
