@@ -28,7 +28,7 @@ fn monitor(device_id: PortMidiDeviceId) -> Result<()> {
     try!(pm::initialize());
 
     // get the device and check it exists
-    let device = try!(pm::get_device_info(device_id).ok_or(PmInvalidDeviceId));
+    let device = try!(pm::DeviceInfo::new(device_id).ok_or(PmInvalidDeviceId));
     println!("Opening: {}", device.name);
 
     // open the input

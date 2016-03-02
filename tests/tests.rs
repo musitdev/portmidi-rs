@@ -12,10 +12,10 @@ fn test_midiin() {
     let defdevout = portmidi::get_default_output_device_id().unwrap();
     println!("portmidi default output device {:?}", defdevout);
 
-    let ininfo = portmidi::get_device_info(defdevin);
+    let ininfo = portmidi::DeviceInfo::new(defdevin);
     println!("portmidi default input device info {:?}", ininfo);
 
-    let outinfo = portmidi::get_device_info(defdevout);
+    let outinfo = portmidi::DeviceInfo::new(defdevout);
     println!("portmidi default output device info {:?}", outinfo);
 
     let mut inport = portmidi::InputPort::new(defdevin, 0);

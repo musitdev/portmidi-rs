@@ -11,7 +11,7 @@ pub fn get_devices() -> pm::Result<Vec<pm::DeviceInfo>> {
     let no = pm::count_devices();
     // use filter_map to discard None, and unwrap the Some(_)
     let devices = (0..no)
-                      .filter_map(|i| pm::get_device_info(i))
+                      .filter_map(|i| pm::DeviceInfo::new(i))
                       .collect::<Vec<_>>();
     try!(pm::terminate());
     Ok(devices)

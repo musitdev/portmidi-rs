@@ -3,8 +3,6 @@ use types::*;
 use std::ffi::CStr;
 use std::str;
 
-// DeviceInfo
-// ----------
 /// Represents what we know about a device
 #[derive(Clone, Debug)]
 pub struct DeviceInfo {
@@ -18,30 +16,27 @@ pub struct DeviceInfo {
     pub output: bool,
 }
 impl DeviceInfo {
-    fn wrap(device_id: PortMidiDeviceId, device_info: *const ffi::PmDeviceInfo) -> DeviceInfo {
-        let name = unsafe {
-            let bytes = CStr::from_ptr((*device_info).name).to_bytes();
-            str::from_utf8_unchecked(bytes).to_string()
-        };
-        let input = unsafe { (*device_info).input };
-        let output = unsafe { (*device_info).output };
+    // TODO: return a Result with an error if `dev_inf_ptr` is NULL (invalid id)
+    pub fn new(id: PortMidiDeviceId) -> Option<Self> {
+        let dev_inf_ptr = unsafe { ffi::Pm_GetDeviceInfo(id) };
+        if dev_inf_ptr.is_null() {
+            None
+        } else {
+            // TODO: use ptr_to_string
+            let name = unsafe {
+                let bytes = CStr::from_ptr((*dev_inf_ptr).name).to_bytes();
+                str::from_utf8_unchecked(bytes).to_owned()
+            };
+            // TODO: Replace this by an enum and create convenience function, `is_{in,out}put`
+            let input = unsafe { (*dev_inf_ptr).input };
+            let output = unsafe { (*dev_inf_ptr).output };
 
-        DeviceInfo {
-            device_id: device_id,
-            name: name,
-            input: input > 0,
-            output: output > 0,
+            Some(DeviceInfo {
+                device_id: id,
+                name: name,
+                input: input > 0,
+                output: output > 0,
+            })
         }
-    }
-}
-
-/// Returns a `DeviceInfo` with information about a device, or `None` if
-/// it does not exist
-pub fn get_device_info(device_id: PortMidiDeviceId) -> Option<DeviceInfo> {
-    let info = unsafe { ffi::Pm_GetDeviceInfo(device_id) };
-    if info.is_null() {
-        None
-    } else {
-        Some(DeviceInfo::wrap(device_id, info))
     }
 }
