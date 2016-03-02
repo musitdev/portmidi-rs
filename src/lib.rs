@@ -256,23 +256,6 @@ impl InputPort {
     pub fn close(&mut self) -> PortMidiResult<()> {
         PortMidiResult::from(unsafe { ffi::Pm_Close(self.stream) })
     }
-
-    //    Test whether stream has a pending host error. Normally, the client finds
-    //    out about errors through returned error codes, but some errors can occur
-    //    asynchronously where the client does not
-    //    explicitly call a function, and therefore cannot receive an error code.
-    //    The client can test for a pending error using has_host_error(). If true,
-    //    the error can be accessed and cleared by calling get_Error_text().
-    //    Errors are also cleared by calling other functions that can return
-    //    errors, e.g. open_input(), open_output(), read(), write(). The
-    //    client does not need to call Pm_HasHostError(). Any pending error will be
-    //    reported the next time the client performs an explicit function call on
-    //    the stream, e.g. an input or output operation. Until the error is cleared,
-    //    no new error codes will be obtained, even for a different stream.
-    //
-    fn has_host_error(&self) -> bool {
-        unsafe { ffi::Pm_HasHostError(self.stream) > 0 }
-    }
 }
 
 
@@ -336,23 +319,6 @@ impl OutputPort {
     pub fn write_message(&mut self, midi_message: MidiMessage) -> PortMidiResult<()> {
         let message = midi_message.unwrap();
         PortMidiResult::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })
-    }
-
-    //    Test whether stream has a pending host error. Normally, the client finds
-    //    out about errors through returned error codes, but some errors can occur
-    //    asynchronously where the client does not
-    //    explicitly call a function, and therefore cannot receive an error code.
-    //    The client can test for a pending error using has_host_error(). If true,
-    //    the error can be accessed and cleared by calling get_Error_text().
-    //    Errors are also cleared by calling other functions that can return
-    //    errors, e.g. open_input(), open_output(), read(), write(). The
-    //    client does not need to call Pm_HasHostError(). Any pending error will be
-    //    reported the next time the client performs an explicit function call on
-    //    the stream, e.g. an input or output operation. Until the error is cleared,
-    //    no new error codes will be obtained, even for a different stream.
-    //
-    pub fn has_host_error(&self) -> bool {
-        unsafe { ffi::Pm_HasHostError(self.stream) > 0 }
     }
 }
 
