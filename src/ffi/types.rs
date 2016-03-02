@@ -25,7 +25,7 @@ pub fn ptr_to_string(str_ptr: *const c_char) -> Option<String> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct PmEvent {
     pub message: PmMessage,
