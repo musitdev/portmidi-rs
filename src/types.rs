@@ -1,8 +1,28 @@
 use std::fmt::{Display, Formatter, Error as FormatError};
 use std::error::Error;
+use std::convert::From;
+
+use ffi;
 
 pub type PortMidiDeviceId = i32;
 pub type PortMidiResult<T> = Result<T, PortMidiError>;
+impl From<ffi::PmError> for PortMidiResult<()> {
+    fn from(err: ffi::PmError) -> Self {
+        match err {
+            ffi::PmError::PmNoError => Ok(()),
+            ffi::PmError::PmGotData => Ok(()),
+            ffi::PmError::PmHostError => Err(PortMidiError::HostError),
+            ffi::PmError::PmInvalidDeviceId => Err(PortMidiError::InvalidDeviceId),
+            ffi::PmError::PmInsufficientMemory => Err(PortMidiError::InsufficientMemory),
+            ffi::PmError::PmBufferTooSmall => Err(PortMidiError::BufferTooSmall),
+            ffi::PmError::PmBufferOverflow => Err(PortMidiError::BufferOverflow),
+            ffi::PmError::PmBadPtr => Err(PortMidiError::BadPtr),
+            ffi::PmError::PmBadData => Err(PortMidiError::BadData),
+            ffi::PmError::PmInternalError => Err(PortMidiError::InternalError),
+            ffi::PmError::PmBufferMaxSize => Err(PortMidiError::BufferMaxSize),
+        }
+    }
+}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum PortMidiError {
