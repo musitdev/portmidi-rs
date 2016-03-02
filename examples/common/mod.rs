@@ -24,8 +24,8 @@ pub fn print_devices(devices: Vec<pm::DeviceInfo>) {
         println!("{:<3} {:<20} {:<6} {:<6}",
                  d.device_id,
                  d.name,
-                 d.input,
-                 d.output);
+                 d.is_input(),
+                 d.is_output());
     }
 }
 

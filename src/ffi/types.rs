@@ -1,4 +1,4 @@
-use std::os::raw::{c_char, c_void};
+use std::os::raw::{c_char, c_void, c_int};
 use std::mem;
 use std::default::Default;
 use std::fmt;
@@ -35,9 +35,9 @@ pub struct PmDeviceInfo {
     /// device name, e.g. USB MidiSport 1x1
     pub name: *const c_char,
     /// true iff input is available
-    pub input: i32,
+    pub input: c_int,
     /// true iff output is available
-    pub output: i32,
+    pub output: c_int,
     /// used by generic PortMidi code to do error checking on arguments
     pub opened: i32,
 }
