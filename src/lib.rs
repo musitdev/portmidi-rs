@@ -271,7 +271,6 @@ pub struct OutputPort {
     output_device: ffi::PmDeviceId,
     buffer_size: i32,
 }
-
 impl OutputPort {
     /// Construct a new `InputPort` for `input_device`
     pub fn new(output_device: PortMidiDeviceId, buffer_size: i32) -> OutputPort {

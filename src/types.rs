@@ -37,6 +37,7 @@ pub enum PortMidiError {
     BufferMaxSize,
 }
 impl PortMidiError {
+    // replace this by a call to get_error_text
     fn msg(&self) -> &'static str {
         match *self {
             PortMidiError::HostError => "Host error",
@@ -49,7 +50,6 @@ impl PortMidiError {
             PortMidiError::InternalError => "Portmidi internal error",
             PortMidiError::BufferMaxSize => "Buffer cannot be made larger",
         }
-
     }
 }
 impl Display for PortMidiError {
