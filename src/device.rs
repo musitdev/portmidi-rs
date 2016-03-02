@@ -23,10 +23,7 @@ impl DeviceInfo {
             None
         } else {
             // TODO: use ptr_to_string
-            let name = unsafe {
-                let bytes = CStr::from_ptr((*dev_inf_ptr).name).to_bytes();
-                str::from_utf8_unchecked(bytes).to_owned()
-            };
+            let name = unsafe { ffi::ptr_to_string((*dev_inf_ptr).name).unwrap() };
             // TODO: Replace this by an enum and create convenience function, `is_{in,out}put`
             let input = unsafe { (*dev_inf_ptr).input };
             let output = unsafe { (*dev_inf_ptr).output };
