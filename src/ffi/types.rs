@@ -35,24 +35,29 @@ pub struct PmDeviceInfo {
 #[derive(Debug)]
 #[repr(C)]
 pub enum PmError {
+    /// "no error" return that also indicates data available
     PmNoError = 0,
-    PmGotData = 1, // < A "no error" return that also indicates data available
+    /// "no error" return that also indicates data available
+    PmGotData = 1,
     PmHostError = -10000,
-    PmInvalidDeviceId = -9999, /* out of range or
-                                * output device when input is requested or
-                                * input device when output is requested or
-                                * device is already opened
-                                * */
+    /// out of range or
+    /// output device when input is requested or
+    /// input device when output is requested or
+    /// device is already opened
+    PmInvalidDeviceId = -9999,
     PmInsufficientMemory = -9998,
     PmBufferTooSmall = -9997,
     PmBufferOverflow = -9996,
-    PmBadPtr = -9995, /* PortMidiStream parameter is NULL or
-                       * stream is not opened or
-                       * stream is output when input is required or
-                       * stream is input when output is required */
-    PmBadData = -9994, // illegal midi data, e.g. missing EOX
+    /// PortMidiStream parameter is NULL or
+    /// stream is not opened or
+    /// stream is output when input is required or
+    /// stream is input when output is required
+    PmBadPtr = -9995,
+    /// illegal midi data, e.g. missing EOX
+    PmBadData = -9994,
     PmInternalError = -9993,
-    PmBufferMaxSize = -9992, // buffer is already as large as it can be
+    /// buffer is already as large as it can be
+    PmBufferMaxSize = -9992,
 }
 
 // while we wait for FromPrimitive to stabilise
