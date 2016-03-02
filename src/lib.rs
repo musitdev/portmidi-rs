@@ -167,7 +167,7 @@ impl MidiEvent {
 /// Representation of an input midi port
 #[allow(missing_copy_implementations)]
 pub struct InputPort {
-    pm_stream: *const ffi::PortMidiStream,
+    stream: *const ffi::PortMidiStream,
     input_device: ffi::PmDeviceId,
     buffer_size: i32,
 }
@@ -177,7 +177,7 @@ impl InputPort {
     /// Construct a new `InputPort` for `input_device`
     pub fn new(input_device: PortMidiDeviceId, buffer_size: i32) -> InputPort {
         InputPort {
-            pm_stream: ptr::null(),
+            stream: ptr::null(),
             input_device: input_device,
             buffer_size: buffer_size,
         }
@@ -186,7 +186,7 @@ impl InputPort {
     /// Open the port returning an error if there is a problem
     pub fn open(&mut self) -> PortMidiResult<()> {
         PortMidiResult::from(unsafe {
-            ffi::Pm_OpenInput(&self.pm_stream,
+            ffi::Pm_OpenInput(&self.stream,
                               self.input_device,
                               ptr::null(),
                               self.buffer_size,
@@ -203,7 +203,7 @@ impl InputPort {
         };
         let mut event_buffer = [ffi::PmEvent::default(); EVENT_BUFFER_SIZE];
         let res = unsafe {
-            ffi::Pm_Read(self.pm_stream,
+            ffi::Pm_Read(self.stream,
                          event_buffer.as_mut_ptr(),
                          read_cnt)
         };
@@ -240,7 +240,7 @@ impl InputPort {
 
     /// `poll` tests if there is input available, either returing a bool or an error
     pub fn poll(&self) -> PortMidiResult<bool> {
-        let pm_error = unsafe { ffi::Pm_Poll(self.pm_stream) };
+        let pm_error = unsafe { ffi::Pm_Poll(self.stream) };
         match pm_error {
             ffi::PmError::PmNoError => Ok(false),
             ffi::PmError::PmGotData => Ok(true),
@@ -254,7 +254,7 @@ impl InputPort {
     /// exits, but this can be difficult under Windows
     /// (according to the PortMidi documentation).
     pub fn close(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe { ffi::Pm_Close(self.pm_stream) })
+        PortMidiResult::from(unsafe { ffi::Pm_Close(self.stream) })
     }
 
     //    Test whether stream has a pending host error. Normally, the client finds
@@ -270,8 +270,8 @@ impl InputPort {
     //    the stream, e.g. an input or output operation. Until the error is cleared,
     //    no new error codes will be obtained, even for a different stream.
     //
-    pub fn has_host_error(&self) -> bool {
-        unsafe { ffi::Pm_HasHostError(self.pm_stream) > 0 }
+    fn has_host_error(&self) -> bool {
+        unsafe { ffi::Pm_HasHostError(self.stream) > 0 }
     }
 }
 
@@ -281,7 +281,7 @@ impl InputPort {
 /// Representation of an output midi port
 #[allow(missing_copy_implementations)]
 pub struct OutputPort {
-    pm_stream: *const ffi::PortMidiStream,
+    stream: *const ffi::PortMidiStream,
     output_device: ffi::PmDeviceId,
     buffer_size: i32,
 }
@@ -289,7 +289,7 @@ impl OutputPort {
     /// Construct a new `InputPort` for `input_device`
     pub fn new(output_device: PortMidiDeviceId, buffer_size: i32) -> OutputPort {
         OutputPort {
-            pm_stream: ptr::null(),
+            stream: ptr::null(),
             output_device: output_device,
             buffer_size: buffer_size,
         }
@@ -298,7 +298,7 @@ impl OutputPort {
     /// Open the port returning an error if there is a problem
     pub fn open(&mut self) -> PortMidiResult<()> {
         PortMidiResult::from(unsafe {
-            ffi::Pm_OpenOutput(&self.pm_stream,
+            ffi::Pm_OpenOutput(&self.stream,
                                self.output_device,
                                ptr::null(),
                                self.buffer_size,
@@ -314,7 +314,7 @@ impl OutputPort {
     /// result in transmission of a partial midi message. Note, not all platforms
     /// support abort.
     pub fn abort(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe { ffi::Pm_Abort(self.pm_stream) })
+        PortMidiResult::from(unsafe { ffi::Pm_Abort(self.stream) })
     }
 
     /// Closes the midi stream, flushing any pending buffers
@@ -323,19 +323,19 @@ impl OutputPort {
     /// exits, but this can be difficult under Windows
     /// (according to the PortMidi documentation).
     pub fn close(&mut self) -> PortMidiResult<()> {
-        PortMidiResult::from(unsafe { ffi::Pm_Close(self.pm_stream) })
+        PortMidiResult::from(unsafe { ffi::Pm_Close(self.stream) })
     }
 
     /// Write a single `MidiEvent`
     pub fn write_event(&mut self, midi_event: MidiEvent) -> PortMidiResult<()> {
         let event = midi_event.unwrap();
-        PortMidiResult::from(unsafe { ffi::Pm_Write(self.pm_stream, &event, 1) })
+        PortMidiResult::from(unsafe { ffi::Pm_Write(self.stream, &event, 1) })
     }
 
     /// Write a single `MidiMessage` immediately
     pub fn write_message(&mut self, midi_message: MidiMessage) -> PortMidiResult<()> {
         let message = midi_message.unwrap();
-        PortMidiResult::from(unsafe { ffi::Pm_WriteShort(self.pm_stream, 0, message) })
+        PortMidiResult::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })
     }
 
     //    Test whether stream has a pending host error. Normally, the client finds
@@ -352,7 +352,7 @@ impl OutputPort {
     //    no new error codes will be obtained, even for a different stream.
     //
     pub fn has_host_error(&self) -> bool {
-        unsafe { ffi::Pm_HasHostError(self.pm_stream) > 0 }
+        unsafe { ffi::Pm_HasHostError(self.stream) > 0 }
     }
 }
 
