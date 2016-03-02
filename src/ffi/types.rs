@@ -5,9 +5,9 @@ use std::fmt;
 
 use ffi;
 
-pub type PmDeviceId = i32;
+pub type PmDeviceId = c_int;
 pub type PortMidiStream = c_void;
-pub type PmMessage = i32;
+pub type PmMessage = c_int;
 pub type PmTimestamp = u32;
 pub const PM_NO_DEVICE: PmDeviceId = -1;
 
@@ -29,7 +29,7 @@ impl Default for PmEvent {
 #[repr(C)]
 pub struct PmDeviceInfo {
     /// this internal structure version
-    pub struct_version: i32,
+    pub struct_version: c_int,
     /// underlying MIDI API, e.g. MMSystem or DirectX
     pub interf: *const c_char,
     /// device name, e.g. USB MidiSport 1x1
@@ -39,7 +39,7 @@ pub struct PmDeviceInfo {
     /// true iff output is available
     pub output: c_int,
     /// used by generic PortMidi code to do error checking on arguments
-    pub opened: i32,
+    pub opened: c_int,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -78,8 +78,8 @@ impl fmt::Display for PmError {
 pub trait MaybeError<T> {
     fn try_from(err_code: T) -> Result<T, PmError>;
 }
-impl MaybeError<i32> for PmError {
-    fn try_from(err_code: i32) -> Result<i32, PmError> {
+impl MaybeError<c_int> for PmError {
+    fn try_from(err_code: c_int) -> Result<c_int, PmError> {
         match err_code {
             -10_000...-9992 | 0 | 1 => unsafe { Err(mem::transmute(err_code)) },
             _ => Ok(err_code),
