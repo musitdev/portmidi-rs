@@ -322,16 +322,5 @@ impl OutputPort {
     }
 }
 
-
-/**  Translate portmidi host error into human readable message.
-     These strings are computed at run time, so client has to allocate storage.
-     After this routine executes, the host error is cleared.
-*/
-pub fn get_host_error_text(msg: *const c_char, len: i32) {
-    unsafe {
-        ffi::Pm_GetHostErrorText(msg, len);
-    }
-}
-
 pub const HDRLENGTH: i32 = 50;
 pub const PM_HOST_ERROR_MSG_LEN: i32 = 256;
