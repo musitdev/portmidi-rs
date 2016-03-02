@@ -9,6 +9,7 @@ use std::ptr;
 use std::os::raw::c_char;
 
 mod ffi;
+use ffi::MaybeError;
 pub mod types;
 pub use types::*;
 
@@ -171,6 +172,7 @@ pub struct InputPort {
     buffer_size: i32,
 }
 
+const EVENT_BUFFER_SIZE: usize = 128;
 impl InputPort {
     /// Construct a new `InputPort` for `input_device`
     pub fn new(input_device: PortMidiDeviceId, buffer_size: i32) -> InputPort {
@@ -193,34 +195,46 @@ impl InputPort {
         })
     }
 
+    pub fn read_n(&mut self, cnt: usize) -> PortMidiResult<Option<Vec<MidiEvent>>> {
+        let read_cnt = if cnt > EVENT_BUFFER_SIZE {
+            EVENT_BUFFER_SIZE as i32
+        } else {
+            cnt as i32
+        };
+        let mut event_buffer = [ffi::PmEvent::default(); EVENT_BUFFER_SIZE];
+        let res = unsafe {
+            ffi::Pm_Read(self.pm_stream,
+                         event_buffer.as_mut_ptr(),
+                         read_cnt)
+        };
+        if res < 0 {
+            let err = ffi::PmError::try_from(res).unwrap();
+            // TODO: Return the error
+            println!("error: {:?}", err);
+            return Ok(None);
+        } else if res == 0 {
+            Ok(None)
+        } else {
+            // remove mutability and replace return value
+            let mut events = (0..res as usize)
+                             .map(|i| MidiEvent::wrap(event_buffer[i].clone()))
+                             .collect::<Vec<MidiEvent>>();
+            Ok(Some(events))
+        }
+    }
+
     /// Reads a single `MidiEvent` if one is avaible
     ///
     /// A `Result` of `None` means no event was available.
     ///
     /// See the PortMidi documentation for information on how it deals with input
     /// overflows
+    /// TODO: call `read_n`
     pub fn read(&mut self) -> PortMidiResult<Option<MidiEvent>> {
-        // get one note a the time
-        let mut event = ffi::PmEvent {
-            message: 0,
-            timestamp: 0,
-        };
-        let no_of_notes = unsafe { ffi::Pm_Read(self.pm_stream, &mut event, 1) };
-        match no_of_notes {
-            y if y == 0 => Ok(None),
-            y if y > 0 => Ok(Some(MidiEvent::wrap(event))),
-            _ => {
-                // if it's negative it's an error, convert it
-                // let maybe_pm_error: Option<ffi::PmError> = FromPrimitive::from_i32(no_of_notes);
-                let maybe_pm_error = ffi::tmp_from_primitive(no_of_notes);
-                if let Some(pm_error) = maybe_pm_error {
-                    PortMidiResult::from(pm_error).map(|_| None)
-                } else {
-                    // what should we do, if we can't convert the error no?
-                    // should we panic?
-                    Ok(None)
-                }
-            }
+        match self.read_n(1) {
+            Ok(Some(mut vec)) => Ok(vec.pop()),
+            Ok(_) => Ok(None),
+            Err(e) => Err(e),
         }
     }
 
