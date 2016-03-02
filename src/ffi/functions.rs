@@ -7,6 +7,7 @@
 // This file may not be copied, modified, or distributed except according to those terms.
 
 use std::os::raw::{c_char, c_void};
+use ffi::types::*;
 
 #[link(name = "portmidi")]
 extern "C" {
