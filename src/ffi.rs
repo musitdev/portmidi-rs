@@ -6,7 +6,7 @@
 //          MIT license (LICENSE-MIT or http://opensource.org/licenses/MIT).
 // This file may not be copied, modified, or distributed except according to those terms.
 
-use libc::{c_char, c_void};
+use std::os::raw::{c_char, c_void};
 
 pub type PmDeviceId = i32;
 
