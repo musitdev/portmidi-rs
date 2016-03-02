@@ -3,7 +3,7 @@ extern crate portmidi as pm;
 use std::thread::sleep_ms;
 
 use pm::{PortMidiDeviceId, PortMidiResult};
-use pm::PortMidiError::InvalidDeviceId;
+use pm::PmError::PmInvalidDeviceId;
 
 pub mod common;
 
@@ -28,7 +28,7 @@ fn monitor(device_id: PortMidiDeviceId) -> PortMidiResult<()> {
     try!(pm::initialize());
 
     // get the device and check it exists
-    let device = try!(pm::get_device_info(device_id).ok_or(InvalidDeviceId));
+    let device = try!(pm::get_device_info(device_id).ok_or(PmInvalidDeviceId));
     println!("Opening: {}", device.name);
 
     // open the input

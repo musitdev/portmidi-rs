@@ -10,6 +10,7 @@ use std::os::raw::c_char;
 
 mod ffi;
 use ffi::MaybeError;
+pub use ffi::PmError;
 pub mod types;
 pub use types::*;
 
@@ -244,7 +245,7 @@ impl InputPort {
         match pm_error {
             ffi::PmError::PmNoError => Ok(false),
             ffi::PmError::PmGotData => Ok(true),
-            other => PortMidiResult::from(other).map(|_| false),
+            err @ _ => Err(Error::PortMidi(err)),
         }
     }
 

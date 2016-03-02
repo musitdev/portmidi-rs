@@ -56,7 +56,7 @@ pub struct PmDeviceInfo {
     pub opened: i32,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 pub enum PmError {
     /// "no error" return that also indicates data available
