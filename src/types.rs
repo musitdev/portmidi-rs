@@ -16,13 +16,8 @@ pub enum PortMidiError {
     InternalError,
     BufferMaxSize,
 }
-impl Display for PortMidiError {
-    fn fmt(&self, f: &mut Formatter) -> Result<(), FormatError> {
-        write!(f, "{:?}", self)
-    }
-}
-impl Error for PortMidiError {
-    fn description(&self) -> &str {
+impl PortMidiError {
+    fn msg(&self) -> &'static str {
         match *self {
             PortMidiError::HostError => "Host error",
             PortMidiError::InvalidDeviceId => "Invalid device ID",
@@ -34,7 +29,16 @@ impl Error for PortMidiError {
             PortMidiError::InternalError => "Portmidi internal error",
             PortMidiError::BufferMaxSize => "Buffer cannot be made larger",
         }
+
     }
 }
-
-
+impl Display for PortMidiError {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), FormatError> {
+        write!(f, "{}", self.msg())
+    }
+}
+impl Error for PortMidiError {
+    fn description(&self) -> &str {
+        self.msg()
+    }
+}
