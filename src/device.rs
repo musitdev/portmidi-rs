@@ -25,9 +25,7 @@ impl DeviceInfo {
         if dev_inf_ptr.is_null() {
             None
         } else {
-            // TODO: use ptr_to_string
             let name = unsafe { ffi::ptr_to_string((*dev_inf_ptr).name).unwrap() };
-            // TODO: Replace this by an enum and create convenience function, `is_{in,out}put`
             let direction = if unsafe { (*dev_inf_ptr).input != 0 } {
                 Direction::Input
             } else {
