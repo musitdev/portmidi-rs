@@ -323,20 +323,6 @@ impl OutputPort {
 }
 
 
-// Old code
-// --------
-/**  Translate portmidi error number into human readable message.
-*    These strings are constants (set at compile time) so client has
-*    no need to allocate storage
-*/
-pub fn get_error_text(error_code: ffi::PmError) -> String {
-    unsafe {
-        let error_text = ffi::Pm_GetErrorText(error_code);
-        let bytes = std::ffi::CStr::from_ptr(error_text).to_bytes();
-        std::str::from_utf8_unchecked(bytes).to_string()
-    }
-}
-
 /**  Translate portmidi host error into human readable message.
      These strings are computed at run time, so client has to allocate storage.
      After this routine executes, the host error is cleared.
