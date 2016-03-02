@@ -9,51 +9,8 @@ use std::ptr;
 use std::os::raw::c_char;
 
 mod ffi;
-
-
-// Types
-// -----
-/// Used by PortMidi to refer to a Midi device
-pub type PortMidiDeviceId = i32;
-pub type PortMidiResult<T> = Result<T, PortMidiError>;
-
-
-// Errors
-// ------
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum PortMidiError {
-    HostError,
-    InvalidDeviceId,
-    InsufficientMemory,
-    BufferTooSmall,
-    BufferOverflow,
-    BadPtr,
-    BadData,
-    InternalError,
-    BufferMaxSize,
-}
-
-impl ::std::fmt::Display for PortMidiError {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
-        write!(f, "{:?}", self)
-    }
-}
-
-impl ::std::error::Error for PortMidiError {
-    fn description(&self) -> &str {
-        match *self {
-            PortMidiError::HostError => "Host error",
-            PortMidiError::InvalidDeviceId => "Invalid device ID",
-            PortMidiError::InsufficientMemory => "Insufficent memory",
-            PortMidiError::BufferTooSmall => "Buffer is too small",
-            PortMidiError::BufferOverflow => "Buffer has overflow",
-            PortMidiError::BadPtr => "Bad pointer was supplied",
-            PortMidiError::BadData => "Invalid MIDI message data",
-            PortMidiError::InternalError => "Portmidi internal error",
-            PortMidiError::BufferMaxSize => "Buffer cannot be made larger",
-        }
-    }
-}
+pub mod types;
+pub use types::*;
 
 fn from_pm_error(pm_error: ffi::PmError) -> PortMidiResult<()> {
     match pm_error {
