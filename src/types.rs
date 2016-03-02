@@ -24,6 +24,7 @@ impl From<ffi::PmError> for PortMidiResult<()> {
     }
 }
 
+// TODO: replace with ffi::PmError (basically the same)
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum PortMidiError {
     HostError,
