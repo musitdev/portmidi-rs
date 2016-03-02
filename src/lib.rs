@@ -10,6 +10,8 @@ use std::os::raw::c_char;
 
 mod ffi;
 use ffi::MaybeError;
+mod device;
+pub use device::*;
 pub use ffi::PmError;
 pub mod types;
 pub use types::*;
@@ -64,49 +66,6 @@ pub fn get_default_output_device_id() -> Option<PortMidiDeviceId> {
 }
 
 
-// DeviceInfo
-// ----------
-/// Represents what we know about a device
-#[derive(Clone, Debug)]
-pub struct DeviceInfo {
-    /// The `PortMidiDeviceId` used with `OutputPort::new` and `InputPort::new`
-    pub device_id: PortMidiDeviceId,
-    /// The name of the device
-    pub name: String,
-    /// Is the device an input
-    pub input: bool,
-    /// Is the device an output
-    pub output: bool,
-}
-
-impl DeviceInfo {
-    fn wrap(device_id: PortMidiDeviceId, device_info: *const ffi::PmDeviceInfo) -> DeviceInfo {
-        let name = unsafe {
-            let bytes = std::ffi::CStr::from_ptr((*device_info).name).to_bytes();
-            std::str::from_utf8_unchecked(bytes).to_string()
-        };
-        let input = unsafe { (*device_info).input };
-        let output = unsafe { (*device_info).output };
-
-        DeviceInfo {
-            device_id: device_id,
-            name: name,
-            input: input > 0,
-            output: output > 0,
-        }
-    }
-}
-
-/// Returns a `DeviceInfo` with information about a device, or `None` if
-/// it does not exist
-pub fn get_device_info(device_id: PortMidiDeviceId) -> Option<DeviceInfo> {
-    let info = unsafe { ffi::Pm_GetDeviceInfo(device_id) };
-    if info.is_null() {
-        None
-    } else {
-        Some(DeviceInfo::wrap(device_id, info))
-    }
-}
 
 
 // Midi events
