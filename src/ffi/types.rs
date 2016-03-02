@@ -42,12 +42,18 @@ impl Default for PmEvent {
 
 #[repr(C)]
 pub struct PmDeviceInfo {
-    pub struct_version: i32, // < this internal structure version
-    pub interf: *const c_char, // < underlying MIDI API, e.g. MMSystem or DirectX
-    pub name: *const c_char, // < device name, e.g. USB MidiSport 1x1
-    pub input: i32, // < true iff input is available
-    pub output: i32, // < true iff output is available
-    pub opened: i32, // < used by generic PortMidi code to do error checking on arguments
+    /// this internal structure version
+    pub struct_version: i32,
+    /// underlying MIDI API, e.g. MMSystem or DirectX
+    pub interf: *const c_char,
+    /// device name, e.g. USB MidiSport 1x1
+    pub name: *const c_char,
+    /// true iff input is available
+    pub input: i32,
+    /// true iff output is available
+    pub output: i32,
+    /// used by generic PortMidi code to do error checking on arguments
+    pub opened: i32,
 }
 
 #[derive(Debug, Clone, Copy)]
