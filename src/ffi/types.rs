@@ -1,5 +1,4 @@
 use std::os::raw::{c_char, c_void};
-use std::ffi::CStr;
 use std::mem;
 use std::default::Default;
 use std::fmt;
@@ -11,19 +10,6 @@ pub type PortMidiStream = c_void;
 pub type PmMessage = i32;
 pub type PmTimestamp = u32;
 pub const PM_NO_DEVICE: PmDeviceId = -1;
-
-pub fn ptr_to_string(str_ptr: *const c_char) -> Option<String> {
-    if !str_ptr.is_null() {
-        match unsafe { CStr::from_ptr(str_ptr) }
-                  .to_str()
-                  .ok() {
-            Some(str_slice) => Some(str_slice.to_owned()),
-            None => None,
-        }
-    } else {
-        None
-    }
-}
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
@@ -86,7 +72,7 @@ pub enum PmError {
 impl fmt::Display for PmError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let str_ptr = unsafe { ffi::Pm_GetErrorText(*self) };
-        write!(f, "{}", ptr_to_string(str_ptr).unwrap())
+        write!(f, "{}", ffi::ptr_to_string(str_ptr).unwrap())
     }
 }
 pub trait MaybeError<T> {
