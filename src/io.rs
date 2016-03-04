@@ -54,7 +54,7 @@ impl InputPort {
         } else {
             // remove mutability and replace return value
             let mut events = (0..res as usize)
-                                 .map(|i| MidiEvent::wrap(event_buffer[i].clone()))
+                                 .map(|i| MidiEvent::from(event_buffer[i].clone()))
                                  .collect::<Vec<MidiEvent>>();
             Ok(Some(events))
         }
@@ -148,7 +148,7 @@ impl OutputPort {
 
     /// Write a single `MidiEvent`
     pub fn write_event(&mut self, midi_event: MidiEvent) -> Result<()> {
-        let event = midi_event.unwrap();
+        let event = midi_event.into();
         Result::from(unsafe { ffi::Pm_Write(self.stream, &event, 1) })
     }
 

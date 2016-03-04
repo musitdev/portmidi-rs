@@ -77,16 +77,16 @@ pub struct MidiEvent {
     pub message: MidiMessage,
     pub timestamp: ffi::PmTimestamp,
 }
-
-impl MidiEvent {
-    pub fn wrap(event: ffi::PmEvent) -> MidiEvent {
+impl From<ffi::PmEvent> for MidiEvent {
+    fn from(raw: ffi::PmEvent) -> Self {
         MidiEvent {
-            message: MidiMessage::from(event.message),
-            timestamp: event.timestamp,
+            message: MidiMessage::from(raw.message),
+            timestamp: raw.timestamp,
         }
     }
-
-    pub fn unwrap(&self) -> ffi::PmEvent {
+}
+impl Into<ffi::PmEvent> for MidiEvent {
+    fn into(self) -> ffi::PmEvent {
         ffi::PmEvent {
             message: MidiMessage::into(self.message),
             timestamp: self.timestamp,
