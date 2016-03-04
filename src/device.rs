@@ -1,7 +1,5 @@
 use ffi;
 use types::*;
-use std::ffi::CStr;
-use std::str;
 
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Direction {

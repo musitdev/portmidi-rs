@@ -1,6 +1,3 @@
-use std::os::raw::c_int;
-use std::fmt::{Display, Formatter, Error as FormatError};
-use std::error::Error as StdError;
 use std::convert::{From, Into};
 use std::result;
 
