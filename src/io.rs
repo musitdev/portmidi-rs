@@ -53,9 +53,9 @@ impl InputPort {
             Ok(None)
         } else {
             // remove mutability and replace return value
-            let mut events = (0..res as usize)
-                                 .map(|i| MidiEvent::from(event_buffer[i].clone()))
-                                 .collect::<Vec<MidiEvent>>();
+            let events = (0..res as usize)
+                             .map(|i| MidiEvent::from(event_buffer[i].clone()))
+                             .collect::<Vec<MidiEvent>>();
             Ok(Some(events))
         }
     }
