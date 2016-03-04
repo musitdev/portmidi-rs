@@ -154,7 +154,7 @@ impl OutputPort {
 
     /// Write a single `MidiMessage` immediately
     pub fn write_message(&mut self, midi_message: MidiMessage) -> Result<()> {
-        let message = midi_message.unwrap();
+        let message = midi_message.into();
         Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })
     }
 }
