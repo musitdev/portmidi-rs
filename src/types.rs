@@ -50,8 +50,8 @@ impl From<[u8; 3]> for MidiMessage {
         }
     }
 }
-/// This can be used for `c_int` as well as `ffi::PmMessage` because these are only type aliases
-impl From<i32> for MidiMessage {
+/// This can be used for `c_int` as well as `i32` because these are only type aliases
+impl From<ffi::PmMessage> for MidiMessage {
     fn from(raw: i32) -> Self {
         MidiMessage {
             status: ((raw & 0x00_FF_00_00) >> 16) as u8,
@@ -60,7 +60,7 @@ impl From<i32> for MidiMessage {
         }
     }
 }
-impl Into<i32> for MidiMessage {
+impl Into<ffi::PmMessage> for MidiMessage {
     fn into(self) -> i32 {
         (((self.data2 as i32) << 16)) | (((self.data1 as i32) << 8)) | self.status as i32
     }
