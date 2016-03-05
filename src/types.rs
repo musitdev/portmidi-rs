@@ -1,5 +1,6 @@
 use std::convert::{From, Into};
 use std::result;
+use std::fmt;
 
 use ffi;
 
@@ -28,6 +29,15 @@ impl From<ffi::PmError> for Error {
         }
     }
 }
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Error::PortMidi(pm_err) => write!(f, "{}", pm_err),
+            err @ _ => write!(f, "{:?}", err)
+        }
+    }
+}
+
 
 // Midi events
 // -----------
