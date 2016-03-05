@@ -22,18 +22,18 @@ extern "C" {
     pub fn Pm_GetDeviceInfo(id: PmDeviceId) -> *const PmDeviceInfo;
     pub fn Pm_OpenInput(stream: *const *const PortMidiStream,
                         inputDevice: PmDeviceId,
-                        inputDriverInfo: Option<*const c_void>,
-                        bufferSize: c_int,
-                        time_proc: Option<*const c_void>,
-                        time_info: Option<*const c_void>)
+                        inputDriverInfo: *const c_void,
+                        bufferSize: i32,
+                        time_proc: *const c_void,
+                        time_info: *const c_void)
                         -> PmError;
     pub fn Pm_OpenOutput(stream: *const *const PortMidiStream,
                          outputDevice: PmDeviceId,
-                         inputDriverInfo: Option<*const c_void>,
-                         bufferSize: c_int,
-                         time_proc: Option<*const c_void>,
-                         time_info: Option<*const c_void>,
-                         latency: c_int)
+                         inputDriverInfo: *const c_void,
+                         bufferSize: i32,
+                         time_proc: *const c_void,
+                         time_info: *const c_void,
+                         latency: i32)
                          -> PmError;
     pub fn Pm_Read(stream: *const PortMidiStream, buffer: *mut PmEvent, length: c_int) -> c_int;
     pub fn Pm_Abort(stream: *const PortMidiStream) -> PmError;
