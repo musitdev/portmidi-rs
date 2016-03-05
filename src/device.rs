@@ -11,17 +11,17 @@ pub enum Direction {
 #[derive(Clone, Debug)]
 pub struct DeviceInfo {
     /// The `PortMidiDeviceId` used with `OutputPort::new` and `InputPort::new`
-    pub device_id: PortMidiDeviceId,
+    id: PortMidiDeviceId,
     /// The name of the device
-    pub name: String,
-    pub dir: Direction,
+    name: String,
+    dir: Direction,
 }
 impl DeviceInfo {
     // TODO: return a Result with an error if `dev_inf_ptr` is NULL (invalid id)
-    pub fn new(id: PortMidiDeviceId) -> Option<Self> {
+    pub fn new(id: PortMidiDeviceId) -> Result<Self> {
         let dev_inf_ptr = unsafe { ffi::Pm_GetDeviceInfo(id) };
         if dev_inf_ptr.is_null() {
-            None
+            Err(Error::PortMidi(ffi::PmError::PmInvalidDeviceId))
         } else {
             let name = unsafe { ffi::ptr_to_string((*dev_inf_ptr).name).unwrap() };
             let direction = if unsafe { (*dev_inf_ptr).input != 0 } {
@@ -30,8 +30,8 @@ impl DeviceInfo {
                 Direction::Output
             };
 
-            Some(DeviceInfo {
-                device_id: id,
+            Ok(DeviceInfo {
+                id: id,
                 name: name,
                 dir: direction,
             })
@@ -47,5 +47,13 @@ impl DeviceInfo {
 
     pub fn is_output(&self) -> bool {
         !self.is_input()
+    }
+
+    pub fn name(self) -> String {
+        self.name
+    }
+
+    pub fn id(&self) -> PortMidiDeviceId {
+        self.id
     }
 }

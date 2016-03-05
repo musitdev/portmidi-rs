@@ -10,12 +10,12 @@ mod device;
 pub use device::*;
 mod io;
 pub use io::*;
-mod global;
-pub use global::*;
 
 pub use ffi::PmError;
 pub mod types;
 pub use types::*;
+mod context;
+pub use context::*;
 
 pub const HDRLENGTH: i32 = 50;
 pub const PM_HOST_ERROR_MSG_LEN: i32 = 256;

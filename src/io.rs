@@ -1,7 +1,9 @@
 use ffi;
+use std::os::raw::c_int;
 use std::ptr;
 use types::*;
 use ffi::MaybeError;
+use device::DeviceInfo;
 
 // Input
 // -----
@@ -9,30 +11,31 @@ use ffi::MaybeError;
 #[allow(missing_copy_implementations)]
 pub struct InputPort {
     stream: *const ffi::PortMidiStream,
-    input_device: ffi::PmDeviceId,
-    buffer_size: i32,
+    device: ffi::PmDeviceId,
+    buffer_size: i32, // TODO: replace with an usize
 }
 
-const EVENT_BUFFER_SIZE: usize = 128;
+const EVENT_BUFFER_SIZE: usize = 128; // replace this with a parameter to InputPort new
 impl InputPort {
     /// Construct a new `InputPort` for `input_device`
-    pub fn new(input_device: PortMidiDeviceId, buffer_size: i32) -> InputPort {
-        InputPort {
-            stream: ptr::null(),
-            input_device: input_device,
-            buffer_size: buffer_size,
+    pub fn new(device: DeviceInfo, buffer_size: i32) -> Result<InputPort> {
+        if device.is_output() {
+            return Err(Error::Invalid);
         }
-    }
+        let raw_stream: *const ffi::PortMidiStream = ptr::null();
+        try!(Result::from(unsafe {
+            ffi::Pm_OpenInput(&raw_stream as *const *const _,
+                              device.id(),
+                              ptr::null(), // *inputDriverInfo, not needed for normal operation
+                              EVENT_BUFFER_SIZE as c_int,
+                              ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms,
+                              ptr::null()) // time_info, a pointer passed to the time procedure
+        }));
 
-    /// Open the port returning an error if there is a problem
-    pub fn open(&mut self) -> Result<()> {
-        Result::from(unsafe {
-            ffi::Pm_OpenInput(&self.stream,
-                              self.input_device,
-                              ptr::null(),
-                              self.buffer_size,
-                              ptr::null(),
-                              ptr::null())
+        Ok(InputPort {
+            stream: raw_stream,
+            device: device.id(),
+            buffer_size: EVENT_BUFFER_SIZE as c_int,
         })
     }
 
@@ -84,14 +87,12 @@ impl InputPort {
             err @ _ => Err(Error::PortMidi(err)),
         }
     }
-
-    /// Closes the input, flushing any pending buffers
-    ///
-    /// PortMidi attempts to close open streams when the application
-    /// exits, but this can be difficult under Windows
-    /// (according to the PortMidi documentation).
-    pub fn close(&mut self) -> Result<()> {
-        Result::from(unsafe { ffi::Pm_Close(self.stream) })
+}
+impl Drop for InputPort {
+    fn drop(&mut self) {
+        if let Err(err) = Result::from(unsafe { ffi::Pm_Close(self.stream) }) {
+            println!("{}", err);
+        }
     }
 }
 
@@ -99,32 +100,34 @@ impl InputPort {
 // Output
 // ------
 /// Representation of an output midi port
+///
 #[allow(missing_copy_implementations)]
 pub struct OutputPort {
     stream: *const ffi::PortMidiStream,
-    output_device: ffi::PmDeviceId,
-    buffer_size: i32,
+    device: ffi::PmDeviceId,
+    buffer_size: i32, // TODO: replace with an usize
 }
 impl OutputPort {
-    /// Construct a new `InputPort` for `input_device`
-    pub fn new(output_device: PortMidiDeviceId, buffer_size: i32) -> OutputPort {
-        OutputPort {
-            stream: ptr::null(),
-            output_device: output_device,
-            buffer_size: buffer_size,
+    /// Construct a new `OutputPort` for `input_device`
+    pub fn new(device: DeviceInfo, buffer_size: i32) -> Result<OutputPort> {
+        if device.is_input() {
+            return Err(Error::Invalid);
         }
-    }
+        let raw_stream: *const ffi::PortMidiStream = ptr::null();
+        try!(Result::from(unsafe {
+            ffi::Pm_OpenOutput(&raw_stream as *const *const _,
+                               device.id(),
+                               ptr::null(), // *inputDriverInfo, not needed for normal operation
+                               EVENT_BUFFER_SIZE as c_int,
+                               ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms,
+                               ptr::null(), // time_info, a pointer passed to the time procedure
+                               0) //latency
+        }));
 
-    /// Open the port returning an error if there is a problem
-    pub fn open(&mut self) -> Result<()> {
-        Result::from(unsafe {
-            ffi::Pm_OpenOutput(&self.stream,
-                               self.output_device,
-                               ptr::null(),
-                               self.buffer_size,
-                               ptr::null(),
-                               ptr::null(),
-                               0)
+        Ok(OutputPort {
+            stream: raw_stream,
+            device: device.id(),
+            buffer_size: EVENT_BUFFER_SIZE as c_int,
         })
     }
 
@@ -137,15 +140,6 @@ impl OutputPort {
         Result::from(unsafe { ffi::Pm_Abort(self.stream) })
     }
 
-    /// Closes the midi stream, flushing any pending buffers
-    ///
-    /// PortMidi attempts to close open streams when the application
-    /// exits, but this can be difficult under Windows
-    /// (according to the PortMidi documentation).
-    pub fn close(&mut self) -> Result<()> {
-        Result::from(unsafe { ffi::Pm_Close(self.stream) })
-    }
-
     /// Write a single `MidiEvent`
     pub fn write_event(&mut self, midi_event: MidiEvent) -> Result<()> {
         let event = midi_event.into();
@@ -156,5 +150,12 @@ impl OutputPort {
     pub fn write_message(&mut self, midi_message: MidiMessage) -> Result<()> {
         let message = midi_message.into();
         Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })
+    }
+}
+impl Drop for OutputPort {
+    fn drop(&mut self) {
+        if let Err(err) = Result::from(unsafe { ffi::Pm_Close(self.stream) }) {
+            println!("{}", err);
+        }
     }
 }
