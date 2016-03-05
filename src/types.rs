@@ -21,6 +21,8 @@ pub enum Error {
     PortMidi(ffi::PmError),
     Unknown,
     Unimplemented,
+    NoDefaultDevice,
+    Invalid,
 }
 impl From<ffi::PmError> for Error {
     fn from(err: ffi::PmError) -> Self {
