@@ -54,6 +54,17 @@ impl PortMidi {
         DeviceInfo::new(id)
     }
 
+    pub fn devices(&self) -> Result<Vec<DeviceInfo>> {
+        let mut devices = Vec::with_capacity(self.device_cnt() as usize);
+        for res in (0..self.device_cnt()).map(|id| self.device(id)) {
+            match res {
+                Ok(device) => devices.push(device),
+                Err(err) => return Err(err),
+            }
+        }
+        Ok(devices)
+    }
+
     pub fn default_input_port(&self) -> Result<InputPort> {
         let info = try!(self.default_input_device_id().and_then(|id| self.device(id)));
         InputPort::new(info, self.buffer_size)
