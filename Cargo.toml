@@ -14,3 +14,7 @@ documentation = "http://musitdev.github.io/portmidi-rs/portmidi/index.html"
 keywords = ["midi", "music", "audio"]
 
 [dependencies]
+
+[dev-dependencies]
+docopt = "0.6.*"
+rustc-serialize = "0.3.*"
