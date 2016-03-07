@@ -24,7 +24,7 @@ impl PortMidi {
 
     /// Return the number of devices. This number will not change during the lifetime
     /// of the program.
-    pub fn device_cnt(self) -> PortMidiDeviceId {
+    pub fn device_cnt(&self) -> PortMidiDeviceId {
         self.device_cnt
     }
 
