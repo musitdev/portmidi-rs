@@ -74,7 +74,7 @@ impl PortMidi {
         if device.is_input() {
             InputPort::new(device, self.buffer_size)
         } else {
-            Err(Error::Invalid)
+            Err(Error::NotAnInputDevice)
         }
     }
 
@@ -87,7 +87,7 @@ impl PortMidi {
         if device.is_output() {
             InputPort::new(device, self.buffer_size)
         } else {
-            Err(Error::Invalid)
+            Err(Error::NotAnOutputDevice)
         }
     }
 }

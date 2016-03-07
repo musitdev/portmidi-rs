@@ -22,6 +22,8 @@ pub enum Error {
     Unknown,
     Unimplemented,
     NoDefaultDevice,
+    NotAnInputDevice,
+    NotAnOutputDevice,
     Invalid,
 }
 impl From<ffi::PmError> for Error {
