@@ -50,12 +50,12 @@ impl PortMidi {
         }
     }
 
-    pub fn device_info(&self, id: PortMidiDeviceId) -> Result<DeviceInfo> {
+    pub fn device(&self, id: PortMidiDeviceId) -> Result<DeviceInfo> {
         DeviceInfo::new(id)
     }
 
     pub fn default_input_port(&self) -> Result<InputPort> {
-        let info = try!(self.default_input_device_id().and_then(|id| self.device_info(id)));
+        let info = try!(self.default_input_device_id().and_then(|id| self.device(id)));
         InputPort::new(info, self.buffer_size)
     }
 
@@ -68,7 +68,7 @@ impl PortMidi {
     }
 
     pub fn default_output_port(&self) -> Result<OutputPort> {
-        let info = try!(self.default_output_device_id().and_then(|id| self.device_info(id)));
+        let info = try!(self.default_output_device_id().and_then(|id| self.device(id)));
         OutputPort::new(info, self.buffer_size)
     }
 
