@@ -1,5 +1,6 @@
 use ffi;
 use types::*;
+use std::fmt;
 
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Direction {
@@ -49,11 +50,20 @@ impl DeviceInfo {
         !self.is_input()
     }
 
-    pub fn name(self) -> String {
-        self.name
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    pub fn direction(&self) -> Direction {
+        self.dir
     }
 
     pub fn id(&self) -> PortMidiDeviceId {
         self.id
+    }
+}
+impl fmt::Display for DeviceInfo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}) {:?}: {}", self.id(), self.direction(), self.name())
     }
 }
