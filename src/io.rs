@@ -12,13 +12,12 @@ use device::DeviceInfo;
 pub struct InputPort {
     stream: *const ffi::PortMidiStream,
     device: ffi::PmDeviceId,
-    buffer_size: i32, // TODO: replace with an usize
+    buffer_size: usize,
 }
 
-const EVENT_BUFFER_SIZE: usize = 128; // replace this with a parameter to InputPort new
 impl InputPort {
     /// Construct a new `InputPort` for `input_device`
-    pub fn new(device: DeviceInfo, buffer_size: i32) -> Result<InputPort> {
+    pub fn new(device: DeviceInfo, buffer_size: usize) -> Result<InputPort> {
         if device.is_output() {
             return Err(Error::NotAnInputDevice);
         }
@@ -27,7 +26,7 @@ impl InputPort {
             ffi::Pm_OpenInput(&raw_stream as *const *const _,
                               device.id(),
                               ptr::null(), // *inputDriverInfo, not needed for normal operation
-                              EVENT_BUFFER_SIZE as c_int,
+                              buffer_size as c_int,
                               ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms,
                               ptr::null()) // time_info, a pointer passed to the time procedure
         }));
@@ -35,17 +34,17 @@ impl InputPort {
         Ok(InputPort {
             stream: raw_stream,
             device: device.id(),
-            buffer_size: EVENT_BUFFER_SIZE as c_int,
+            buffer_size: buffer_size,
         })
     }
 
     pub fn read_n(&mut self, cnt: usize) -> Result<Option<Vec<MidiEvent>>> {
-        let read_cnt = if cnt > EVENT_BUFFER_SIZE {
-            EVENT_BUFFER_SIZE as i32
+        let read_cnt = if cnt > self.buffer_size {
+            self.buffer_size as c_int
         } else {
-            cnt as i32
+            cnt as c_int
         };
-        let mut event_buffer = [ffi::PmEvent::default(); EVENT_BUFFER_SIZE];
+        let mut event_buffer = vec![ffi::PmEvent::default(); self.buffer_size];
         let res = unsafe { ffi::Pm_Read(self.stream, event_buffer.as_mut_ptr(), read_cnt) };
         if res < 0 {
             let err = ffi::PmError::try_from(res).unwrap();
@@ -105,11 +104,11 @@ impl Drop for InputPort {
 pub struct OutputPort {
     stream: *const ffi::PortMidiStream,
     device: ffi::PmDeviceId,
-    buffer_size: i32, // TODO: replace with an usize
+    buffer_size: usize,
 }
 impl OutputPort {
     /// Construct a new `OutputPort` for `input_device`
-    pub fn new(device: DeviceInfo, buffer_size: i32) -> Result<OutputPort> {
+    pub fn new(device: DeviceInfo, buffer_size: usize) -> Result<OutputPort> {
         if device.is_input() {
             return Err(Error::NotAnOutputDevice);
         }
@@ -118,7 +117,7 @@ impl OutputPort {
             ffi::Pm_OpenOutput(&raw_stream as *const *const _,
                                device.id(),
                                ptr::null(), // *inputDriverInfo, not needed for normal operation
-                               EVENT_BUFFER_SIZE as c_int,
+                               buffer_size as c_int,
                                ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms,
                                ptr::null(), // time_info, a pointer passed to the time procedure
                                0) //latency
@@ -127,7 +126,7 @@ impl OutputPort {
         Ok(OutputPort {
             stream: raw_stream,
             device: device.id(),
-            buffer_size: EVENT_BUFFER_SIZE as c_int,
+            buffer_size: buffer_size,
         })
     }
 

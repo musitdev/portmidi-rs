@@ -6,7 +6,7 @@ use device::DeviceInfo;
 /// The elements are static after initializing
 pub struct PortMidi {
     device_cnt: i32,
-    buffer_size: i32,
+    buffer_size: usize,
 }
 impl PortMidi {
     /// Initializes the underlying PortMidi C library.
