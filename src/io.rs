@@ -20,7 +20,7 @@ impl InputPort {
     /// Construct a new `InputPort` for `input_device`
     pub fn new(device: DeviceInfo, buffer_size: i32) -> Result<InputPort> {
         if device.is_output() {
-            return Err(Error::Invalid);
+            return Err(Error::NotAnInputDevice);
         }
         let raw_stream: *const ffi::PortMidiStream = ptr::null();
         try!(Result::from(unsafe {
@@ -111,7 +111,7 @@ impl OutputPort {
     /// Construct a new `OutputPort` for `input_device`
     pub fn new(device: DeviceInfo, buffer_size: i32) -> Result<OutputPort> {
         if device.is_input() {
-            return Err(Error::Invalid);
+            return Err(Error::NotAnOutputDevice);
         }
         let raw_stream: *const ffi::PortMidiStream = ptr::null();
         try!(Result::from(unsafe {
