@@ -13,12 +13,12 @@ impl PortMidi {
     /// It does not support *hot plugging*, this means
     /// that devices that are connect after calling `new`
     /// are not picked up by PortMidi.
-    pub fn new() -> Result<Self> {
+    pub fn new(buffer_size: usize) -> Result<Self> {
         try!(Result::from(unsafe { ffi::Pm_Initialize() }));
 
         Ok(PortMidi {
             device_cnt: unsafe { ffi::Pm_CountDevices() },
-            buffer_size: 1024, // TODO: argument
+            buffer_size: buffer_size,
         })
     }
 
