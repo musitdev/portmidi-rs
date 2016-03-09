@@ -37,7 +37,7 @@ fn main() {
 
     let mut in_port = context.input_port(info).unwrap();
     while let Ok(_) = in_port.poll() {
-        if let Ok(Some(event)) = in_port.read() {
+        if let Ok(Some(event)) = in_port.read_n(1024) {
             println!("{:?}", event);
         }
     }
