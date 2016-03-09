@@ -46,19 +46,16 @@ impl InputPort {
         };
         let mut event_buffer = vec![ffi::PmEvent::default(); self.buffer_size];
         let res = unsafe { ffi::Pm_Read(self.stream, event_buffer.as_mut_ptr(), read_cnt) };
-        if res < 0 {
-            let err = ffi::PmError::try_from(res).unwrap();
-            // TODO: Return the error
-            println!("error: {:?}", err);
-            return Ok(None);
-        } else if res == 0 {
-            Ok(None)
-        } else {
-            // remove mutability and replace return value
-            let events = (0..res as usize)
-                             .map(|i| MidiEvent::from(event_buffer[i].clone()))
-                             .collect::<Vec<MidiEvent>>();
-            Ok(Some(events))
+        ::std::thread::sleep_ms(20);
+        match ffi::PmError::try_from(res) {
+            Ok(event_cnt) => {
+                let events = (0..event_cnt as usize)
+                                 .map(|i| MidiEvent::from(event_buffer[i].clone()))
+                                 .collect::<Vec<MidiEvent>>();
+                Ok(Some(events))
+            }
+            err @ Err(ffi::PmError::PmNoError) => Ok(None),
+            Err(err) => return Err(Error::PortMidi(err)),
         }
     }
 
