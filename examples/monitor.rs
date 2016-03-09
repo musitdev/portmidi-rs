@@ -27,7 +27,7 @@ fn print_devices(pm: &pm::PortMidi) {
 }
 
 fn main() {
-    let context = pm::PortMidi::new().unwrap();
+    let context = pm::PortMidi::new(1024).unwrap();
     let args: Args = docopt::Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|err| {
         print_devices(&context);
         err.exit();
