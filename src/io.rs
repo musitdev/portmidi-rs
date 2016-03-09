@@ -38,7 +38,7 @@ impl InputPort {
         })
     }
 
-    pub fn read_n(&mut self, cnt: usize) -> Result<Option<Vec<MidiEvent>>> {
+    pub fn read_n(&self, cnt: usize) -> Result<Option<Vec<MidiEvent>>> {
         let read_cnt = if cnt > self.buffer_size {
             self.buffer_size as c_int
         } else {
