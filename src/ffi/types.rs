@@ -81,7 +81,7 @@ pub trait MaybeError<T> {
 impl MaybeError<c_int> for PmError {
     fn try_from(err_code: c_int) -> Result<c_int, PmError> {
         match err_code {
-            -10_000...-9992 | 0 | 1 => unsafe { Err(mem::transmute(err_code)) },
+            -10_000...-9992 | 0 => unsafe { Err(mem::transmute(err_code)) },
             _ => Ok(err_code),
         }
     }
