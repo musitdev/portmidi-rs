@@ -17,7 +17,7 @@ Omitting <id> will list the available devices.
 
 #[derive(Debug, RustcDecodable)]
 struct Args {
-    arg_id: u32,
+    arg_id: i32,
 }
 
 fn print_devices(pm: &pm::PortMidi) {
@@ -32,7 +32,7 @@ fn main() {
         print_devices(&context);
         err.exit();
     });
-    let info = context.device(args.arg_id as i32).unwrap();
+    let info = context.device(args.arg_id).unwrap();
     println!("Listening on: {}) {}", info.id(), info.name());
 
     let mut in_port = context.input_port(info).unwrap();
