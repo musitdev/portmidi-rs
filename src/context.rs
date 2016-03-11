@@ -1,4 +1,5 @@
 use ffi;
+use std::os::raw::c_int;
 use types::{Result, PortMidiDeviceId, Error};
 use io::{InputPort, OutputPort};
 use device::DeviceInfo;
@@ -6,27 +7,27 @@ use device::DeviceInfo;
 /// The PortMidi base struct.
 /// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
-    device_cnt: i32,
-    buffer_size: usize,
+    device_cnt: u32,
 }
 impl PortMidi {
     /// Initializes the underlying PortMidi C library.
     /// PortMidi does not support *hot plugging*, this means
     /// that devices that are connect after calling `new`
-    /// are not picked up by PortMidi.
-    pub fn new(buffer_size: usize) -> Result<Self> {
+    /// are not picked up.
+    pub fn new() -> Result<Self> {
         try!(Result::from(unsafe { ffi::Pm_Initialize() }));
-
-        Ok(PortMidi {
-            device_cnt: unsafe { ffi::Pm_CountDevices() },
-            buffer_size: buffer_size,
-        })
+        let device_cnt = unsafe { ffi::Pm_CountDevices() };
+        if device_cnt >= 0 {
+            Ok(PortMidi { device_cnt: device_cnt as u32 })
+        } else {
+            Err(Error::Invalid)
+        }
     }
 
     /// Return the number of devices. This number will not change during the lifetime
     /// of the program.
     pub fn device_cnt(&self) -> PortMidiDeviceId {
-        self.device_cnt
+        self.device_cnt as c_int
     }
 
     /// Returns the `PortMidiDeviceId` for the default input device, or an `Error::NoDefaultDevice` if
@@ -66,27 +67,33 @@ impl PortMidi {
         Ok(devices)
     }
 
-    pub fn default_input_port(&self) -> Result<InputPort> {
+    /// Creates an `InputPort` instance with the given buffer size for the default input device.
+    pub fn default_input_port(&self, buffer_size: usize) -> Result<InputPort> {
         let info = try!(self.default_input_device_id().and_then(|id| self.device(id)));
-        InputPort::new(info, self.buffer_size)
+        InputPort::new(info, buffer_size)
     }
 
-    pub fn input_port(&self, device: DeviceInfo) -> Result<InputPort> {
+    /// Creates an `InputPort` instance for the given device and buffer size.
+    /// If the given device is not an input device an `Error::NotAnInputDevice` is returned.
+    pub fn input_port(&self, device: DeviceInfo, buffer_size: usize) -> Result<InputPort> {
         if device.is_input() {
-            InputPort::new(device, self.buffer_size)
+            InputPort::new(device, buffer_size)
         } else {
             Err(Error::NotAnInputDevice)
         }
     }
 
-    pub fn default_output_port(&self) -> Result<OutputPort> {
+    /// Creates an `OutputPort` instance with the given buffer size for the default output device.
+    pub fn default_output_port(&self, buffer_size: usize) -> Result<OutputPort> {
         let info = try!(self.default_output_device_id().and_then(|id| self.device(id)));
-        OutputPort::new(info, self.buffer_size)
+        OutputPort::new(info, buffer_size)
     }
 
-    pub fn output_port(&self, device: DeviceInfo) -> Result<InputPort> {
+    /// Creates an `OutputPort` instance for the given device and buffer size.
+    /// If the given device is not an output device an `Error::NotAnOutputDevice` is returned.
+    pub fn output_port(&self, device: DeviceInfo, buffer_size: usize) -> Result<OutputPort> {
         if device.is_output() {
-            InputPort::new(device, self.buffer_size)
+            OutputPort::new(device, buffer_size)
         } else {
             Err(Error::NotAnOutputDevice)
         }
