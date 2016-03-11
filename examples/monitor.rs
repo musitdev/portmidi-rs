@@ -27,18 +27,28 @@ fn print_devices(pm: &pm::PortMidi) {
 }
 
 fn main() {
-    let context = pm::PortMidi::new(1024).unwrap();
+    // initialize the PortMidi context.
+    let context = pm::PortMidi::new().unwrap();
+
+    // setup the command line interface
     let args: Args = docopt::Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|err| {
         print_devices(&context);
         err.exit();
     });
+
+    // get the device info for the given id
     let info = context.device(args.arg_id).unwrap();
     println!("Listening on: {}) {}", info.id(), info.name());
 
-    let mut in_port = context.input_port(info).unwrap();
+    // get the device's input port
+    let mut in_port = context.input_port(info, 1024).unwrap();
+
     while let Ok(_) = in_port.poll() {
         if let Ok(Some(event)) = in_port.read_n(1024) {
             println!("{:?}", event);
+            // there is no blocking receive method in PortMidi, therefore
+            // we have to sleep some time to prevent a busy-wait loop
+            ::std::thread::sleep_ms(20);
         }
     }
 }
