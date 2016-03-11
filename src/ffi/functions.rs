@@ -39,7 +39,10 @@ extern "C" {
     pub fn Pm_Abort(stream: *const PortMidiStream) -> PmError;
     pub fn Pm_Close(stream: *const PortMidiStream) -> PmError;
     pub fn Pm_Poll(stream: *const PortMidiStream) -> PmError;
-    pub fn Pm_Write(stream: *const PortMidiStream, buffer: *const PmEvent, length: c_int) -> PmError;
+    pub fn Pm_Write(stream: *const PortMidiStream,
+                    buffer: *const PmEvent,
+                    length: c_int)
+                    -> PmError;
     pub fn Pm_WriteShort(stream: *const PortMidiStream,
                          timestamp: PmTimestamp,
                          message: PmMessage)

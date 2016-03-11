@@ -25,7 +25,7 @@ impl InputPort {
                               device.id(),
                               ptr::null(), // *inputDriverInfo, not needed for normal operation
                               buffer_size as c_int,
-                              ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms,
+                              ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms
                               ptr::null()) // time_info, a pointer passed to the time procedure
         }));
 
