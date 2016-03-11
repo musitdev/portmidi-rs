@@ -1,10 +1,11 @@
+use std::os::raw::c_int;
 use std::convert::{From, Into};
 use std::result;
 use std::fmt;
 
 use ffi;
 
-pub type PortMidiDeviceId = i32;
+pub type PortMidiDeviceId = c_int;
 
 /// PortMidi result type.
 pub type Result<T> = result::Result<T, Error>;
