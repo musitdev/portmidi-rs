@@ -2,23 +2,25 @@ use ffi;
 use types::*;
 use std::fmt;
 
+/// Device event direction.
 #[derive(Debug,Clone,Copy,PartialEq)]
 pub enum Direction {
     Input,
     Output,
 }
 
-/// Represents what we know about a device
+/// Represents a PortMidi device.
 #[derive(Clone, Debug)]
 pub struct DeviceInfo {
-    /// The `PortMidiDeviceId` used with `OutputPort::new` and `InputPort::new`
     id: PortMidiDeviceId,
-    /// The name of the device
+    /// The device name
     name: String,
+    /// Event direction
     dir: Direction,
 }
 impl DeviceInfo {
-    // TODO: return a Result with an error if `dev_inf_ptr` is NULL (invalid id)
+    /// Creates a new `DeviceInfo` instance for the given device id.
+    /// Returns an `Error::PortMidi(_)` if the given id is invalid.
     pub fn new(id: PortMidiDeviceId) -> Result<Self> {
         let dev_inf_ptr = unsafe { ffi::Pm_GetDeviceInfo(id) };
         if dev_inf_ptr.is_null() {
@@ -39,6 +41,7 @@ impl DeviceInfo {
         }
     }
 
+    /// Returns `true` for an input device.
     pub fn is_input(&self) -> bool {
         match self.dir {
             Direction::Input => true,
@@ -46,18 +49,22 @@ impl DeviceInfo {
         }
     }
 
+    /// Returns `true` for an output device.
     pub fn is_output(&self) -> bool {
         !self.is_input()
     }
 
+    /// Returns the device name.
     pub fn name(&self) -> &String {
         &self.name
     }
 
+    /// Returns the device event direction.
     pub fn direction(&self) -> Direction {
         self.dir
     }
 
+    /// Returns the device id.
     pub fn id(&self) -> PortMidiDeviceId {
         self.id
     }

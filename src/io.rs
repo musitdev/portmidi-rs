@@ -5,18 +5,16 @@ use types::*;
 use ffi::MaybeError;
 use device::DeviceInfo;
 
-// Input
-// -----
-/// Representation of an input midi port
-#[allow(missing_copy_implementations)]
+/// Represents the input port of a PortMidi device.
 pub struct InputPort {
     stream: *const ffi::PortMidiStream,
     device: ffi::PmDeviceId,
     buffer_size: usize,
 }
-
 impl InputPort {
-    /// Construct a new `InputPort` for `input_device`
+    /// Construct a new `InputPort` for the given device and buffer size.
+    ///
+    /// If the `device` is not an input device an `Error::NotAnInputDevice` is returned.
     pub fn new(device: DeviceInfo, buffer_size: usize) -> Result<InputPort> {
         if device.is_output() {
             return Err(Error::NotAnInputDevice);
@@ -38,6 +36,9 @@ impl InputPort {
         })
     }
 
+    /// Returns a `Vec<MidiEvent>` with at most `cnt` elements.
+    /// If there was no Midi event available, `None` is returned.
+    /// If PortMidi fails to read from the device an `Error::PortMidi(_)` is returned.
     pub fn read_n(&self, cnt: usize) -> Result<Option<Vec<MidiEvent>>> {
         let read_cnt = if cnt > self.buffer_size {
             self.buffer_size as c_int
@@ -59,13 +60,9 @@ impl InputPort {
         }
     }
 
-    /// Reads a single `MidiEvent` if one is avaible
+    /// Reads a single `MidiEvent` if one is avaible.
     ///
     /// A `Result` of `None` means no event was available.
-    ///
-    /// See the PortMidi documentation for information on how it deals with input
-    /// overflows
-    /// TODO: call `read_n`
     pub fn read(&mut self) -> Result<Option<MidiEvent>> {
         match self.read_n(1) {
             Ok(Some(mut vec)) => Ok(vec.pop()),
@@ -74,7 +71,9 @@ impl InputPort {
         }
     }
 
-    /// `poll` tests if there is input available, either returing a bool or an error
+    /// Polls for available Midi events.
+    /// Returns `true` if there are events available, otherwise `false` is returned.
+    /// If the polling fails an `Error::PortMidi(_)` is returned.
     pub fn poll(&self) -> Result<bool> {
         let pm_error = unsafe { ffi::Pm_Poll(self.stream) };
         match pm_error {
@@ -93,18 +92,16 @@ impl Drop for InputPort {
 }
 
 
-// Output
-// ------
-/// Representation of an output midi port
-///
-#[allow(missing_copy_implementations)]
+/// Representation the output port of a PortMidi device.
 pub struct OutputPort {
     stream: *const ffi::PortMidiStream,
     device: ffi::PmDeviceId,
     buffer_size: usize,
 }
 impl OutputPort {
-    /// Construct a new `OutputPort` for `input_device`
+    /// Construct a new `OutputPort` for the given device and buffer size.
+    ///
+    /// If the `device` is not an output device an `Error::NotAnOutputDevice` is returned.
     pub fn new(device: DeviceInfo, buffer_size: usize) -> Result<OutputPort> {
         if device.is_input() {
             return Err(Error::NotAnOutputDevice);
@@ -127,7 +124,7 @@ impl OutputPort {
         })
     }
 
-    /// Terminates outgoing messages immediately
+    /// Terminates outgoing messages immediately.
     ///
     /// The caller should immediately close the output port, this may
     /// result in transmission of a partial midi message. Note, not all platforms
@@ -142,7 +139,8 @@ impl OutputPort {
         Result::from(unsafe { ffi::Pm_Write(self.stream, &event, 1) })
     }
 
-    /// Write a single `MidiMessage` immediately
+    /// Write a single `MidiMessage`.
+    /// Returns an `Error::PortMidi(_)` if something went wrong.
     pub fn write_message(&mut self, midi_message: MidiMessage) -> Result<()> {
         let message = midi_message.into();
         Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, message) })

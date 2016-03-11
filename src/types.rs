@@ -6,6 +6,7 @@ use ffi;
 
 pub type PortMidiDeviceId = i32;
 
+/// PortMidi result type.
 pub type Result<T> = result::Result<T, Error>;
 impl From<ffi::PmError> for Result<()> {
     fn from(err: ffi::PmError) -> Self {
@@ -16,6 +17,7 @@ impl From<ffi::PmError> for Result<()> {
     }
 }
 
+/// PortMidi error type.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Error {
     PortMidi(ffi::PmError),
@@ -37,15 +39,13 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Error::PortMidi(pm_err) => write!(f, "{}", pm_err),
-            err @ _ => write!(f, "{:?}", err)
+            err @ _ => write!(f, "{:?}", err),
         }
     }
 }
 
 
-// Midi events
-// -----------
-/// Represents a single midi message, see also `MidiEvent`
+/// Represents a Midi message.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiMessage {
     pub status: u8,
@@ -61,7 +61,8 @@ impl From<[u8; 3]> for MidiMessage {
         }
     }
 }
-/// This can be used for `c_int` as well as `i32` because these are only type aliases
+/// Converts a `PmMessage` to a `MidiMessage.
+/// This can be used for `c_int` as well as `i32` because these are only type aliases.
 impl From<ffi::PmMessage> for MidiMessage {
     fn from(raw: i32) -> Self {
         MidiMessage {
@@ -81,8 +82,6 @@ impl Into<ffi::PmMessage> for MidiMessage {
 ///
 /// See the PortMidi documentation for how SysEx and midi realtime messages
 /// are handled
-///
-/// TODO: what to do about the timestamp?
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct MidiEvent {
     pub message: MidiMessage,

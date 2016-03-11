@@ -3,14 +3,15 @@ use types::{Result, PortMidiDeviceId, Error};
 use io::{InputPort, OutputPort};
 use device::DeviceInfo;
 
-/// The elements are static after initializing
+/// The PortMidi base struct.
+/// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
     device_cnt: i32,
     buffer_size: usize,
 }
 impl PortMidi {
     /// Initializes the underlying PortMidi C library.
-    /// It does not support *hot plugging*, this means
+    /// PortMidi does not support *hot plugging*, this means
     /// that devices that are connect after calling `new`
     /// are not picked up by PortMidi.
     pub fn new(buffer_size: usize) -> Result<Self> {
@@ -28,10 +29,8 @@ impl PortMidi {
         self.device_cnt
     }
 
-    /// Gets the `PortMidiDeviceId` for the default input, or `None` if
-    /// there isn't one
-    ///
-    /// See the PortMidi documentation for details of how to set the default device
+    /// Returns the `PortMidiDeviceId` for the default input device, or an `Error::NoDefaultDevice` if
+    /// there is no available.
     pub fn default_input_device_id(&self) -> Result<PortMidiDeviceId> {
         match unsafe { ffi::Pm_GetDefaultInputDeviceID() } {
             ffi::PM_NO_DEVICE => Err(Error::NoDefaultDevice),
@@ -39,10 +38,8 @@ impl PortMidi {
         }
     }
 
-    /// Gets the `PortMidiDeviceId` for the default output, or `None` if
-    /// there isn't one
-    ///
-    /// See the PortMidi documentation for details of how to set the default device
+    /// Returns the `PortMidiDeviceId` for the default output device, or an `Error::NoDefaultDevice` if
+    /// there is no available.
     pub fn default_output_device_id(&self) -> Result<PortMidiDeviceId> {
         match unsafe { ffi::Pm_GetDefaultOutputDeviceID() } {
             ffi::PM_NO_DEVICE => Err(Error::NoDefaultDevice),
@@ -50,10 +47,14 @@ impl PortMidi {
         }
     }
 
+    /// Returns the `DeviceInfo` for the given device id or an `Error::PortMidi(_)` if
+    /// the given id is invalid.
     pub fn device(&self, id: PortMidiDeviceId) -> Result<DeviceInfo> {
         DeviceInfo::new(id)
     }
 
+    /// Returns a `Vec<DeviceInfo>` containing all known device infos.
+    /// An `Error::PortMidi(_)` is returned if the info for a device can't be obtained.
     pub fn devices(&self) -> Result<Vec<DeviceInfo>> {
         let mut devices = Vec::with_capacity(self.device_cnt() as usize);
         for res in (0..self.device_cnt()).map(|id| self.device(id)) {
