@@ -139,6 +139,14 @@ impl OutputPort {
     pub fn write_event(&mut self, midi_event: MidiEvent) -> Result<()> {
         let event = midi_event.into();
         Result::from(unsafe { ffi::Pm_Write(self.stream, &event, 1) })
+
+    /// Write a buffer of midi events to the output port.
+    /// Returns an `Error::PortMidi(_)` if something went wrong.
+    pub fn write_events<T: Into<MidiEvent>>(&mut self, midi_events: Vec<T>) -> Result<()> {
+        let events: Vec<ffi::PmEvent> = midi_events.into_iter()
+                                                   .map(|event| event.into().into())
+                                                   .collect();
+        Result::from(unsafe { ffi::Pm_Write(self.stream, events.as_ptr(), events.len() as c_int) })
     }
 
     /// Write a single `MidiMessage`.
