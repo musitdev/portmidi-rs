@@ -47,7 +47,6 @@ impl InputPort {
         };
         let mut event_buffer = vec![ffi::PmEvent::default(); self.buffer_size];
         let res = unsafe { ffi::Pm_Read(self.stream, event_buffer.as_mut_ptr(), read_cnt) };
-        ::std::thread::sleep_ms(20);
         match ffi::PmError::try_from(res) {
             Ok(event_cnt) => {
                 let events = (0..event_cnt as usize)
