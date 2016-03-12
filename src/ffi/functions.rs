@@ -16,7 +16,7 @@ extern "C" {
     pub fn Pm_Terminate() -> PmError;
     fn Pm_HasHostError(stream: *const PortMidiStream) -> c_int;
     pub fn Pm_GetErrorText(errorCode: PmError) -> *const c_char;
-    fn Pm_GetHostErrorText(msg: *const c_char, len: c_int);
+    pub fn Pm_GetHostErrorText(msg: *mut c_char, len: c_int);
     pub fn Pm_CountDevices() -> c_int;
     pub fn Pm_GetDefaultInputDeviceID() -> PmDeviceId;
     pub fn Pm_GetDefaultOutputDeviceID() -> PmDeviceId;
