@@ -22,3 +22,7 @@ rustc-serialize = "0.3.*"
 [[example]]
 name = "monitor"
 path = "examples/monitor.rs"
+
+[[example]]
+name = "play"
+path = "examples/twinkle_twinkle.rs"
