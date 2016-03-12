@@ -91,7 +91,7 @@ impl Drop for InputPort {
 }
 
 
-/// Representation the output port of a PortMidi device.
+/// Represents the output port of a PortMidi device.
 pub struct OutputPort {
     stream: *const ffi::PortMidiStream,
     device: ffi::PmDeviceId,
