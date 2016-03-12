@@ -8,7 +8,6 @@ use device::DeviceInfo;
 /// Represents the input port of a PortMidi device.
 pub struct InputPort {
     stream: *const ffi::PortMidiStream,
-    device: ffi::PmDeviceId,
     buffer_size: usize,
 }
 impl InputPort {
@@ -31,7 +30,6 @@ impl InputPort {
 
         Ok(InputPort {
             stream: raw_stream,
-            device: device.id(),
             buffer_size: buffer_size,
         })
     }
@@ -54,7 +52,7 @@ impl InputPort {
                                  .collect::<Vec<MidiEvent>>();
                 Ok(Some(events))
             }
-            err @ Err(ffi::PmError::PmNoError) => Ok(None),
+            Err(ffi::PmError::PmNoError) => Ok(None),
             Err(err) => return Err(Error::PortMidi(err)),
         }
     }
@@ -94,8 +92,6 @@ impl Drop for InputPort {
 /// Represents the output port of a PortMidi device.
 pub struct OutputPort {
     stream: *const ffi::PortMidiStream,
-    device: ffi::PmDeviceId,
-    buffer_size: usize,
 }
 impl OutputPort {
     /// Construct a new `OutputPort` for the given device and buffer size.
@@ -118,8 +114,6 @@ impl OutputPort {
 
         Ok(OutputPort {
             stream: raw_stream,
-            device: device.id(),
-            buffer_size: buffer_size,
         })
     }
 
