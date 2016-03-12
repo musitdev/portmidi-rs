@@ -7,7 +7,7 @@ use device::DeviceInfo;
 /// The PortMidi base struct.
 /// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
-    device_cnt: u32,
+    device_count: u32,
 }
 impl PortMidi {
     /// Initializes the underlying PortMidi C library.
@@ -16,9 +16,9 @@ impl PortMidi {
     /// are not picked up.
     pub fn new() -> Result<Self> {
         try!(Result::from(unsafe { ffi::Pm_Initialize() }));
-        let device_cnt = unsafe { ffi::Pm_CountDevices() };
-        if device_cnt >= 0 {
-            Ok(PortMidi { device_cnt: device_cnt as u32 })
+        let device_count = unsafe { ffi::Pm_CountDevices() };
+        if device_count >= 0 {
+            Ok(PortMidi { device_count: device_count as u32 })
         } else {
             Err(Error::Invalid)
         }
@@ -26,8 +26,8 @@ impl PortMidi {
 
     /// Return the number of devices. This number will not change during the lifetime
     /// of the program.
-    pub fn device_cnt(&self) -> PortMidiDeviceId {
-        self.device_cnt as c_int
+    pub fn device_count(&self) -> PortMidiDeviceId {
+        self.device_count as c_int
     }
 
     /// Returns the `PortMidiDeviceId` for the default input device, or an `Error::NoDefaultDevice` if
@@ -57,8 +57,8 @@ impl PortMidi {
     /// Returns a `Vec<DeviceInfo>` containing all known device infos.
     /// An `Error::PortMidi(_)` is returned if the info for a device can't be obtained.
     pub fn devices(&self) -> Result<Vec<DeviceInfo>> {
-        let mut devices = Vec::with_capacity(self.device_cnt() as usize);
-        for res in (0..self.device_cnt()).map(|id| self.device(id)) {
+        let mut devices = Vec::with_capacity(self.device_count() as usize);
+        for res in (0..self.device_count()).map(|id| self.device(id)) {
             match res {
                 Ok(device) => devices.push(device),
                 Err(err) => return Err(err),
