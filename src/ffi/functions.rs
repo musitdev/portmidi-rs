@@ -9,6 +9,7 @@
 use std::os::raw::{c_char, c_void, c_int};
 use ffi::types::*;
 
+#[allow(dead_code)]
 #[link(name = "portmidi")]
 extern "C" {
     pub fn Pm_Initialize() -> PmError;
