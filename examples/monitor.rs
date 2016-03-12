@@ -3,6 +3,9 @@ extern crate portmidi as pm;
 extern crate rustc_serialize;
 extern crate docopt;
 
+use std::time::Duration;
+use std::thread;
+
 const USAGE: &'static str = r#"
 portmidi-rs: monitor-device example
 
@@ -48,7 +51,7 @@ fn main() {
             println!("{:?}", event);
             // there is no blocking receive method in PortMidi, therefore
             // we have to sleep some time to prevent a busy-wait loop
-            ::std::thread::sleep_ms(20);
+            thread::sleep(Duration::new(0,50))
         }
     }
 }
