@@ -101,6 +101,14 @@ impl From<ffi::PmEvent> for MidiEvent {
         }
     }
 }
+impl From<MidiMessage> for MidiEvent {
+    fn from(msg: MidiMessage) -> Self {
+        MidiEvent {
+            message: msg,
+            timestamp: 0,
+        }
+    }
+}
 impl Into<ffi::PmEvent> for MidiEvent {
     fn into(self) -> ffi::PmEvent {
         ffi::PmEvent {
