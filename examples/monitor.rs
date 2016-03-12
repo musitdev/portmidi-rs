@@ -10,17 +10,17 @@ const USAGE: &'static str = r#"
 portmidi-rs: monitor-device example
 
 Usage:
-    monitor-device <id>
+    monitor-device <device-id>
 
 Options:
     -h --help   Show this screen.
 
-Omitting <id> will list the available devices.
+Omitting <device-id> will list the available devices.
 "#;
 
 #[derive(Debug, RustcDecodable)]
 struct Args {
-    arg_id: i32,
+    arg_device_id: i32,
 }
 
 fn print_devices(pm: &pm::PortMidi) {
@@ -40,7 +40,7 @@ fn main() {
     });
 
     // get the device info for the given id
-    let info = context.device(args.arg_id).unwrap();
+    let info = context.device(args.arg_device_id).unwrap();
     println!("Listening on: {}) {}", info.id(), info.name());
 
     // get the device's input port
