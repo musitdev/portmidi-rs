@@ -62,6 +62,11 @@ impl From<[u8; 3]> for MidiMessage {
         }
     }
 }
+impl fmt::Display for MidiMessage {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "status: {}, data: {}, {}", self.status, self.data1, self.data2)
+    }
+}
 /// Converts a `PmMessage` to a `MidiMessage.
 /// This can be used for `c_int` as well as `i32` because these are only type aliases.
 impl From<ffi::PmMessage> for MidiMessage {
