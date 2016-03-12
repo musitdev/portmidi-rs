@@ -102,6 +102,6 @@ impl PortMidi {
 impl Drop for PortMidi {
     fn drop(&mut self) {
         Result::from(unsafe { ffi::Pm_Terminate() })
-            .map_err(|err| println!("Could not terminate: {}", err));
+            .map_err(|err| println!("Could not terminate: {}", err)).unwrap();
     }
 }
