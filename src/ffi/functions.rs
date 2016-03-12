@@ -13,9 +13,9 @@ use ffi::types::*;
 extern "C" {
     pub fn Pm_Initialize() -> PmError;
     pub fn Pm_Terminate() -> PmError;
-    pub fn Pm_HasHostError(stream: *const PortMidiStream) -> c_int;
+    fn Pm_HasHostError(stream: *const PortMidiStream) -> c_int;
     pub fn Pm_GetErrorText(errorCode: PmError) -> *const c_char;
-    pub fn Pm_GetHostErrorText(msg: *const c_char, len: c_int);
+    fn Pm_GetHostErrorText(msg: *const c_char, len: c_int);
     pub fn Pm_CountDevices() -> c_int;
     pub fn Pm_GetDefaultInputDeviceID() -> PmDeviceId;
     pub fn Pm_GetDefaultOutputDeviceID() -> PmDeviceId;
@@ -36,7 +36,7 @@ extern "C" {
                          latency: i32)
                          -> PmError;
     pub fn Pm_Read(stream: *const PortMidiStream, buffer: *mut PmEvent, length: c_int) -> c_int;
-    pub fn Pm_Abort(stream: *const PortMidiStream) -> PmError;
+    fn Pm_Abort(stream: *const PortMidiStream) -> PmError;
     pub fn Pm_Close(stream: *const PortMidiStream) -> PmError;
     pub fn Pm_Poll(stream: *const PortMidiStream) -> PmError;
     pub fn Pm_Write(stream: *const PortMidiStream,
