@@ -132,8 +132,8 @@ impl OutputPort {
 
     /// Write a single `MidiMessage`.
     /// Returns an `Error::PortMidi(_)` if something went wrong.
-    pub fn write_message(&mut self, midi_message: MidiMessage) -> Result<()> {
-        Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, midi_message.into()) })
+    pub fn write_message<T: Into<MidiMessage>>(&mut self, midi_message: T) -> Result<()> {
+        Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, midi_message.into().into()) })
     }
 }
 impl Drop for OutputPort {
