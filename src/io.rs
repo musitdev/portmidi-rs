@@ -112,9 +112,7 @@ impl OutputPort {
                                0) //latency
         }));
 
-        Ok(OutputPort {
-            stream: raw_stream,
-        })
+        Ok(OutputPort { stream: raw_stream })
     }
 
     /// Write a single `MidiEvent`.
