@@ -14,7 +14,7 @@ Installation
 Add this to your `Cargo.toml`.
 ```toml
 [dependencies]
-portmidi = "^0.1"
+portmidi = "^0.2"
 ```
 
 Prerequisites
@@ -25,6 +25,11 @@ You need to make sure you have the PortMidi library installed.
 On Ubuntu / Debian:
 ```sh
 apt-get install libportmidi-dev
+```
+
+Arch Linux:
+```sh
+pacman -S portmidi
 ```
 
 On OSX (Homebrew):
@@ -42,37 +47,12 @@ On OSX, if you get a linker error `ld: library not found for -lportmidi`, either
 Examples
 ========
 Examples can be run by cloning the repository and running `cargo run --example <example name>`.
- * **`list_devices.rs`**: the simplest example, displays a list of your midi devices
- * **`twinkle_twinkle.rs`**: demonstrates midi output by playing Twinkle Twinkle Little Star (forever...)
- * **`monitor_device.rs`**: demonstrate midi input
+ * **`play`**: demonstrates midi output by playing Twinkle Twinkle Little Star (forever...)
+ * **`monitor`**: demonstrate midi input
 
-Both `twinkle_twinkle.rs` and `monitor_device.rs` need a device number supplied, run them without an argument to get a list of the connected devices, e.g.
+Example: `cargo run --example play -- 1 --verbose`
 
-```
-$ cargo run --example twinkle_twinkle
-     Running `target/examples/twinkle_twinkle`
-Please supply a device number:
-
-Id  Name                 Input? Output?
-=======================================
-0   IAC Driver Bus 1     true   false 
-1   RADIAS MIDI IN       true   false 
-2   RADIAS KBD/KNOB      true   false 
-3   IAC Driver Bus 1     false  true  
-4   RADIAS MIDI OUT      false  true  
-5   RADIAS SOUND         false  true  
-An unknown error occurred
-
-To learn more, run the command again with --verbose.
-```
-(ignore the `An unknown error occurred`, that is due to the example setting a non-zero exit code, when no device number is supplied)
-
-```
-$ cargo run --example twinkle_twinkle 5
-     Running `target/examples/twinkle_twinkle 5`
-Opening: RADIAS SOUND
-Press enter to quit
-```
+Both `play` and `monitor` need a device number supplied, run them without an argument to get a list of the connected devices, e.g.
 
 License
 =======

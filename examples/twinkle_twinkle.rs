@@ -1,95 +1,87 @@
 extern crate portmidi as pm;
 
-use std::thread::sleep_ms;
+extern crate rustc_serialize;
+extern crate docopt;
 
-use pm::{MidiMessage, PortMidiDeviceId, PortMidiResult};
-use pm::PortMidiError::InvalidDeviceId;
+use std::thread;
+use std::time::Duration;
 
-pub mod common;
+use pm::MidiMessage;
 
-static MIDI_CH: u8 = 0; // == midi channel 1
+static CHANNEL: u8 = 0;
+static MELODY: [(u8, u32); 42] = [(60, 1), (60, 1), (67, 1), (67, 1), (69, 1), (69, 1), (67, 2),
+                                  (65, 1), (65, 1), (64, 1), (64, 1), (62, 1), (62, 1), (60, 2),
+                                  (67, 1), (67, 1), (65, 1), (65, 1), (64, 1), (64, 1), (62, 2),
+                                  (67, 1), (67, 1), (65, 1), (65, 1), (64, 1), (64, 1), (62, 2),
+                                  (60, 1), (60, 1), (67, 1), (67, 1), (69, 1), (69, 1), (67, 2),
+                                  (65, 1), (65, 1), (64, 1), (64, 1), (62, 1), (62, 1), (60, 2)];
 
-static MELODY: &'static [(u8, u32)] = &[
-    (60, 1), (60, 1), (67, 1), (67, 1),
-    (69, 1), (69, 1), (67, 2),
-    (65, 1), (65, 1), (64, 1), (64, 1),
-    (62, 1), (62, 1), (60, 2),
+const USAGE: &'static str = r#"
+portmidi-rs: play-twinkle-twinkle
 
-    (67, 1), (67, 1), (65, 1), (65, 1),
-    (64, 1), (64, 1), (62, 2),
-    (67, 1), (67, 1), (65, 1), (65, 1),
-    (64, 1), (64, 1), (62, 2),
+Usage:
+    play [-v | --verbose] <device-id>
 
-    (60, 1), (60, 1), (67, 1), (67, 1),
-    (69, 1), (69, 1), (67, 2),
-    (65, 1), (65, 1), (64, 1), (64, 1),
-    (62, 1), (62, 1), (60, 2)
-    ];
+Options:
+    -h --help       Show this screen.
+    -v --verbose    Print what's being done
+
+Omitting <device-id> will list the available devices.
+"#;
+
+#[derive(Debug, RustcDecodable)]
+struct Args {
+    arg_device_id: i32,
+    flag_verbose: bool,
+}
+
+fn print_devices(pm: &pm::PortMidi) {
+    for dev in pm.devices().unwrap() {
+        println!("{}", dev);
+    }
+}
 
 fn main() {
-    // get the device number from the command line, or die()
-    let device_id = match common::get_arg(1) {
-        Some(id) => id,
-        None => { common::die(); return; }
-    };
+    // initialize the PortMidi context.
+    let context = pm::PortMidi::new().unwrap();
 
-    // run twinkle_twinkle, print an error if it returns one
-    if let Err(e) = twinkle_twinkle(device_id) {
-        println!("Error: {:?}", e);
-    }
+    // setup the command line interface
+    let args: Args = docopt::Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|err| {
+        print_devices(&context);
+        err.exit();
+    });
+
+    let out_port = context.device(args.arg_device_id)
+                          .and_then(|dev| context.output_port(dev, 1024))
+                          .unwrap();
+    play(out_port, args.flag_verbose).unwrap()
 }
 
-fn twinkle_twinkle(device_id: PortMidiDeviceId) -> PortMidiResult<()> {
-    // initialize portmidi
-    try!(pm::initialize());
-
-    // get the device and check it exists
-    let device = try!(pm::get_device_info(device_id).ok_or(InvalidDeviceId));
-    println!("Opening: {}", device.name);
-
-    // open the output
-    let mut output = pm::OutputPort::new(device_id, 1024);
-    try!(output.open());
-
-    let qw = common::QuitWatcher::new();
-    qw.start();
-
-    let mut iter = MELODY.iter().cycle();
-
-    while qw.is_running() {
-        if let Some(&(n, d)) = iter.next() {
-            let dur: u32 = 400 * d;
-
-            // send the note on
-            try!(output.write_message(note_on(MIDI_CH, n)));
-            sleep_ms(dur - 100);
-
-            // send the note off
-            try!(output.write_message(note_off(MIDI_CH, n)));
-            sleep_ms(100);
+fn play(mut out_port: pm::OutputPort, verbose: bool) -> pm::Result<()> {
+    for &(note, dur) in MELODY.iter().cycle() {
+        let note_on = MidiMessage {
+            status: 0x90 + CHANNEL,
+            data1: note,
+            data2: 100,
+        };
+        if verbose {
+            println!("{}", note_on)
         }
+        try!(out_port.write_message(note_on));
+        // note hold time before sending note off
+        thread::sleep(Duration::from_millis(dur as u64 * 400));
+
+        let note_off = MidiMessage {
+            status: 0x80 + CHANNEL,
+            data1: note,
+            data2: 100,
+        };
+        if verbose {
+            println!("{}", note_off);
+        }
+        try!(out_port.write_message(note_off));
+        // short pause
+        thread::sleep(Duration::from_millis(100));
     }
-
-    // close the input and terminate portmidi
-    try!(output.close());
-    pm::terminate()
+    Ok(())
 }
-
-fn note_on(channel: u8, note: u8) -> MidiMessage {
-    let status = (9 & 0b00001111) * 16 + channel;
-    MidiMessage {
-        status: status,
-        data1: note,
-        data2: 100
-    }
-}
-
-fn note_off(channel: u8, note: u8) -> MidiMessage {
-    let status = (8 & 0b00001111) * 16 + channel;
-    MidiMessage {
-        status: status,
-        data1: note,
-        data2: 0
-    }
-}
-
