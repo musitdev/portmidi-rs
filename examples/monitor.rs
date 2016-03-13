@@ -44,7 +44,7 @@ fn main() {
     println!("Listening on: {}) {}", info.id(), info.name());
 
     // get the device's input port
-    let mut in_port = context.input_port(info, 1024).unwrap();
+    let in_port = context.input_port(info, 1024).unwrap();
 
     while let Ok(_) = in_port.poll() {
         if let Ok(Some(event)) = in_port.read_n(1024) {
