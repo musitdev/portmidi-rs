@@ -18,6 +18,7 @@ keywords = ["midi", "music", "audio"]
 [dev-dependencies]
 docopt = "0.6.*"
 rustc-serialize = "0.3.*"
+rci = "~0.1"
 
 [[example]]
 name = "monitor"
