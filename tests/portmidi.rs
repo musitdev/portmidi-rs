@@ -23,8 +23,15 @@ fn test_main() {
         assert!(context.devices().unwrap().len() > 0);
         let mut in_port = context.default_input_port(1024).unwrap();
         let mut out_port = context.default_output_port(1024).unwrap();
-        assert!(in_port.poll() == Ok(false));
-        assert!(in_port.read() == Ok(None));
+        match in_port.poll() {
+            Ok(flag) => println!("test_main) midi events available: {}", flag),
+            Err(err) => println!("test_main) poll error: {}", err),
+        };
+        match in_port.read() {
+            Ok(Some(event)) => println!("received midi event: {:?}", event),
+            Ok(None) => println!("test_main) no midi event available"),
+            Err(err) => println!("test_main) read error: {}", err),
+        };
         let msgs = vec![portmidi::MidiMessage {
                             status: 0x90,
                             data1: 60,
@@ -35,6 +42,9 @@ fn test_main() {
                             data1: 60,
                             data2: 0,
                         }];
-        assert!(out_port.write_events(msgs).is_ok());
+        match out_port.write_events(msgs) {
+            Ok(_) => println!("test_main) successfully wrote midi events"),
+            Err(err) => println!("test_main) write error: {}", err),
+        }
     }
 }
