@@ -49,6 +49,7 @@ Examples
 Examples can be run by cloning the repository and running `cargo run --example <example name>`.
  * **`play`**: demonstrates midi output by playing Twinkle Twinkle Little Star (forever...)
  * **`monitor`**: demonstrate midi input
+ * **`monitor-all`**: listens on all-input devices and uses threads and channels
 
 Example: `cargo run --example play -- 1 --verbose`
 
