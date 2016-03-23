@@ -9,6 +9,7 @@ use device::DeviceInfo;
 pub struct InputPort {
     stream: *const ffi::PortMidiStream,
     buffer_size: usize,
+    device: DeviceInfo,
 }
 impl InputPort {
     /// Construct a new `InputPort` for the given device and buffer size.
@@ -31,6 +32,7 @@ impl InputPort {
         Ok(InputPort {
             stream: raw_stream,
             buffer_size: buffer_size,
+            device: device,
         })
     }
 
@@ -79,6 +81,11 @@ impl InputPort {
             err @ _ => Err(Error::PortMidi(err)),
         }
     }
+
+    /// Returns the `DeviceInfo` of the Midi device that owns this port.
+    pub fn device(&self) -> DeviceInfo {
+        return self.device.clone()
+    }
 }
 impl Drop for InputPort {
     fn drop(&mut self) {
@@ -92,6 +99,7 @@ impl Drop for InputPort {
 /// Represents the output port of a PortMidi device.
 pub struct OutputPort {
     stream: *const ffi::PortMidiStream,
+    device: DeviceInfo,
 }
 impl OutputPort {
     /// Construct a new `OutputPort` for the given device and buffer size.
@@ -112,7 +120,7 @@ impl OutputPort {
                                0) //latency
         }));
 
-        Ok(OutputPort { stream: raw_stream })
+        Ok(OutputPort { stream: raw_stream, device: device })
     }
 
     /// Write a single `MidiEvent`.
@@ -134,6 +142,11 @@ impl OutputPort {
     /// Returns an `Error::PortMidi(_)` if something went wrong.
     pub fn write_message<T: Into<MidiMessage>>(&mut self, midi_message: T) -> Result<()> {
         Result::from(unsafe { ffi::Pm_WriteShort(self.stream, 0, midi_message.into().into()) })
+    }
+
+    /// Returns the `DeviceInfo` of the Midi device that owns this port.
+    pub fn device(&self) -> DeviceInfo {
+        return self.device.clone()
     }
 }
 impl Drop for OutputPort {
