@@ -4,6 +4,7 @@ use std::ptr;
 use types::*;
 use ffi::MaybeError;
 use device::DeviceInfo;
+use std::marker::Send;
 
 /// Represents the input port of a PortMidi device.
 pub struct InputPort {
@@ -94,6 +95,7 @@ impl Drop for InputPort {
         }
     }
 }
+unsafe impl Send for InputPort{}
 
 
 /// Represents the output port of a PortMidi device.
@@ -156,3 +158,4 @@ impl Drop for OutputPort {
         }
     }
 }
+unsafe impl Send for OutputPort{}
