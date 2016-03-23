@@ -74,7 +74,8 @@ impl fmt::Display for PmError {
         let mut host_error_text: [c_char; 1024] = [0; 1024];
         let str_ptr = match self {
             &PmError::PmHostError => unsafe {
-                ffi::Pm_GetHostErrorText(host_error_text.as_mut_ptr(), host_error_text.len() as c_int);
+                ffi::Pm_GetHostErrorText(host_error_text.as_mut_ptr(),
+                                         host_error_text.len() as c_int);
                 host_error_text.as_ptr()
             },
             _ => unsafe { ffi::Pm_GetErrorText(*self) },

@@ -85,7 +85,7 @@ impl InputPort {
 
     /// Returns the `DeviceInfo` of the Midi device that owns this port.
     pub fn device(&self) -> DeviceInfo {
-        return self.device.clone()
+        return self.device.clone();
     }
 }
 impl Drop for InputPort {
@@ -95,7 +95,7 @@ impl Drop for InputPort {
         }
     }
 }
-unsafe impl Send for InputPort{}
+unsafe impl Send for InputPort {}
 
 
 /// Represents the output port of a PortMidi device.
@@ -122,7 +122,10 @@ impl OutputPort {
                                0) //latency
         }));
 
-        Ok(OutputPort { stream: raw_stream, device: device })
+        Ok(OutputPort {
+            stream: raw_stream,
+            device: device,
+        })
     }
 
     /// Write a single `MidiEvent`.
@@ -148,7 +151,7 @@ impl OutputPort {
 
     /// Returns the `DeviceInfo` of the Midi device that owns this port.
     pub fn device(&self) -> DeviceInfo {
-        return self.device.clone()
+        return self.device.clone();
     }
 }
 impl Drop for OutputPort {
@@ -158,4 +161,4 @@ impl Drop for OutputPort {
         }
     }
 }
-unsafe impl Send for OutputPort{}
+unsafe impl Send for OutputPort {}
