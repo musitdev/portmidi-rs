@@ -25,5 +25,9 @@ name = "monitor"
 path = "examples/monitor.rs"
 
 [[example]]
+name = "monitor-all"
+path = "examples/monitor_all.rs"
+
+[[example]]
 name = "play"
 path = "examples/twinkle_twinkle.rs"
