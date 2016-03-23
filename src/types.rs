@@ -76,9 +76,9 @@ impl fmt::Display for MidiMessage {
 impl From<ffi::PmMessage> for MidiMessage {
     fn from(raw: i32) -> Self {
         MidiMessage {
-            status: ((raw & 0x00_FF_00_00) >> 16) as u8,
+            status: (raw & 0x00_00_00_FF) as u8,
             data1: ((raw & 0x00_00_FF_00) >> 8) as u8,
-            data2: (raw & 0x00_00_00_FF) as u8,
+            data2: ((raw & 0x00_FF_00_00) >> 16) as u8,
         }
     }
 }
