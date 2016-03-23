@@ -64,7 +64,11 @@ impl From<[u8; 3]> for MidiMessage {
 }
 impl fmt::Display for MidiMessage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "status: {}, data: {}, {}", self.status, self.data1, self.data2)
+        write!(f,
+               "status: {}, data: {}, {}",
+               self.status,
+               self.data1,
+               self.data2)
     }
 }
 /// Converts a `PmMessage` to a `MidiMessage.

@@ -32,6 +32,7 @@ fn print_devices(pm: &pm::PortMidi) {
 fn main() {
     // initialize the PortMidi context.
     let context = pm::PortMidi::new().unwrap();
+    let timeout = Duration::from_millis(10);
 
     // setup the command line interface
     let args: Args = docopt::Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|err| {
@@ -51,7 +52,7 @@ fn main() {
             println!("{:?}", event);
             // there is no blocking receive method in PortMidi, therefore
             // we have to sleep some time to prevent a busy-wait loop
-            thread::sleep(Duration::new(0,50))
+            thread::sleep(timeout)
         }
     }
 }
