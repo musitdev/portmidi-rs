@@ -90,3 +90,14 @@ fn test_threads() {
         writer.join();
     }
 }
+
+#[test]
+fn test_types() {
+    let message = portmidi::MidiMessage::from(0x007F3C81);
+    // NoteOn
+    assert_eq!(message.status, 0x81);
+    // Key: Note 60
+    assert_eq!(message.data1, 60);
+    // Velocity: 127
+    assert_eq!(message.data2, 127);
+}
