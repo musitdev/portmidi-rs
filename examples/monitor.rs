@@ -50,9 +50,9 @@ fn main() {
     while let Ok(_) = in_port.poll() {
         if let Ok(Some(event)) = in_port.read_n(1024) {
             println!("{:?}", event);
-            // there is no blocking receive method in PortMidi, therefore
-            // we have to sleep some time to prevent a busy-wait loop
-            thread::sleep(timeout)
         }
+        // there is no blocking receive method in PortMidi, therefore
+        // we have to sleep some time to prevent a busy-wait loop
+        thread::sleep(timeout);
     }
 }
