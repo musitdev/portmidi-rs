@@ -61,12 +61,12 @@ impl error::Error for Error {
                 ffi::PmError::PmInternalError       => "PortMidi: `Internal PortMidi Error'",
                 ffi::PmError::PmBufferMaxSize       => "PortMidi: `Buffer cannot be made larger'"
             },
-            Error::Unknown              => "Unknown",
-            Error::Unimplemented        => "Unimplemented",
-            Error::NoDefaultDevice      => "No default device",
-            Error::NotAnInputDevice     => "Not an input device",
-            Error::NotAnOutputDevice    => "Not an output device",
-            Error::Invalid              => "Invalid"
+            Error::Unknown              => "portmidi-rs: Unknown",
+            Error::Unimplemented        => "portmidi-rs: Unimplemented",
+            Error::NoDefaultDevice      => "portmidi-rs: No default device",
+            Error::NotAnInputDevice     => "portmidi-rs: Not an input device",
+            Error::NotAnOutputDevice    => "portmidi-rs: Not an output device",
+            Error::Invalid              => "portmidi-rs: Invalid"
         }
     }
 }
