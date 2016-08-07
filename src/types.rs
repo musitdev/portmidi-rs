@@ -49,17 +49,17 @@ impl error::Error for Error {
     fn description(&self) -> &str {
         match *self {
             Error::PortMidi(pm_error)   => match pm_error {
-                ffi::PmError::PmNoError             => "No error",
-                ffi::PmError::PmGotData             => "Got data",
-                ffi::PmError::PmHostError           => "Host error",
-                ffi::PmError::PmInvalidDeviceId     => "Invalid device ID",
-                ffi::PmError::PmInsufficientMemory  => "Insufficient memory",
-                ffi::PmError::PmBufferTooSmall      => "Buffer too small",
-                ffi::PmError::PmBufferOverflow      => "Buffer overflow",
-                ffi::PmError::PmBadPtr              => "Bad pointer",
-                ffi::PmError::PmBadData             => "Bad data",
-                ffi::PmError::PmInternalError       => "Internal error",
-                ffi::PmError::PmBufferMaxSize       => "Buffer max size"
+                ffi::PmError::PmNoError             => "",
+                ffi::PmError::PmGotData             => "PortMidi: `Illegal error number'",
+                ffi::PmError::PmHostError           => "PortMidi: `Host error'",
+                ffi::PmError::PmInvalidDeviceId     => "PortMidi: `Invalid device ID'",
+                ffi::PmError::PmInsufficientMemory  => "PortMidi: `Insufficient memory'",
+                ffi::PmError::PmBufferTooSmall      => "PortMidi: `Buffer too small'",
+                ffi::PmError::PmBufferOverflow      => "PortMidi: `Buffer overflow'",
+                ffi::PmError::PmBadPtr              => "PortMidi: `Bad pointer'",
+                ffi::PmError::PmBadData             => "PortMidi: `Invalid MIDI message Data'",
+                ffi::PmError::PmInternalError       => "PortMidi: `Internal PortMidi Error'",
+                ffi::PmError::PmBufferMaxSize       => "PortMidi: `Buffer cannot be made larger'"
             },
             Error::Unknown              => "Unknown",
             Error::Unimplemented        => "Unimplemented",
