@@ -1,3 +1,4 @@
+use std::error;
 use std::os::raw::c_int;
 use std::convert::{From, Into};
 use std::result;
@@ -41,6 +42,31 @@ impl fmt::Display for Error {
         match *self {
             Error::PortMidi(pm_err) => write!(f, "{}", pm_err),
             err @ _ => write!(f, "{:?}", err),
+        }
+    }
+}
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        match *self {
+            Error::PortMidi(pm_error)   => match pm_error {
+                ffi::PmError::PmNoError             => "No error",
+                ffi::PmError::PmGotData             => "Got data",
+                ffi::PmError::PmHostError           => "Host error",
+                ffi::PmError::PmInvalidDeviceId     => "Invalid device ID",
+                ffi::PmError::PmInsufficientMemory  => "Insufficient memory",
+                ffi::PmError::PmBufferTooSmall      => "Buffer too small",
+                ffi::PmError::PmBufferOverflow      => "Buffer overflow",
+                ffi::PmError::PmBadPtr              => "Bad pointer",
+                ffi::PmError::PmBadData             => "Bad data",
+                ffi::PmError::PmInternalError       => "Internal error",
+                ffi::PmError::PmBufferMaxSize       => "Buffer max size"
+            },
+            Error::Unknown              => "Unknown",
+            Error::Unimplemented        => "Unimplemented",
+            Error::NoDefaultDevice      => "No default device",
+            Error::NotAnInputDevice     => "Not an input device",
+            Error::NotAnOutputDevice    => "Not an output device",
+            Error::Invalid              => "Invalid"
         }
     }
 }
