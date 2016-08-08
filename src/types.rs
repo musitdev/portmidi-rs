@@ -1,3 +1,4 @@
+use std::error;
 use std::os::raw::c_int;
 use std::convert::{From, Into};
 use std::result;
@@ -41,6 +42,31 @@ impl fmt::Display for Error {
         match *self {
             Error::PortMidi(pm_err) => write!(f, "{}", pm_err),
             err @ _ => write!(f, "{:?}", err),
+        }
+    }
+}
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        match *self {
+            Error::PortMidi(pm_error)   => match pm_error {
+                ffi::PmError::PmNoError             => "",
+                ffi::PmError::PmGotData             => "PortMidi: `Illegal error number'",
+                ffi::PmError::PmHostError           => "PortMidi: `Host error'",
+                ffi::PmError::PmInvalidDeviceId     => "PortMidi: `Invalid device ID'",
+                ffi::PmError::PmInsufficientMemory  => "PortMidi: `Insufficient memory'",
+                ffi::PmError::PmBufferTooSmall      => "PortMidi: `Buffer too small'",
+                ffi::PmError::PmBufferOverflow      => "PortMidi: `Buffer overflow'",
+                ffi::PmError::PmBadPtr              => "PortMidi: `Bad pointer'",
+                ffi::PmError::PmBadData             => "PortMidi: `Invalid MIDI message Data'",
+                ffi::PmError::PmInternalError       => "PortMidi: `Internal PortMidi Error'",
+                ffi::PmError::PmBufferMaxSize       => "PortMidi: `Buffer cannot be made larger'"
+            },
+            Error::Unknown              => "portmidi-rs: Unknown",
+            Error::Unimplemented        => "portmidi-rs: Unimplemented",
+            Error::NoDefaultDevice      => "portmidi-rs: No default device",
+            Error::NotAnInputDevice     => "portmidi-rs: Not an input device",
+            Error::NotAnOutputDevice    => "portmidi-rs: Not an output device",
+            Error::Invalid              => "portmidi-rs: Invalid"
         }
     }
 }
