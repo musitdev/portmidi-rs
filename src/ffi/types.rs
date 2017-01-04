@@ -10,6 +10,7 @@ pub type PmMessage = c_int;
 
 pub type PmTimestamp = u32;
 pub const PM_NO_DEVICE: PmDeviceId = -1;
+pub const MIDI_EOX: u8 = 0xf7;
 
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]

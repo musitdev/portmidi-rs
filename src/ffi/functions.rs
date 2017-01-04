@@ -6,7 +6,7 @@
 //          MIT license (LICENSE-MIT or http://opensource.org/licenses/MIT).
 // This file may not be copied, modified, or distributed except according to those terms.
 
-use std::os::raw::{c_char, c_void, c_int};
+use std::os::raw::{c_char, c_void, c_int, c_uchar};
 use ffi::types::*;
 
 #[allow(dead_code)]
@@ -47,5 +47,9 @@ extern "C" {
     pub fn Pm_WriteShort(stream: *const PortMidiStream,
                          timestamp: PmTimestamp,
                          message: PmMessage)
+                         -> PmError;
+    pub fn Pm_WriteSysEx(stream: *const PortMidiStream,
+                         when: PmTimestamp,
+                         msg: *const c_uchar)
                          -> PmError;
 }

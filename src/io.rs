@@ -153,6 +153,16 @@ impl OutputPort {
     pub fn device(&self) -> DeviceInfo {
         return self.device.clone();
     }
+
+    // Write arbitrarily long EOX-terminated data
+    pub fn write_sysex(&self, timestamp: ffi::PmTimestamp, msg: &[u8]) -> Result<()> {
+        // Sysex writes MUST be EOX-terminated
+        if Some(&ffi::MIDI_EOX) != msg.last() {
+            Err(Error::Invalid)
+        } else {
+            Result::from(unsafe { ffi::Pm_WriteSysEx(self.stream, timestamp, msg.as_ptr())})
+        }
+    }
 }
 impl Drop for OutputPort {
     fn drop(&mut self) {
