@@ -1,6 +1,7 @@
 extern crate portmidi;
 extern crate rci;
 
+use std::sync::Arc;
 use std::thread;
 
 #[test]
@@ -57,20 +58,24 @@ fn test_threads() {
     const BUF_LEN: usize = 1024;
     if ci.is_none() && false {
         let context = portmidi::PortMidi::new().unwrap();
-        let mut in_port = context.default_input_port(BUF_LEN).unwrap();
-        let mut out_port = context.default_output_port(BUF_LEN).unwrap();
-        let reader = thread::spawn(move || {
-            match in_port.poll() {
-                Ok(flag) => println!("test_threads) midi events available: {}", flag),
-                Err(err) => println!("test_threads) poll error: {}", err),
-            }
-            match in_port.read() {
-                Ok(Some(event)) => println!("test_threads) received midi event: {:?}", event),
-                Ok(None) => println!("test_threads) no midi event available"),
-                Err(err) => println!("test_threads) read error: {}", err),
+        let context = Arc::new(context);
+        let reader = thread::spawn({
+            let context = context.clone();
+            move || {
+                let mut in_port = context.default_input_port(BUF_LEN).unwrap();
+                match in_port.poll() {
+                    Ok(flag) => println!("test_threads) midi events available: {}", flag),
+                    Err(err) => println!("test_threads) poll error: {}", err),
+                }
+                match in_port.read() {
+                    Ok(Some(event)) => println!("test_threads) received midi event: {:?}", event),
+                    Ok(None) => println!("test_threads) no midi event available"),
+                    Err(err) => println!("test_threads) read error: {}", err),
+                }
             }
         });
         let writer = thread::spawn(move || {
+            let mut out_port = context.default_output_port(BUF_LEN).unwrap();
             let msgs = vec![portmidi::MidiMessage {
                                 status: 0x90,
                                 data1: 60,
@@ -86,8 +91,8 @@ fn test_threads() {
                 Err(err) => println!("test_threads) write error: {}", err),
             }
         });
-        reader.join();
-        writer.join();
+        reader.join().unwrap();
+        writer.join().unwrap();
     }
 }
 
