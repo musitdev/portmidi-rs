@@ -70,14 +70,14 @@ impl PortMidi {
     /// Creates an `InputPort` instance with the given buffer size for the default input device.
     pub fn default_input_port(&self, buffer_size: usize) -> Result<InputPort> {
         let info = try!(self.default_input_device_id().and_then(|id| self.device(id)));
-        InputPort::new(info, buffer_size)
+        InputPort::new(self, info, buffer_size)
     }
 
     /// Creates an `InputPort` instance for the given device and buffer size.
     /// If the given device is not an input device an `Error::NotAnInputDevice` is returned.
     pub fn input_port(&self, device: DeviceInfo, buffer_size: usize) -> Result<InputPort> {
         if device.is_input() {
-            InputPort::new(device, buffer_size)
+            InputPort::new(self, device, buffer_size)
         } else {
             Err(Error::NotAnInputDevice)
         }
@@ -86,14 +86,14 @@ impl PortMidi {
     /// Creates an `OutputPort` instance with the given buffer size for the default output device.
     pub fn default_output_port(&self, buffer_size: usize) -> Result<OutputPort> {
         let info = try!(self.default_output_device_id().and_then(|id| self.device(id)));
-        OutputPort::new(info, buffer_size)
+        OutputPort::new(self, info, buffer_size)
     }
 
     /// Creates an `OutputPort` instance for the given device and buffer size.
     /// If the given device is not an output device an `Error::NotAnOutputDevice` is returned.
     pub fn output_port(&self, device: DeviceInfo, buffer_size: usize) -> Result<OutputPort> {
         if device.is_output() {
-            OutputPort::new(device, buffer_size)
+            OutputPort::new(self, device, buffer_size)
         } else {
             Err(Error::NotAnOutputDevice)
         }

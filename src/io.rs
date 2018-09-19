@@ -1,3 +1,4 @@
+use context::PortMidi;
 use ffi;
 use std::os::raw::c_int;
 use std::ptr;
@@ -7,16 +8,17 @@ use device::DeviceInfo;
 use std::marker::Send;
 
 /// Represents the input port of a PortMidi device.
-pub struct InputPort {
+pub struct InputPort<'a> {
     stream: *const ffi::PortMidiStream,
     buffer_size: usize,
+    _context: &'a PortMidi, // Used for lifetime pinning
     device: DeviceInfo,
 }
-impl InputPort {
+impl<'a> InputPort<'a> {
     /// Construct a new `InputPort` for the given device and buffer size.
     ///
     /// If the `device` is not an input device an `Error::NotAnInputDevice` is returned.
-    pub fn new(device: DeviceInfo, buffer_size: usize) -> Result<InputPort> {
+    pub fn new(context: &'a PortMidi, device: DeviceInfo, buffer_size: usize) -> Result<InputPort> {
         if device.is_output() {
             return Err(Error::NotAnInputDevice);
         }
@@ -33,7 +35,8 @@ impl InputPort {
         Ok(InputPort {
             stream: raw_stream,
             buffer_size: buffer_size,
-            device: device,
+            _context: context,
+            device,
         })
     }
 
@@ -88,26 +91,27 @@ impl InputPort {
         return self.device.clone();
     }
 }
-impl Drop for InputPort {
+impl<'a> Drop for InputPort<'a> {
     fn drop(&mut self) {
         if let Err(err) = Result::from(unsafe { ffi::Pm_Close(self.stream) }) {
             println!("{}", err);
         }
     }
 }
-unsafe impl Send for InputPort {}
+unsafe impl<'a> Send for InputPort<'a> {}
 
 
 /// Represents the output port of a PortMidi device.
-pub struct OutputPort {
+pub struct OutputPort<'a> {
     stream: *const ffi::PortMidiStream,
+    _context: &'a PortMidi, // Used for lifetime pinning
     device: DeviceInfo,
 }
-impl OutputPort {
+impl<'a> OutputPort<'a> {
     /// Construct a new `OutputPort` for the given device and buffer size.
     ///
     /// If the `device` is not an output device an `Error::NotAnOutputDevice` is returned.
-    pub fn new(device: DeviceInfo, buffer_size: usize) -> Result<OutputPort> {
+    pub fn new(context: &'a PortMidi, device: DeviceInfo, buffer_size: usize) -> Result<OutputPort> {
         if device.is_input() {
             return Err(Error::NotAnOutputDevice);
         }
@@ -124,7 +128,8 @@ impl OutputPort {
 
         Ok(OutputPort {
             stream: raw_stream,
-            device: device,
+            _context: context,
+            device,
         })
     }
 
@@ -164,11 +169,11 @@ impl OutputPort {
         }
     }
 }
-impl Drop for OutputPort {
+impl<'a> Drop for OutputPort<'a> {
     fn drop(&mut self) {
         if let Err(err) = Result::from(unsafe { ffi::Pm_Close(self.stream) }) {
             println!("{}", err);
         }
     }
 }
-unsafe impl Send for OutputPort {}
+unsafe impl<'a> Send for OutputPort<'a> {}

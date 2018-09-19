@@ -11,18 +11,13 @@ fn main() {
     const BUF_LEN: usize = 1024;
     let (tx, rx) = mpsc::channel();
 
-    let in_devices: Vec<pm::DeviceInfo> = context.devices()
-                                                 .unwrap()
-                                                 .into_iter()
-                                                 .filter(|dev| dev.is_input())
-                                                 .collect();
-    let in_ports: Vec<pm::InputPort> = in_devices.into_iter()
-                                                 .filter_map(|dev| {
-                                                     context.input_port(dev, BUF_LEN)
-                                                            .ok()
-                                                 })
-                                                 .collect();
     thread::spawn(move || {
+        let in_ports = context
+            .devices()
+            .unwrap()
+            .into_iter()
+            .filter_map(|dev| context.input_port(dev, BUF_LEN).ok())
+            .collect::<Vec<_>>();
         loop {
             for port in &in_ports {
                 if let Ok(Some(events)) = port.read_n(BUF_LEN) {
