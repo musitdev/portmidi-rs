@@ -39,11 +39,13 @@ fn test_main() {
                             status: 0x90,
                             data1: 60,
                             data2: 127,
+                            data3: 0,
                         },
                         portmidi::MidiMessage {
                             status: 0x80,
                             data1: 60,
                             data2: 0,
+                            data3: 0,
                         }];
         match out_port.write_events(msgs) {
             Ok(_) => println!("test_main) successfully wrote midi events"),
@@ -80,11 +82,13 @@ fn test_threads() {
                                 status: 0x90,
                                 data1: 60,
                                 data2: 127,
+                                data3: 0,
                             },
                             portmidi::MidiMessage {
                                 status: 0x80,
                                 data1: 60,
                                 data2: 0,
+                                data3: 0,
                             }];
             match out_port.write_events(msgs) {
                 Ok(_) => println!("test_threads) successfully wrote midi events"),

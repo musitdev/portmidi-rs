@@ -63,6 +63,7 @@ fn play(mut out_port: pm::OutputPort, verbose: bool) -> pm::Result<()> {
             status: 0x90 + CHANNEL,
             data1: note,
             data2: 100,
+            data3: 0,
         };
         if verbose {
             println!("{}", note_on)
@@ -75,6 +76,7 @@ fn play(mut out_port: pm::OutputPort, verbose: bool) -> pm::Result<()> {
             status: 0x80 + CHANNEL,
             data1: note,
             data2: 100,
+            data3: 0,
         };
         if verbose {
             println!("{}", note_off);
