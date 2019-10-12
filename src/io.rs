@@ -1,11 +1,11 @@
 use context::PortMidi;
+use device::DeviceInfo;
 use ffi;
+use ffi::MaybeError;
+use std::marker::Send;
 use std::os::raw::c_int;
 use std::ptr;
 use types::*;
-use ffi::MaybeError;
-use device::DeviceInfo;
-use std::marker::Send;
 
 /// Represents the input port of a PortMidi device.
 pub struct InputPort<'a> {
@@ -24,12 +24,14 @@ impl<'a> InputPort<'a> {
         }
         let raw_stream: *const ffi::PortMidiStream = ptr::null();
         try!(Result::from(unsafe {
-            ffi::Pm_OpenInput(&raw_stream as *const *const _,
-                              device.id(),
-                              ptr::null(), // *inputDriverInfo, not needed for normal operation
-                              buffer_size as c_int,
-                              ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms
-                              ptr::null()) // time_info, a pointer passed to the time procedure
+            ffi::Pm_OpenInput(
+                &raw_stream as *const *const _,
+                device.id(),
+                ptr::null(), // *inputDriverInfo, not needed for normal operation
+                buffer_size as c_int,
+                ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms
+                ptr::null(),
+            ) // time_info, a pointer passed to the time procedure
         }));
 
         Ok(InputPort {
@@ -54,8 +56,8 @@ impl<'a> InputPort<'a> {
         match ffi::PmError::try_from(res) {
             Ok(event_cnt) => {
                 let events = (0..event_cnt as usize)
-                                 .map(|i| MidiEvent::from(event_buffer[i].clone()))
-                                 .collect::<Vec<MidiEvent>>();
+                    .map(|i| MidiEvent::from(event_buffer[i].clone()))
+                    .collect::<Vec<MidiEvent>>();
                 Ok(Some(events))
             }
             Err(ffi::PmError::PmNoError) => Ok(None),
@@ -67,10 +69,14 @@ impl<'a> InputPort<'a> {
     ///
     /// A `Result` of `None` means no event was available.
     pub fn read(&mut self) -> Result<Option<MidiEvent>> {
-        match self.read_n(1) {
-            Ok(Some(mut vec)) => Ok(vec.pop()),
-            Ok(_) => Ok(None),
-            Err(e) => Err(e),
+        let mut event = ffi::PmEvent::default();
+        let read_cnt = 1;
+        let res = unsafe { ffi::Pm_Read(self.stream, &mut event, read_cnt) };
+        match ffi::PmError::try_from(res) {
+            Ok(0) => Ok(None),
+            Ok(_) => Ok(Some(MidiEvent::from(event))),
+            Err(ffi::PmError::PmNoError) => Ok(None),
+            Err(err) => Err(Error::PortMidi(err)),
         }
     }
 
@@ -100,7 +106,6 @@ impl<'a> Drop for InputPort<'a> {
 }
 unsafe impl<'a> Send for InputPort<'a> {}
 
-
 /// Represents the output port of a PortMidi device.
 pub struct OutputPort<'a> {
     stream: *const ffi::PortMidiStream,
@@ -111,19 +116,25 @@ impl<'a> OutputPort<'a> {
     /// Construct a new `OutputPort` for the given device and buffer size.
     ///
     /// If the `device` is not an output device an `Error::NotAnOutputDevice` is returned.
-    pub fn new(context: &'a PortMidi, device: DeviceInfo, buffer_size: usize) -> Result<OutputPort> {
+    pub fn new(
+        context: &'a PortMidi,
+        device: DeviceInfo,
+        buffer_size: usize,
+    ) -> Result<OutputPort> {
         if device.is_input() {
             return Err(Error::NotAnOutputDevice);
         }
         let raw_stream: *const ffi::PortMidiStream = ptr::null();
         try!(Result::from(unsafe {
-            ffi::Pm_OpenOutput(&raw_stream as *const *const _,
-                               device.id(),
-                               ptr::null(), // *inputDriverInfo, not needed for normal operation
-                               buffer_size as c_int,
-                               ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms,
-                               ptr::null(), // time_info, a pointer passed to the time procedure
-                               0) //latency
+            ffi::Pm_OpenOutput(
+                &raw_stream as *const *const _,
+                device.id(),
+                ptr::null(), // *inputDriverInfo, not needed for normal operation
+                buffer_size as c_int,
+                ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms,
+                ptr::null(), // time_info, a pointer passed to the time procedure
+                0,
+            ) //latency
         }));
 
         Ok(OutputPort {
@@ -142,9 +153,10 @@ impl<'a> OutputPort<'a> {
     /// Write a buffer of midi events to the output port.
     /// Returns an `Error::PortMidi(_)` if something went wrong.
     pub fn write_events<T: Into<MidiEvent>>(&mut self, midi_events: Vec<T>) -> Result<()> {
-        let events: Vec<ffi::PmEvent> = midi_events.into_iter()
-                                                   .map(|event| event.into().into())
-                                                   .collect();
+        let events: Vec<ffi::PmEvent> = midi_events
+            .into_iter()
+            .map(|event| event.into().into())
+            .collect();
         Result::from(unsafe { ffi::Pm_Write(self.stream, events.as_ptr(), events.len() as c_int) })
     }
 
@@ -165,7 +177,7 @@ impl<'a> OutputPort<'a> {
         if Some(&ffi::MIDI_EOX) != msg.last() {
             Err(Error::Invalid)
         } else {
-            Result::from(unsafe { ffi::Pm_WriteSysEx(self.stream, timestamp, msg.as_ptr())})
+            Result::from(unsafe { ffi::Pm_WriteSysEx(self.stream, timestamp, msg.as_ptr()) })
         }
     }
 }
