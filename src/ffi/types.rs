@@ -1,4 +1,4 @@
-use std::os::raw::{c_char, c_void, c_int};
+use std::os::raw::{c_char, c_void, c_int, c_uint};
 use std::mem;
 use std::default::Default;
 use std::fmt;
@@ -6,7 +6,7 @@ use ffi;
 
 pub type PmDeviceId = c_int;
 pub type PortMidiStream = c_void;
-pub type PmMessage = c_int;
+pub type PmMessage = c_uint;
 
 pub type PmTimestamp = u32;
 pub const PM_NO_DEVICE: PmDeviceId = -1;

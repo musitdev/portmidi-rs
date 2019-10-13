@@ -78,39 +78,43 @@ pub struct MidiMessage {
     pub status: u8,
     pub data1: u8,
     pub data2: u8,
+    pub data3: u8,
 }
-impl From<[u8; 3]> for MidiMessage {
-    fn from(raw: [u8; 3]) -> Self {
+impl From<[u8; 4]> for MidiMessage {
+    fn from(raw: [u8; 4]) -> Self {
         MidiMessage {
             status: raw[0],
             data1: raw[1],
             data2: raw[2],
+            data3: raw[3],
         }
     }
 }
 impl fmt::Display for MidiMessage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,
-               "status: {}, data: {}, {}",
+               "status: {}, data: {}, {}, {}",
                self.status,
                self.data1,
-               self.data2)
+               self.data2,
+               self.data3)
     }
 }
 /// Converts a `PmMessage` to a `MidiMessage.
 /// This can be used for `c_int` as well as `i32` because these are only type aliases.
 impl From<ffi::PmMessage> for MidiMessage {
-    fn from(raw: i32) -> Self {
+    fn from(raw: u32) -> Self {
         MidiMessage {
             status: (raw & 0x00_00_00_FF) as u8,
             data1: ((raw & 0x00_00_FF_00) >> 8) as u8,
             data2: ((raw & 0x00_FF_00_00) >> 16) as u8,
+            data3: ((raw & 0xFF_00_00_00) >> 24) as u8,
         }
     }
 }
 impl Into<ffi::PmMessage> for MidiMessage {
-    fn into(self) -> i32 {
-        (((self.data2 as i32) << 16)) | (((self.data1 as i32) << 8)) | self.status as i32
+    fn into(self) -> u32 {
+        (((self.data3 as u32) << 24)) | (((self.data2 as u32) << 16)) | (((self.data1 as u32) << 8)) | self.status as u32
     }
 }
 
