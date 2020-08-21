@@ -1,8 +1,8 @@
-use ffi;
-use std::os::raw::c_int;
-use types::{Result, PortMidiDeviceId, Error};
-use io::{InputPort, OutputPort};
 use device::DeviceInfo;
+use ffi;
+use io::{InputPort, OutputPort};
+use std::os::raw::c_int;
+use types::{Error, PortMidiDeviceId, Result};
 
 /// The PortMidi base struct.
 /// Initializes PortMidi on creation and terminates it on drop.
@@ -15,10 +15,12 @@ impl PortMidi {
     /// that devices that are connect after calling `new`
     /// are not picked up.
     pub fn new() -> Result<Self> {
-        try!(Result::from(unsafe { ffi::Pm_Initialize() }));
+        Result::from(unsafe { ffi::Pm_Initialize() })?;
         let device_count = unsafe { ffi::Pm_CountDevices() };
         if device_count >= 0 {
-            Ok(PortMidi { device_count: device_count as u32 })
+            Ok(PortMidi {
+                device_count: device_count as u32,
+            })
         } else {
             Err(Error::Invalid)
         }
@@ -35,7 +37,7 @@ impl PortMidi {
     pub fn default_input_device_id(&self) -> Result<PortMidiDeviceId> {
         match unsafe { ffi::Pm_GetDefaultInputDeviceID() } {
             ffi::PM_NO_DEVICE => Err(Error::NoDefaultDevice),
-            id @ _ => Ok(id),
+            id => Ok(id),
         }
     }
 
@@ -44,7 +46,7 @@ impl PortMidi {
     pub fn default_output_device_id(&self) -> Result<PortMidiDeviceId> {
         match unsafe { ffi::Pm_GetDefaultOutputDeviceID() } {
             ffi::PM_NO_DEVICE => Err(Error::NoDefaultDevice),
-            id @ _ => Ok(id),
+            id => Ok(id),
         }
     }
 
@@ -69,7 +71,9 @@ impl PortMidi {
 
     /// Creates an `InputPort` instance with the given buffer size for the default input device.
     pub fn default_input_port(&self, buffer_size: usize) -> Result<InputPort> {
-        let info = try!(self.default_input_device_id().and_then(|id| self.device(id)));
+        let info = self
+            .default_input_device_id()
+            .and_then(|id| self.device(id))?;
         InputPort::new(self, info, buffer_size)
     }
 
@@ -85,7 +89,9 @@ impl PortMidi {
 
     /// Creates an `OutputPort` instance with the given buffer size for the default output device.
     pub fn default_output_port(&self, buffer_size: usize) -> Result<OutputPort> {
-        let info = try!(self.default_output_device_id().and_then(|id| self.device(id)));
+        let info = self
+            .default_output_device_id()
+            .and_then(|id| self.device(id))?;
         OutputPort::new(self, info, buffer_size)
     }
 

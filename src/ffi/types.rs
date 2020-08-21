@@ -1,8 +1,8 @@
-use std::os::raw::{c_char, c_void, c_int, c_uint};
-use std::mem;
+use ffi;
 use std::default::Default;
 use std::fmt;
-use ffi;
+use std::mem;
+use std::os::raw::{c_char, c_int, c_uint, c_void};
 
 pub type PmDeviceId = c_int;
 pub type PortMidiStream = c_void;
@@ -73,10 +73,12 @@ pub enum PmError {
 impl fmt::Display for PmError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut host_error_text: [c_char; 1024] = [0; 1024];
-        let str_ptr = match self {
-            &PmError::PmHostError => unsafe {
-                ffi::Pm_GetHostErrorText(host_error_text.as_mut_ptr(),
-                                         host_error_text.len() as c_int);
+        let str_ptr = match *self {
+            PmError::PmHostError => unsafe {
+                ffi::Pm_GetHostErrorText(
+                    host_error_text.as_mut_ptr(),
+                    host_error_text.len() as c_int,
+                );
                 host_error_text.as_ptr()
             },
             _ => unsafe { ffi::Pm_GetErrorText(*self) },
@@ -90,7 +92,7 @@ pub trait MaybeError<T> {
 impl MaybeError<c_int> for PmError {
     fn try_from(err_code: c_int) -> Result<c_int, PmError> {
         match err_code {
-            -10_000...-9992 | 0 => unsafe { Err(mem::transmute(err_code)) },
+            -10_000..=-9992 | 0 => unsafe { Err(mem::transmute(err_code)) },
             _ => Ok(err_code),
         }
     }
