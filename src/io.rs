@@ -23,7 +23,7 @@ impl<'a> InputPort<'a> {
             return Err(Error::NotAnInputDevice);
         }
         let raw_stream: *const ffi::PortMidiStream = ptr::null();
-        try!(Result::from(unsafe {
+        Result::from(unsafe {
             ffi::Pm_OpenInput(
                 &raw_stream as *const *const _,
                 device.id(),
@@ -32,11 +32,11 @@ impl<'a> InputPort<'a> {
                 ptr::null(), // PmTimeProcPtr, a procedure that returns time in ms
                 ptr::null(),
             ) // time_info, a pointer passed to the time procedure
-        }));
+        })?;
 
         Ok(InputPort {
             stream: raw_stream,
-            buffer_size: buffer_size,
+            buffer_size,
             _context: context,
             device,
         })
@@ -56,12 +56,12 @@ impl<'a> InputPort<'a> {
         match ffi::PmError::try_from(res) {
             Ok(event_cnt) => {
                 let events = (0..event_cnt as usize)
-                    .map(|i| MidiEvent::from(event_buffer[i].clone()))
+                    .map(|i| MidiEvent::from(event_buffer[i]))
                     .collect::<Vec<MidiEvent>>();
                 Ok(Some(events))
             }
             Err(ffi::PmError::PmNoError) => Ok(None),
-            Err(err) => return Err(Error::PortMidi(err)),
+            Err(err) => Err(Error::PortMidi(err)),
         }
     }
 
@@ -88,13 +88,13 @@ impl<'a> InputPort<'a> {
         match pm_error {
             ffi::PmError::PmNoError => Ok(false),
             ffi::PmError::PmGotData => Ok(true),
-            err @ _ => Err(Error::PortMidi(err)),
+            err => Err(Error::PortMidi(err)),
         }
     }
 
     /// Returns the `DeviceInfo` of the Midi device that owns this port.
     pub fn device(&self) -> DeviceInfo {
-        return self.device.clone();
+        self.device.clone()
     }
 }
 impl<'a> Drop for InputPort<'a> {
@@ -125,7 +125,7 @@ impl<'a> OutputPort<'a> {
             return Err(Error::NotAnOutputDevice);
         }
         let raw_stream: *const ffi::PortMidiStream = ptr::null();
-        try!(Result::from(unsafe {
+        Result::from(unsafe {
             ffi::Pm_OpenOutput(
                 &raw_stream as *const *const _,
                 device.id(),
@@ -135,7 +135,7 @@ impl<'a> OutputPort<'a> {
                 ptr::null(), // time_info, a pointer passed to the time procedure
                 0,
             ) //latency
-        }));
+        })?;
 
         Ok(OutputPort {
             stream: raw_stream,
@@ -168,7 +168,7 @@ impl<'a> OutputPort<'a> {
 
     /// Returns the `DeviceInfo` of the Midi device that owns this port.
     pub fn device(&self) -> DeviceInfo {
-        return self.device.clone();
+        self.device.clone()
     }
 
     // Write arbitrarily long EOX-terminated data

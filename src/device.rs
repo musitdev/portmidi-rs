@@ -1,9 +1,9 @@
 use ffi;
-use types::*;
 use std::fmt;
+use types::*;
 
 /// Device event direction.
-#[derive(Debug,Clone,Copy,PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Direction {
     Input,
     Output,
@@ -34,8 +34,8 @@ impl DeviceInfo {
             };
 
             Ok(DeviceInfo {
-                id: id,
-                name: name,
+                id,
+                name,
                 dir: direction,
             })
         }

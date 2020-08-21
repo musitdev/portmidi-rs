@@ -1,8 +1,8 @@
-use std::error;
-use std::os::raw::c_int;
 use std::convert::{From, Into};
-use std::result;
+use std::error;
 use std::fmt;
+use std::os::raw::c_int;
+use std::result;
 
 use ffi;
 
@@ -32,45 +32,42 @@ pub enum Error {
 }
 impl From<ffi::PmError> for Error {
     fn from(err: ffi::PmError) -> Self {
-        match err {
-            err @ _ => Error::PortMidi(err),
-        }
+        Error::PortMidi(err)
     }
 }
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Error::PortMidi(pm_err) => write!(f, "{}", pm_err),
-            err @ _ => write!(f, "{:?}", err),
+            err => write!(f, "{:?}", err),
         }
     }
 }
 impl error::Error for Error {
     fn description(&self) -> &str {
         match *self {
-            Error::PortMidi(pm_error)   => match pm_error {
-                ffi::PmError::PmNoError             => "",
-                ffi::PmError::PmGotData             => "PortMidi: `Illegal error number'",
-                ffi::PmError::PmHostError           => "PortMidi: `Host error'",
-                ffi::PmError::PmInvalidDeviceId     => "PortMidi: `Invalid device ID'",
-                ffi::PmError::PmInsufficientMemory  => "PortMidi: `Insufficient memory'",
-                ffi::PmError::PmBufferTooSmall      => "PortMidi: `Buffer too small'",
-                ffi::PmError::PmBufferOverflow      => "PortMidi: `Buffer overflow'",
-                ffi::PmError::PmBadPtr              => "PortMidi: `Bad pointer'",
-                ffi::PmError::PmBadData             => "PortMidi: `Invalid MIDI message Data'",
-                ffi::PmError::PmInternalError       => "PortMidi: `Internal PortMidi Error'",
-                ffi::PmError::PmBufferMaxSize       => "PortMidi: `Buffer cannot be made larger'"
+            Error::PortMidi(pm_error) => match pm_error {
+                ffi::PmError::PmNoError => "",
+                ffi::PmError::PmGotData => "PortMidi: `Illegal error number'",
+                ffi::PmError::PmHostError => "PortMidi: `Host error'",
+                ffi::PmError::PmInvalidDeviceId => "PortMidi: `Invalid device ID'",
+                ffi::PmError::PmInsufficientMemory => "PortMidi: `Insufficient memory'",
+                ffi::PmError::PmBufferTooSmall => "PortMidi: `Buffer too small'",
+                ffi::PmError::PmBufferOverflow => "PortMidi: `Buffer overflow'",
+                ffi::PmError::PmBadPtr => "PortMidi: `Bad pointer'",
+                ffi::PmError::PmBadData => "PortMidi: `Invalid MIDI message Data'",
+                ffi::PmError::PmInternalError => "PortMidi: `Internal PortMidi Error'",
+                ffi::PmError::PmBufferMaxSize => "PortMidi: `Buffer cannot be made larger'",
             },
-            Error::Unknown              => "portmidi-rs: Unknown",
-            Error::Unimplemented        => "portmidi-rs: Unimplemented",
-            Error::NoDefaultDevice      => "portmidi-rs: No default device",
-            Error::NotAnInputDevice     => "portmidi-rs: Not an input device",
-            Error::NotAnOutputDevice    => "portmidi-rs: Not an output device",
-            Error::Invalid              => "portmidi-rs: Invalid"
+            Error::Unknown => "portmidi-rs: Unknown",
+            Error::Unimplemented => "portmidi-rs: Unimplemented",
+            Error::NoDefaultDevice => "portmidi-rs: No default device",
+            Error::NotAnInputDevice => "portmidi-rs: Not an input device",
+            Error::NotAnOutputDevice => "portmidi-rs: Not an output device",
+            Error::Invalid => "portmidi-rs: Invalid",
         }
     }
 }
-
 
 /// Represents a Midi message.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -92,12 +89,11 @@ impl From<[u8; 4]> for MidiMessage {
 }
 impl fmt::Display for MidiMessage {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
-               "status: {}, data: {}, {}, {}",
-               self.status,
-               self.data1,
-               self.data2,
-               self.data3)
+        write!(
+            f,
+            "status: {}, data: {}, {}, {}",
+            self.status, self.data1, self.data2, self.data3
+        )
     }
 }
 /// Converts a `PmMessage` to a `MidiMessage.
@@ -114,7 +110,10 @@ impl From<ffi::PmMessage> for MidiMessage {
 }
 impl Into<ffi::PmMessage> for MidiMessage {
     fn into(self) -> u32 {
-        (((self.data3 as u32) << 24)) | (((self.data2 as u32) << 16)) | (((self.data1 as u32) << 8)) | self.status as u32
+        (self.data3 as u32) << 24
+            | (self.data2 as u32) << 16
+            | (self.data1 as u32) << 8
+            | self.status as u32
     }
 }
 
