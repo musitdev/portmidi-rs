@@ -114,7 +114,8 @@ impl Drop for PortMidi {
         if !self.virtual_devs.is_empty() {
             for id in self.virtual_devs.iter() {
                 Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(*id) })
-                    .map_err(|err| println!("Could not terminate: {}", err)).unwrap();
+                    .map_err(|err| println!("Could not delete virtual device: {}", err))
+                    .unwrap();
 	    }
         }
 
