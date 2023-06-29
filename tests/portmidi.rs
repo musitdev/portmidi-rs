@@ -24,6 +24,7 @@ fn test_main() {
         assert!(context.default_input_device_id().is_ok());
         assert!(context.default_output_device_id().is_ok());
         assert!(context.devices().unwrap().len() > 0);
+        assert!(context.virtual_device_count() == 0);
         let mut in_port = context.default_input_port(1024).unwrap();
         let mut out_port = context.default_output_port(1024).unwrap();
         match in_port.poll() {
