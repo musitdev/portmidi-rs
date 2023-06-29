@@ -8,6 +8,7 @@ use types::{Error, PortMidiDeviceId, Result};
 /// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
     device_count: u32,
+    virtual_devs: Vec<PortMidiDeviceId>
 }
 impl PortMidi {
     /// Initializes the underlying PortMidi C library.
@@ -17,9 +18,11 @@ impl PortMidi {
     pub fn new() -> Result<Self> {
         Result::from(unsafe { ffi::Pm_Initialize() })?;
         let device_count = unsafe { ffi::Pm_CountDevices() };
+        let virtual_devs = vec![];
         if device_count >= 0 {
             Ok(PortMidi {
                 device_count: device_count as u32,
+                virtual_devs,
             })
         } else {
             Err(Error::Invalid)
@@ -104,9 +107,17 @@ impl PortMidi {
             Err(Error::NotAnOutputDevice)
         }
     }
+
 }
 impl Drop for PortMidi {
     fn drop(&mut self) {
+        if !self.virtual_devs.is_empty() {
+            for id in self.virtual_devs.iter() {
+                Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(*id) })
+                    .map_err(|err| println!("Could not terminate: {}", err)).unwrap();
+	    }
+        }
+
         Result::from(unsafe { ffi::Pm_Terminate() })
             .map_err(|err| println!("Could not terminate: {}", err))
             .unwrap();
