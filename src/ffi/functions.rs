@@ -36,6 +36,17 @@ extern "C" {
                          time_info: *const c_void,
                          latency: i32)
                          -> PmError;
+    pub fn Pm_CreateVirtualInput(
+        name: *const c_char,
+        interf: *const c_char,
+        deviceInfo: *const c_void,
+    ) -> PmError;
+    pub fn Pm_CreateVirtualOutput(
+        name: *const c_char,
+        interf: *const c_char,
+        deviceInfo: *const c_void,
+    ) -> PmError;
+    pub fn Pm_DeleteVirtualDevice(device: PmDeviceId) -> PmError;
     pub fn Pm_Read(stream: *const PortMidiStream, buffer: *mut PmEvent, length: c_int) -> c_int;
     fn Pm_Abort(stream: *const PortMidiStream) -> PmError;
     pub fn Pm_Close(stream: *const PortMidiStream) -> PmError;
