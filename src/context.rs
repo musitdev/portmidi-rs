@@ -35,6 +35,10 @@ impl PortMidi {
         self.device_count as c_int
     }
 
+    pub fn virtual_device_count(&self) -> PortMidiDeviceId {
+	self.virtual_devs.len() as c_int
+    }
+
     /// Returns the `PortMidiDeviceId` for the default input device, or an `Error::NoDefaultDevice` if
     /// there is no available.
     pub fn default_input_device_id(&self) -> Result<PortMidiDeviceId> {
