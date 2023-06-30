@@ -1,15 +1,20 @@
 use device::DeviceInfo;
 use ffi;
+use ffi::MaybeError;
 use io::{InputPort, OutputPort};
 use std::os::raw::c_int;
+use std::ptr;
+use std::ffi::CString;
+use std::sync::Mutex;
 use types::{Error, PortMidiDeviceId, Result};
 
 /// The PortMidi base struct.
 /// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
     device_count: u32,
-    virtual_devs: Vec<PortMidiDeviceId>
+    virtual_devs: Mutex<Vec<PortMidiDeviceId>>
 }
+
 impl PortMidi {
     /// Initializes the underlying PortMidi C library.
     /// PortMidi does not support *hot plugging*, this means
@@ -18,7 +23,7 @@ impl PortMidi {
     pub fn new() -> Result<Self> {
         Result::from(unsafe { ffi::Pm_Initialize() })?;
         let device_count = unsafe { ffi::Pm_CountDevices() };
-        let virtual_devs = vec![];
+        let virtual_devs = Mutex::new(vec![]);
         if device_count >= 0 {
             Ok(PortMidi {
                 device_count: device_count as u32,
@@ -36,7 +41,7 @@ impl PortMidi {
     }
 
     pub fn virtual_device_count(&self) -> PortMidiDeviceId {
-	self.virtual_devs.len() as c_int
+	(*self.virtual_devs.lock().unwrap()).len() as c_int
     }
 
     /// Returns the `PortMidiDeviceId` for the default input device, or an `Error::NoDefaultDevice` if
@@ -112,11 +117,28 @@ impl PortMidi {
         }
     }
 
+    // Creates a `VirtualOutput` instance with the given name and ......
+    pub fn create_virtual_output(&self, name: String) -> Result<DeviceInfo> {
+    	let c_string = CString::new(name).unwrap();
+    	let id = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
+    	
+    	let id = match ffi::PmError::try_from(id as c_int) {
+		Ok(id) => Ok(Some(id)),
+		Err(ffi::PmError::PmNoError) => Ok(None),
+		Err(err) => Err(Error::PortMidi(err)),
+    	}?;
+
+	let id: PortMidiDeviceId = id.unwrap();
+
+	(*self.virtual_devs.lock().unwrap()).push(id);
+	DeviceInfo::new(id)
+    }
+
 }
 impl Drop for PortMidi {
     fn drop(&mut self) {
-        if !self.virtual_devs.is_empty() {
-            for id in self.virtual_devs.iter() {
+        if !(*self.virtual_devs.lock().unwrap()).is_empty() {
+            for id in (*self.virtual_devs.lock().unwrap()).iter() {
                 Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(*id) })
                     .map_err(|err| println!("Could not delete virtual device: {}", err))
                     .unwrap();
