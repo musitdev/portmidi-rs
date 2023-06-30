@@ -120,14 +120,15 @@ impl PortMidi {
 
     // Creates a `VirtualOutput` instance with the given name and ......
     pub fn create_virtual_output(&self, name: String) -> Result<DeviceInfo> {
-    	let c_string = CString::new(name).unwrap();
-    	let id = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
-    	
+        let c_string = CString::new(name.clone()).unwrap();
+        let id  = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
+
     	let id = match ffi::PmError::try_from(id as c_int) {
-		Ok(id) => Ok(Some(id)),
-		Err(ffi::PmError::PmNoError) => Ok(None),
-		Err(err) => Err(Error::PortMidi(err)),
-    	}?;
+		Err(ffi::PmError::PmNoError) => None,
+                Err(ffi::PmError::PmInvalidDeviceId) => panic!("Device name \"{}\" already exists or is invalid!", name),
+		Err(err) => return Err(Error::PortMidi(err)),
+		Ok(id) => Some(id),
+        };
 
 	let id: PortMidiDeviceId = id.unwrap();
 
