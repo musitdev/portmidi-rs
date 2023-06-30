@@ -134,7 +134,7 @@ impl PortMidi {
 
     /// Creates a virtual input/output device depending on is_input argument.
     /// Returns the device info of the created device or throws an Error.
-    fn create_virtual_device(&self, name: String, is_input: bool) -> Result<DeviceInfo> {
+    fn create_virtual_device(&self, name: &str, is_input: bool) -> Result<DeviceInfo> {
         let c_string = CString::new(name.clone()).unwrap();
         let id;
         if is_input {
@@ -159,13 +159,13 @@ impl PortMidi {
 
     /// Creates a virtual output device for the lifetime of the PortMidi instance.
     /// Returns the device info of the created device or throws an Error.
-    pub fn create_virtual_input(&self, name: String) -> Result<DeviceInfo> {
+    pub fn create_virtual_input(&self, name: &str) -> Result<DeviceInfo> {
         self.create_virtual_device(name, true)
     }
 
     /// Creates a virtual input device for the lifetime of the PortMidi instance.
     /// Returns the device info of the created device or throws an Error.
-    pub fn create_virtual_output(&self, name: String) -> Result<DeviceInfo> {
+    pub fn create_virtual_output(&self, name: &str) -> Result<DeviceInfo> {
         self.create_virtual_device(name, false)
     }
 

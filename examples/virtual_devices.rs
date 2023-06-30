@@ -57,8 +57,8 @@ fn main() {
     let context = Arc::new(context);
     let timeout = Duration::from_millis(10);
 
-    let v_in = context.create_virtual_input("Virt In 1".into()).unwrap();
-    let v_out = context.create_virtual_output("Virt Out 1".into()).unwrap();
+    let v_in = context.create_virtual_input("Virt In 1").unwrap();
+    let v_out = context.create_virtual_output("Virt Out 1").unwrap();
 
     println!("Virtual Devices: {:?}", context.virtual_devices().unwrap());
 
