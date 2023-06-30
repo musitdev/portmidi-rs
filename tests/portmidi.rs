@@ -24,7 +24,17 @@ fn test_main() {
         assert!(context.default_input_device_id().is_ok());
         assert!(context.default_output_device_id().is_ok());
         assert!(context.devices().unwrap().len() > 0);
-        assert!(context.virtual_device_count() == 0);
+
+	// creating virtual ports on windows not possible that way (only through drivers)
+	if ! cfg!(windows) {
+            assert_eq!(context.virtual_device_count(), 0);
+            let v_in = context.create_virtual_input("Virt in".into()).unwrap();
+            context.create_virtual_output("Virt out".into()).unwrap();
+            assert_eq!(context.virtual_device_count(), 2);
+	    context.delete_virtual_device(v_in.id()).unwrap();
+            assert_eq!(context.virtual_device_count(), 1);
+        }
+
         let mut in_port = context.default_input_port(1024).unwrap();
         let mut out_port = context.default_output_port(1024).unwrap();
         match in_port.poll() {
