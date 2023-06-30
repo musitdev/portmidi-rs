@@ -31,3 +31,7 @@ path = "examples/monitor_all.rs"
 [[example]]
 name = "play"
 path = "examples/twinkle_twinkle.rs"
+
+[[example]]
+name = "virtual_devices"
+path = "examples/virtual_devices.rs"
