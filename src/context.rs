@@ -169,6 +169,8 @@ impl PortMidi {
         self.create_virtual_device(name, false)
     }
 
+    /// Deletes a virtual device created by this instance.
+    /// Returns Ok(()) or an Error, Error::Unknown when id is not an id of a virtual device.
     pub fn delete_virtual_device(&self, id: PortMidiDeviceId) -> Result<()> {
         let v_dev_vec = &mut (*self.virtual_devs.lock().unwrap());
 
