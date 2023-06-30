@@ -82,6 +82,20 @@ impl PortMidi {
         Ok(devices)
     }
 
+    /// Returns a `Vec<DeviceInfo>` containing all virtual device infos.
+    /// An `Error::PortMidi(_)` is returned if the info for a virtual device can't be obtained.
+    pub fn virtual_devices(&self) -> Result<Vec<DeviceInfo>> {
+	let mut v_devs = Vec::with_capacity(self.virtual_device_count() as usize);
+	let v_dev_vec: &Vec<PortMidiDeviceId> = &self.virtual_devs.lock().unwrap();
+	for res in v_dev_vec.iter().map(|&id| self.device(id)) {
+	    match res {
+		Ok(device) => v_devs.push(device),
+		Err(err) => return Err(err),
+	    }
+	}
+	Ok(v_devs)
+    }
+
     /// Creates an `InputPort` instance with the given buffer size for the default input device.
     pub fn default_input_port(&self, buffer_size: usize) -> Result<InputPort> {
         let info = self
