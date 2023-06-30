@@ -132,10 +132,17 @@ impl PortMidi {
         }
     }
 
-    // Creates a `VirtualOutput` instance with the given name and ......
-    pub fn create_virtual_output(&self, name: String) -> Result<DeviceInfo> {
+    /// Creates a virtual input/output device depending on is_input argument.
+    /// Returns the device info of the created device or throws an Error.
+    fn create_virtual_device(&self, name: String, is_input: bool) -> Result<DeviceInfo> {
         let c_string = CString::new(name.clone()).unwrap();
-        let id  = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
+        let id;
+        if is_input {
+            id = unsafe { ffi::Pm_CreateVirtualInput(c_string.as_ptr(), ptr::null(), ptr::null()) }
+        } else {
+
+            id = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
+        }
 
     	let id = match ffi::PmError::try_from(id as c_int) {
 		Err(ffi::PmError::PmNoError) => None,
@@ -148,6 +155,18 @@ impl PortMidi {
 
 	(*self.virtual_devs.lock().unwrap()).push(id);
 	DeviceInfo::new(id)
+    }
+
+    /// Creates a virtual output device for the lifetime of the PortMidi instance.
+    /// Returns the device info of the created device or throws an Error.
+    pub fn create_virtual_input(&self, name: String) -> Result<DeviceInfo> {
+        self.create_virtual_device(name, true)
+    }
+
+    /// Creates a virtual input device for the lifetime of the PortMidi instance.
+    /// Returns the device info of the created device or throws an Error.
+    pub fn create_virtual_output(&self, name: String) -> Result<DeviceInfo> {
+        self.create_virtual_device(name, false)
     }
 
 }
