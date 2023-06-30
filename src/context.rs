@@ -169,16 +169,27 @@ impl PortMidi {
         self.create_virtual_device(name, false)
     }
 
+    pub fn delete_virtual_device(&self, id: PortMidiDeviceId) -> Result<()> {
+        let v_dev_vec = &mut (*self.virtual_devs.lock().unwrap());
+
+        if v_dev_vec.contains(&id) {
+            let index = v_dev_vec.iter().position(|pos| *pos == id).unwrap();
+            v_dev_vec.remove(index);
+            Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(id) })
+        } else {
+            Err(Error::Unknown)
+        }
+    }
+
 }
 impl Drop for PortMidi {
     fn drop(&mut self) {
-        if !(*self.virtual_devs.lock().unwrap()).is_empty() {
-            for id in (*self.virtual_devs.lock().unwrap()).iter() {
-                Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(*id) })
-                    .map_err(|err| println!("Could not delete virtual device: {}", err))
-                    .unwrap();
-	    }
-        }
+
+        while let Some(id) = (*self.virtual_devs.lock().unwrap()).pop() {
+            Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(id) })
+                .map_err(|err| println!("Could not delete virtual device: {}", err))
+                .unwrap();
+        };
 
         Result::from(unsafe { ffi::Pm_Terminate() })
             .map_err(|err| println!("Could not terminate: {}", err))
