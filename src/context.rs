@@ -40,6 +40,7 @@ impl PortMidi {
         self.device_count as c_int
     }
 
+    /// Return the number of virtual devices created in this instance.
     pub fn virtual_device_count(&self) -> PortMidiDeviceId {
 	(*self.virtual_devs.lock().unwrap()).len() as c_int
     }
