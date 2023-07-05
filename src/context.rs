@@ -2,9 +2,9 @@ use device::DeviceInfo;
 use ffi;
 use ffi::MaybeError;
 use io::{InputPort, OutputPort};
+use std::ffi::CString;
 use std::os::raw::c_int;
 use std::ptr;
-use std::ffi::CString;
 use std::sync::Mutex;
 use types::{Error, PortMidiDeviceId, Result};
 
@@ -12,7 +12,7 @@ use types::{Error, PortMidiDeviceId, Result};
 /// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
     device_count: u32,
-    virtual_devs: Mutex<Vec<PortMidiDeviceId>>
+    virtual_devs: Mutex<Vec<PortMidiDeviceId>>,
 }
 
 impl PortMidi {
@@ -42,7 +42,7 @@ impl PortMidi {
 
     /// Return the number of virtual devices created in this instance.
     pub fn virtual_device_count(&self) -> PortMidiDeviceId {
-	(*self.virtual_devs.lock().unwrap()).len() as c_int
+        (*self.virtual_devs.lock().unwrap()).len() as c_int
     }
 
     /// Returns the `PortMidiDeviceId` for the default input device, or an `Error::NoDefaultDevice` if
@@ -85,15 +85,15 @@ impl PortMidi {
     /// Returns a `Vec<DeviceInfo>` containing all virtual device infos.
     /// An `Error::PortMidi(_)` is returned if the info for a virtual device can't be obtained.
     pub fn virtual_devices(&self) -> Result<Vec<DeviceInfo>> {
-	let mut v_devs = Vec::with_capacity(self.virtual_device_count() as usize);
-	let v_dev_vec: &Vec<PortMidiDeviceId> = &self.virtual_devs.lock().unwrap();
-	for res in v_dev_vec.iter().map(|&id| self.device(id)) {
-	    match res {
-		Ok(device) => v_devs.push(device),
-		Err(err) => return Err(err),
-	    }
-	}
-	Ok(v_devs)
+        let mut v_devs = Vec::with_capacity(self.virtual_device_count() as usize);
+        let v_dev_vec: &Vec<PortMidiDeviceId> = &self.virtual_devs.lock().unwrap();
+        for res in v_dev_vec.iter().map(|&id| self.device(id)) {
+            match res {
+                Ok(device) => v_devs.push(device),
+                Err(err) => return Err(err),
+            }
+        }
+        Ok(v_devs)
     }
 
     /// Creates an `InputPort` instance with the given buffer size for the default input device.
@@ -140,21 +140,23 @@ impl PortMidi {
         if is_input {
             id = unsafe { ffi::Pm_CreateVirtualInput(c_string.as_ptr(), ptr::null(), ptr::null()) }
         } else {
-
-            id = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
+            id =
+                unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
         }
 
-    	let id = match ffi::PmError::try_from(id as c_int) {
-		Err(ffi::PmError::PmNoError) => None,
-                Err(ffi::PmError::PmInvalidDeviceId) => panic!("Device name \"{}\" already exists or is invalid!", name),
-		Err(err) => return Err(Error::PortMidi(err)),
-		Ok(id) => Some(id),
+        let id = match ffi::PmError::try_from(id as c_int) {
+            Err(ffi::PmError::PmNoError) => None,
+            Err(ffi::PmError::PmInvalidDeviceId) => {
+                panic!("Device name \"{}\" already exists or is invalid!", name)
+            }
+            Err(err) => return Err(Error::PortMidi(err)),
+            Ok(id) => Some(id),
         };
 
-	let id: PortMidiDeviceId = id.unwrap();
+        let id: PortMidiDeviceId = id.unwrap();
 
-	(*self.virtual_devs.lock().unwrap()).push(id);
-	DeviceInfo::new(id)
+        (*self.virtual_devs.lock().unwrap()).push(id);
+        DeviceInfo::new(id)
     }
 
     /// Creates a virtual output device for the lifetime of the PortMidi instance.
@@ -182,16 +184,14 @@ impl PortMidi {
             Err(Error::Unknown)
         }
     }
-
 }
 impl Drop for PortMidi {
     fn drop(&mut self) {
-
         while let Some(id) = (*self.virtual_devs.lock().unwrap()).pop() {
             Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(id) })
                 .map_err(|err| println!("Could not delete virtual device: {}", err))
                 .unwrap();
-        };
+        }
 
         Result::from(unsafe { ffi::Pm_Terminate() })
             .map_err(|err| println!("Could not terminate: {}", err))

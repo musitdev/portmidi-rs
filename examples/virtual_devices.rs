@@ -1,9 +1,9 @@
 extern crate portmidi as pm;
 
-use std::sync::Arc;
-use std::time::Duration;
-use std::thread;
 use pm::MidiMessage;
+use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
 
 static CHANNEL: u8 = 0;
 static MELODY: [(u8, u32); 42] = [
@@ -64,11 +64,11 @@ fn main() {
 
     let con2 = Arc::clone(&context);
     thread::spawn(move || {
-	let out_port = con2.output_port(v_out, 1024).unwrap();
-	println!("Playing... Connect Virt Out 1 to Virt In 1 to see midi messages on screen...");
-	println!("(Note: Windows not supported: midi devices do have to be implemented drivers)");
-	println!("Press Crtl-C to abort...");
-	play(out_port, false).unwrap();
+        let out_port = con2.output_port(v_out, 1024).unwrap();
+        println!("Playing... Connect Virt Out 1 to Virt In 1 to see midi messages on screen...");
+        println!("(Note: Windows not supported: midi devices do have to be implemented drivers)");
+        println!("Press Crtl-C to abort...");
+        play(out_port, false).unwrap();
     });
 
     let in_port = context.input_port(v_in, 1024).unwrap();
@@ -82,7 +82,6 @@ fn main() {
         thread::sleep(timeout);
     }
 }
-
 
 fn play(mut out_port: pm::OutputPort, verbose: bool) -> pm::Result<()> {
     for &(note, dur) in MELODY.iter().cycle() {

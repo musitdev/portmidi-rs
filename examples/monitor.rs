@@ -1,10 +1,10 @@
 extern crate portmidi as pm;
 
-extern crate rustc_serialize;
 extern crate docopt;
+extern crate rustc_serialize;
 
-use std::time::Duration;
 use std::thread;
+use std::time::Duration;
 
 const USAGE: &'static str = r#"
 portmidi-rs: monitor-device example
@@ -35,10 +35,12 @@ fn main() {
     let timeout = Duration::from_millis(10);
 
     // setup the command line interface
-    let args: Args = docopt::Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|err| {
-        print_devices(&context);
-        err.exit();
-    });
+    let args: Args = docopt::Docopt::new(USAGE)
+        .and_then(|d| d.decode())
+        .unwrap_or_else(|err| {
+            print_devices(&context);
+            err.exit();
+        });
 
     // get the device info for the given id
     let info = context.device(args.arg_device_id).unwrap();
