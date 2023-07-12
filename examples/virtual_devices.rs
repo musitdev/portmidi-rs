@@ -63,14 +63,14 @@ fn main() {
 
     let con2 = Arc::clone(&context);
     thread::spawn(move || {
-        let out_port = con2.output_port(v_out.devinfo().clone(), 1024).unwrap();
+        let out_port = con2.output_port(con2.device(v_out.id()).unwrap(), 1024).unwrap();
         println!("Playing... Connect Virt Out 1 to Virt In 1 to see midi messages on screen...");
         println!("(Note: Windows not supported: midi devices do have to be implemented drivers)");
         println!("Press Crtl-C to abort...");
         play(out_port, false);
     });
 
-    let in_port = context.input_port(v_in.devinfo().clone(), 1024).unwrap();
+    let in_port = context.input_port(context.device(v_in.id()).unwrap(), 1024).unwrap();
 
     while let Ok(_) = in_port.poll() {
         if let Ok(Some(event)) = in_port.read_n(1024) {

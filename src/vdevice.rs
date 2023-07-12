@@ -50,11 +50,6 @@ impl VirtualDevice {
     pub fn is_input(&self) -> bool { self.info.is_input() }
 
     pub fn is_output(&self) -> bool { self.info.is_output() }
-
-    pub fn devinfo(&self) -> &DeviceInfo {
-        &self.info
-    }
-
 }
 
 impl Drop for VirtualDevice {
