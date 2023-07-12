@@ -1,9 +1,9 @@
 use device::{DeviceInfo, Direction};
-use vdevice::VirtualDevice;
 use ffi;
 use io::{InputPort, OutputPort};
 use std::os::raw::c_int;
 use types::{Error, PortMidiDeviceId, Result};
+use vdevice::VirtualDevice;
 
 /// The PortMidi base struct.
 /// Initializes PortMidi on creation and terminates it on drop.
@@ -118,7 +118,6 @@ impl PortMidi {
     pub fn create_virtual_output(&self, name: &str) -> Result<VirtualDevice> {
         VirtualDevice::new(name, Direction::Output)
     }
-
 }
 impl Drop for PortMidi {
     fn drop(&mut self) {

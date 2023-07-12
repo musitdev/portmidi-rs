@@ -1,11 +1,10 @@
+use device::{DeviceInfo, Direction};
 use ffi;
-use types::*;
-use device::{Direction, DeviceInfo};
-use std::ptr;
+use ffi::MaybeError;
 use std::ffi::CString;
 use std::os::raw::c_int;
-use ffi::MaybeError;
-
+use std::ptr;
+use types::*;
 
 #[derive(Clone, Debug)]
 pub struct VirtualDevice {
@@ -13,16 +12,18 @@ pub struct VirtualDevice {
 }
 
 impl VirtualDevice {
-
     /// Creates a virtual input/output device depending on direction argument.
-    /// Returns the device info of the created device or an Error. 
+    /// Returns the device info of the created device or an Error.
     pub fn new(name: &str, direction: Direction) -> Result<Self> {
-
         let c_string = CString::new(name).unwrap();
 
         let id = match direction {
-            Direction::Input => unsafe { ffi::Pm_CreateVirtualInput(c_string.as_ptr(), ptr::null(), ptr::null()) },
-            Direction::Output => unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) },
+            Direction::Input => unsafe {
+                ffi::Pm_CreateVirtualInput(c_string.as_ptr(), ptr::null(), ptr::null())
+            },
+            Direction::Output => unsafe {
+                ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null())
+            },
         };
 
         let id = match ffi::PmError::try_from(id as c_int) {
@@ -38,23 +39,30 @@ impl VirtualDevice {
 
         let info = DeviceInfo::new(id)?;
 
-        Ok(VirtualDevice {
-            info,
-        })
+        Ok(VirtualDevice { info })
     }
 
-    pub fn id(&self) -> PortMidiDeviceId { self.info.id() }
+    pub fn id(&self) -> PortMidiDeviceId {
+        self.info.id()
+    }
 
-    pub fn name(&self) -> &str { self.info.name() }
+    pub fn name(&self) -> &str {
+        self.info.name()
+    }
 
-    pub fn is_input(&self) -> bool { self.info.is_input() }
+    pub fn is_input(&self) -> bool {
+        self.info.is_input()
+    }
 
-    pub fn is_output(&self) -> bool { self.info.is_output() }
+    pub fn is_output(&self) -> bool {
+        self.info.is_output()
+    }
 }
 
 impl Drop for VirtualDevice {
-    fn drop(&mut self)  {
+    fn drop(&mut self) {
         Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(self.id()) })
-            .map_err(|err| println!("Error deleting virtual device: {}", err)).unwrap();
+            .map_err(|err| println!("Error deleting virtual device: {}", err))
+            .unwrap();
     }
 }
