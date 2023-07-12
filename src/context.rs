@@ -5,14 +5,12 @@ use io::{InputPort, OutputPort};
 use std::ffi::CString;
 use std::os::raw::c_int;
 use std::ptr;
-use std::sync::Mutex;
 use types::{Error, PortMidiDeviceId, Result};
 
 /// The PortMidi base struct.
 /// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
     device_count: u32,
-    virtual_devs: Mutex<Vec<PortMidiDeviceId>>,
 }
 
 impl PortMidi {
@@ -23,11 +21,9 @@ impl PortMidi {
     pub fn new() -> Result<Self> {
         Result::from(unsafe { ffi::Pm_Initialize() })?;
         let device_count = unsafe { ffi::Pm_CountDevices() };
-        let virtual_devs = Mutex::new(vec![]);
         if device_count >= 0 {
             Ok(PortMidi {
                 device_count: device_count as u32,
-                virtual_devs,
             })
         } else {
             Err(Error::Invalid)
@@ -38,11 +34,6 @@ impl PortMidi {
     /// of the program.
     pub fn device_count(&self) -> PortMidiDeviceId {
         self.device_count as c_int
-    }
-
-    /// Return the number of virtual devices created in this instance.
-    pub fn virtual_device_count(&self) -> PortMidiDeviceId {
-        (*self.virtual_devs.lock().unwrap()).len() as c_int
     }
 
     /// Returns the `PortMidiDeviceId` for the default input device, or an `Error::NoDefaultDevice` if
@@ -80,20 +71,6 @@ impl PortMidi {
             }
         }
         Ok(devices)
-    }
-
-    /// Returns a `Vec<DeviceInfo>` containing all virtual device infos.
-    /// An `Error::PortMidi(_)` is returned if the info for a virtual device can't be obtained.
-    pub fn virtual_devices(&self) -> Result<Vec<DeviceInfo>> {
-        let mut v_devs = Vec::with_capacity(self.virtual_device_count() as usize);
-        let v_dev_vec: &Vec<PortMidiDeviceId> = &self.virtual_devs.lock().unwrap();
-        for res in v_dev_vec.iter().map(|&id| self.device(id)) {
-            match res {
-                Ok(device) => v_devs.push(device),
-                Err(err) => return Err(err),
-            }
-        }
-        Ok(v_devs)
     }
 
     /// Creates an `InputPort` instance with the given buffer size for the default input device.
@@ -138,10 +115,9 @@ impl PortMidi {
         let c_string = CString::new(name.clone()).unwrap();
         let id;
         if is_input {
-            id = unsafe { ffi::Pm_CreateVirtualInput(c_string.as_ptr(), ptr::null(), ptr::null()) }
+            id = unsafe { ffi::Pm_CreateVirtualInput(c_string.as_ptr(), ptr::null(), ptr::null()) };
         } else {
-            id =
-                unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
+            id = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
         }
 
         let id = match ffi::PmError::try_from(id as c_int) {
@@ -155,7 +131,6 @@ impl PortMidi {
 
         let id: PortMidiDeviceId = id.unwrap();
 
-        (*self.virtual_devs.lock().unwrap()).push(id);
         DeviceInfo::new(id)
     }
 
@@ -171,28 +146,9 @@ impl PortMidi {
         self.create_virtual_device(name, false)
     }
 
-    /// Deletes a virtual device created by this instance.
-    /// Returns Ok(()) or an Error, Error::Unknown when id is not an id of a virtual device.
-    pub fn delete_virtual_device(&self, id: PortMidiDeviceId) -> Result<()> {
-        let v_dev_vec = &mut (*self.virtual_devs.lock().unwrap());
-
-        if v_dev_vec.contains(&id) {
-            let index = v_dev_vec.iter().position(|pos| *pos == id).unwrap();
-            v_dev_vec.remove(index);
-            Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(id) })
-        } else {
-            Err(Error::Unknown)
-        }
-    }
 }
 impl Drop for PortMidi {
     fn drop(&mut self) {
-        while let Some(id) = (*self.virtual_devs.lock().unwrap()).pop() {
-            Result::from(unsafe { ffi::Pm_DeleteVirtualDevice(id) })
-                .map_err(|err| println!("Could not delete virtual device: {}", err))
-                .unwrap();
-        }
-
         Result::from(unsafe { ffi::Pm_Terminate() })
             .map_err(|err| println!("Could not terminate: {}", err))
             .unwrap();
