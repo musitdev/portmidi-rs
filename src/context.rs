@@ -1,10 +1,8 @@
-use device::DeviceInfo;
+use device::{DeviceInfo, Direction};
+use vdevice::VirtualDevice;
 use ffi;
-use ffi::MaybeError;
 use io::{InputPort, OutputPort};
-use std::ffi::CString;
 use std::os::raw::c_int;
-use std::ptr;
 use types::{Error, PortMidiDeviceId, Result};
 
 /// The PortMidi base struct.
@@ -109,41 +107,16 @@ impl PortMidi {
         }
     }
 
-    /// Creates a virtual input/output device depending on is_input argument.
-    /// Returns the device info of the created device or throws an Error.
-    fn create_virtual_device(&self, name: &str, is_input: bool) -> Result<DeviceInfo> {
-        let c_string = CString::new(name.clone()).unwrap();
-        let id;
-        if is_input {
-            id = unsafe { ffi::Pm_CreateVirtualInput(c_string.as_ptr(), ptr::null(), ptr::null()) };
-        } else {
-            id = unsafe { ffi::Pm_CreateVirtualOutput(c_string.as_ptr(), ptr::null(), ptr::null()) };
-        }
-
-        let id = match ffi::PmError::try_from(id as c_int) {
-            Err(ffi::PmError::PmNoError) => None,
-            Err(ffi::PmError::PmInvalidDeviceId) => {
-                panic!("Device name \"{}\" already exists or is invalid!", name)
-            }
-            Err(err) => return Err(Error::PortMidi(err)),
-            Ok(id) => Some(id),
-        };
-
-        let id: PortMidiDeviceId = id.unwrap();
-
-        DeviceInfo::new(id)
-    }
-
     /// Creates a virtual output device for the lifetime of the PortMidi instance.
     /// Returns the device info of the created device or throws an Error.
-    pub fn create_virtual_input(&self, name: &str) -> Result<DeviceInfo> {
-        self.create_virtual_device(name, true)
+    pub fn create_virtual_input(&self, name: &str) -> Result<VirtualDevice> {
+        VirtualDevice::new(name, Direction::Input)
     }
 
     /// Creates a virtual input device for the lifetime of the PortMidi instance.
     /// Returns the device info of the created device or throws an Error.
-    pub fn create_virtual_output(&self, name: &str) -> Result<DeviceInfo> {
-        self.create_virtual_device(name, false)
+    pub fn create_virtual_output(&self, name: &str) -> Result<VirtualDevice> {
+        VirtualDevice::new(name, Direction::Output)
     }
 
 }
