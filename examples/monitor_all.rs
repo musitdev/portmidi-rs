@@ -1,8 +1,8 @@
 extern crate portmidi as pm;
 
-use std::time::Duration;
 use std::sync::mpsc;
 use std::thread;
+use std::time::Duration;
 
 fn main() {
     // initialize the PortMidi context.

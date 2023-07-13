@@ -1,14 +1,16 @@
-use device::DeviceInfo;
+use device::{DeviceInfo, Direction};
 use ffi;
 use io::{InputPort, OutputPort};
 use std::os::raw::c_int;
 use types::{Error, PortMidiDeviceId, Result};
+use vdevice::VirtualDevice;
 
 /// The PortMidi base struct.
 /// Initializes PortMidi on creation and terminates it on drop.
 pub struct PortMidi {
     device_count: u32,
 }
+
 impl PortMidi {
     /// Initializes the underlying PortMidi C library.
     /// PortMidi does not support *hot plugging*, this means
@@ -103,6 +105,18 @@ impl PortMidi {
         } else {
             Err(Error::NotAnOutputDevice)
         }
+    }
+
+    /// Creates a virtual output device for the lifetime of the PortMidi instance.
+    /// Returns the device info of the created device or throws an Error.
+    pub fn create_virtual_input(&self, name: &str) -> Result<VirtualDevice> {
+        VirtualDevice::new(name, Direction::Input)
+    }
+
+    /// Creates a virtual input device for the lifetime of the PortMidi instance.
+    /// Returns the device info of the created device or throws an Error.
+    pub fn create_virtual_output(&self, name: &str) -> Result<VirtualDevice> {
+        VirtualDevice::new(name, Direction::Output)
     }
 }
 impl Drop for PortMidi {

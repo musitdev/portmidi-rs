@@ -24,6 +24,17 @@ fn test_main() {
         assert!(context.default_input_device_id().is_ok());
         assert!(context.default_output_device_id().is_ok());
         assert!(context.devices().unwrap().len() > 0);
+
+        // creating virtual ports on windows not possible that way (only through drivers)
+        if !cfg!(windows) {
+            assert_eq!(context.virtual_device_count(), 0);
+            let v_in = context.create_virtual_input("Virt in").unwrap();
+            context.create_virtual_output("Virt out").unwrap();
+            assert_eq!(context.virtual_device_count(), 2);
+            context.delete_virtual_device(v_in.id()).unwrap();
+            assert_eq!(context.virtual_device_count(), 1);
+        }
+
         let mut in_port = context.default_input_port(1024).unwrap();
         let mut out_port = context.default_output_port(1024).unwrap();
         match in_port.poll() {
@@ -35,18 +46,20 @@ fn test_main() {
             Ok(None) => println!("test_main) no midi event available"),
             Err(err) => println!("test_main) read error: {}", err),
         };
-        let msgs = vec![portmidi::MidiMessage {
-                            status: 0x90,
-                            data1: 60,
-                            data2: 127,
-                            data3: 0,
-                        },
-                        portmidi::MidiMessage {
-                            status: 0x80,
-                            data1: 60,
-                            data2: 0,
-                            data3: 0,
-                        }];
+        let msgs = vec![
+            portmidi::MidiMessage {
+                status: 0x90,
+                data1: 60,
+                data2: 127,
+                data3: 0,
+            },
+            portmidi::MidiMessage {
+                status: 0x80,
+                data1: 60,
+                data2: 0,
+                data3: 0,
+            },
+        ];
         match out_port.write_events(msgs) {
             Ok(_) => println!("test_main) successfully wrote midi events"),
             Err(err) => println!("test_main) write error: {}", err),
@@ -78,18 +91,20 @@ fn test_threads() {
         });
         let writer = thread::spawn(move || {
             let mut out_port = context.default_output_port(BUF_LEN).unwrap();
-            let msgs = vec![portmidi::MidiMessage {
-                                status: 0x90,
-                                data1: 60,
-                                data2: 127,
-                                data3: 0,
-                            },
-                            portmidi::MidiMessage {
-                                status: 0x80,
-                                data1: 60,
-                                data2: 0,
-                                data3: 0,
-                            }];
+            let msgs = vec![
+                portmidi::MidiMessage {
+                    status: 0x90,
+                    data1: 60,
+                    data2: 127,
+                    data3: 0,
+                },
+                portmidi::MidiMessage {
+                    status: 0x80,
+                    data1: 60,
+                    data2: 0,
+                    data3: 0,
+                },
+            ];
             match out_port.write_events(msgs) {
                 Ok(_) => println!("test_threads) successfully wrote midi events"),
                 Err(err) => println!("test_threads) write error: {}", err),
